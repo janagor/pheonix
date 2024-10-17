@@ -1,0 +1,100 @@
+// these are one line comments
+
+/*
+these
+are
+multiline
+comments
+*/
+
+// you cannot include other files
+
+// type has to always be written explicitely
+let global a: u32 = 12;
+let global mut b: u16 = 1; // "global mut" or "mut global" are both available
+let mut global c: u16 = 1;
+// let d = 12; error: the type of variable has to be written explicitely
+
+// everything is passed via value/copy, so for objects there is always a copy created
+// no moving
+
+fn example_of_math_operations() {
+    let a: u32 = 1;
+    let b: u32 = 2;
+    let c: u32 = a+b; // works fine
+    // let d: u16 = a+b; // error - l-value type different then r-value
+    // let d: u16 = a as u16 + b; // error - cannot operate on to types with different type
+    let d: u16 = a as u16 + b as u16; // ok.
+    let e: i8 = -1;
+    let f: u8 = e as u8; // f = 255
+    // no float type
+    let a: u16 = 12; // shadowing is allowed
+}
+fn add(a: u32, b: u32) -> u32 {
+    return a + b;
+}
+fn pipe_like_operation() {
+    let a: u32 = 1;
+    let b: u32 = 2;
+    let c: u32 = b |> add(@, a); // 3, same as add(b, a)
+    let d: u32 = b |> add(@, a) |> add(@, a); // 4, same as add(add(b, a), a)
+}
+
+struct Rectangle {
+    width: u32,
+    height: u32,
+
+    fn get_area() -> u32 {
+        return width * height;
+    }
+    fn get_perimeter() -> u32 {
+        let result = 2 * (width * height);
+        return result;
+    }
+}
+
+fn operate_on_rectangle(rec: Rectangle) {
+    let area: u32 = rec.get_area();
+    let perimeter: u32 = rec.get_perimeter();
+}
+
+struct Circle {
+    radius: u32,
+    x_cord: i32,
+    y_cord: i32,
+}
+
+fn new_radius_of_circle(c: mut Circle, r: u32) -> Circle {
+    c.radius = r;
+    return c;
+}
+
+fn new_circle() {
+    let c: Circle = Circle {
+        .radius = 1,
+        . x_cord = -1,
+        .
+        y_cord = -1
+    };
+}
+// no private fields and methods in structs
+struct Big {
+    value1: i32 = 0,
+    value2: i32 = -1,
+    fn () {
+        let c: u32 = 12;
+        let d: u32 = 13;
+        let e: u32 = add(c, d);
+        let f: u32 = d |> add(@, c) |> add(@, c);
+        if (c == d) {
+            let f: u32 = c; // start of lifetime of f
+        } //  end of lifetime of f
+    },
+
+    fn add(first: u32, second: u32) -> u32 {
+        return first + second;
+    },
+}
+
+fn main () { // every function has to have written explicitely what is the return type of it unless it is void
+}
