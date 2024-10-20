@@ -31,6 +31,8 @@ Tematem projektu jest napisanie interpretera własnego języka programowania.
 
 ``` EBNF
 TODO: I don't know if comments should be included in gramma of the language
+Probably not since they are removed at the tokenizing stage as well as white signs
+
        program = { features } ;
       features = { feature } main { feature } ;
        feature = {
@@ -47,29 +49,23 @@ TODO: I don't know if comments should be included in gramma of the language
                  | something_else
                  | something_else
                  | something_else ;
-    while_loop = "while" , S ,
-                 "(" , S , condition , S , ")" , S ,
-                 "{" , S , statements , S , "}";
-  if_statement = if_clause , { S , else_if_clause } , [ S , else_clause ]
-else_if_clause = "else" , S , if_clause ;
-   else_clause = "else" , "{" , S , statements , S , "}" ;
-     if_clause = "if" , S ,
-                 "(" , S , condition , S , ")" , S ,
-                 "{" , S , statements , S , "}" ;
-     condition = identifier | "(" , S , condition , S , ")"
-                 | identifier , S , relational_op , S , identifier ;
+    while_loop = "while" "(" condition ")" "{" statements "}";
+  if_statement = if_clause { else_if_clause } [ else_clause ]
+else_if_clause = "else" if_clause ;
+   else_clause = "else" "{" statements "}" ;
+     if_clause = "if" "(" condition ")" "{" statements "}" ;
+     condition = identifier
+                 | "(" condition ")"
+                 | identifier relational_op identifier ;
 
-identifier_type = identifier , S , ":" , S , type ;
+identifier_type = identifier ":" type ;
            type = identifier ;
 
-     identifier = letter , { letter | digit | "_" } ;
+     identifier = letter { letter | digit | "_" } ;
 
   relational_op = "<" | ">" | "==" | "!=" | "<=" | ">=" ;
 
-addition_expression = expression , S , "+" , S , expression ;
-
-one_line_comment = "//" , {digit | letter | ( S - new_line ) } , new_line ;
-multiline_comment = "/*" , { digit | letter | S } , "*/" ;
+addition_expression = expression "+" expression ;
 
      letter = "A" | "B" | "C" | "D" | "E" | "F" | "G"
               | "H" | "I" | "J" | "K" | "L" | "M" | "N"
