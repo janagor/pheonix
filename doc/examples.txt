@@ -12,19 +12,15 @@ comments
 // The primitive types in the language are: u8, u16, u32, u64, i8, i16, i32, i64, bool.
 
 // Type has to be always written explicitly
-let global a: u32 = 12;
-// let global d = 12; error: the type of variable has to be written explicitly
-
-// global variables need to be initiated with "global" keyword
-
-let global a: u32 = 12;
-// let d: u32 = 12; error: no use of "global" keyword
+let a: u32 = 12;
+// let b = 12; error: the type of variable has to be written explicitly
 
 // Variables are constant by default. To make them mutable you need to use
 // "mut" keyword at initiation.
-// "global mut" or "mut global" are both available.
-let global mut b: u16 = 1;
-let mut global c: u16 = 1;
+fn test_mutablity() {
+    let mut b: u16 = 1;
+    b = 12; // ok.
+}
 
 // Everything is passed via value/copy, so for objects there is always a copy created
 // no moving
@@ -38,7 +34,7 @@ fn example_function() {
 // Function can take 0, 1, or more parameters ...
 fn function_with_parameters(param1: u16, param2: i8) {
     /* ... */
-}
+};
 
 // ... and can return a value or not.
 fn function_with_return_value() -> u32 {
@@ -58,7 +54,7 @@ fn function_without_return_value_with_keyword() {
 
 // Parameters of the function cannot be changes unless they are "mutable"
 fn change(param1: mut u16, param2: u16) {
-    param1 = 12; // ok
+    param1 = 12; // ok.
     // param2 = 12; // 'error[54: 5]: unmutable function parameter
                     // "param2: u16" cannot be changed. You can use
                     //  "let param2: u16 = 12;" to "shadow" it.'
@@ -68,6 +64,9 @@ fn change(param1: mut u16, param2: u16) {
 // You can create structs.
 struct Empty {}
 
+// Creating an insance of a structure
+let empty: Empty = Empty {};
+
 // Struct can have parameters of an explicit type
 struct Person {
     age: u8,
@@ -75,13 +74,37 @@ struct Person {
     height: u8,
 }
 
-// Those parameters are unmutable after initiation unless you use "mut" keyword
-// with a given field
+// Creating an insance of a structure with parameters.
+let person: Person = Person {
+    .age = 18,
+    .weight = 100,
+    .height = 190,
+};
+
+// Structure instances can also be mutable or constant. By default they are
+// constant Unless you use "mut" keyword AND while instantiating structure
+// object you make it mutable with the keyword "mut" too.
+
 struct Person {
     age : mut u8,
     weight: u8,
     height: u8,
 }
+
+let person: Person = Person {
+    .age = 18,
+    .weight = 100,
+    .height = 190,
+}; // all fields are constant
+// person.age = 100; // 'error[97: 1]: cannot assign to an immutable object:
+                     // "person".'
+
+let person: mut Person = Person {
+    .age = 18,
+    .weight = 100,
+    .height = 190,
+}; // field 'age' is mutable
+person.age = 100; // ok.
 
 // They can also have methods.
 struct DancingPerson {
@@ -91,17 +114,58 @@ struct DancingPerson {
     fn dance() {},
 }
 
+fn test_methods() {
+    let person: DancingPerson = DancingPerson {
+        .age = 18,
+        .weight = 100,
+        .height = 190,
+    };
+
+    person.dance();
+}
+
 // Methods can change fields of structures only if those fields are mutable
 struct DancingPerson {
     isSmiling: bool,
     isDancing: mut bool,
     fn dance(dancing: bool) {
-        isDancing = d; // ok
+        isDancing = d; // ok.
     },
     fn smile(smiling: bool) {
         // isSmiling = smiling; // 'error[95: 9]: unmutable struct field
                                 // "isSmiling: bool" is not mutable.'
     },
+}
+
+// Inheritance is allowed with "inherits" keyword. One struct can have only one
+// Base clase from which it inherits.
+struct Base {
+    x: u32,
+}
+
+struct Derived inherits Base {
+    y: u32,
+}
+
+fn test_inheritance() {
+    let a: Base = Base { .x = 12, };
+    let b: Derived = Derived {
+        .x = a.x,
+        .y = 13,
+    };
+}
+
+// Shadowing is allowed.
+struct Derived2 inherits Derived {
+    x: i64,
+}
+
+fn test_shadowing_inheritance() {
+    let a: i64 = 12;
+    let b: Derived = Derived {
+        .x = a, // ok.
+        .y = 13,
+    };
 }
 
 // There are additon, subtraction, multiplication and devision operations.
@@ -112,10 +176,10 @@ fn example_of_math_operations() {
     // a+b; // 'error[106: 5]: expression "a+b" cannot be evaluated. "a: u32"
             // and "b: u16" have different types.'
     let b: u32 = 2;
-    a+b; // ok
-    a-b; // ok
-    a*b; // ok
-    a/b; // ok
+    a+b; // ok.
+    a-b; // ok.
+    a*b; // ok.
+    a/b; // ok.
 
     // Result type of those operation is the same as type of the r-value
     // expression.
@@ -125,7 +189,7 @@ fn example_of_math_operations() {
     // To cast variable of one type into another you can use "as" operator.
     let a: u32 = 1;
     // let b: u16 = a; // 'error[120: 5]: expected type "u16", found "u32".'
-    let b: u16 = a as u16; // ok
+    let b: u16 = a as u16; // ok.
     let c: u16 = a as u16 + a as u16; // ok.
 
     // Such cast can be unsafe when range of 'from' type is smaller than 'into'
@@ -155,84 +219,45 @@ fn pipe_like_operation() {
     // above.
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// TODO: Can structure be created in the function? same as function in function
+// Scopes can be created with "{}" signs.
+fn scopes_example() {
+    let a: u32 = 12; //
+    {
+        let a: u32 = 64;
+        // a==64
+    }
+    // a==12
+}
+
+// Structure be created in the function. Same as function in function
 // and structure in structure etc..
+fn casted_structure() {
+    struct Rectangle {
+        width: u32,
+        height: u32,
 
-struct Rectangle {
-    width: u32,
-    height: u32,
-
-    fn get_area() -> u32 {
-        return width * height;
+        fn get_area() -> u32 {
+            return width * height;
+        }
+        fn get_perimeter() -> u32 {
+            let result = 2 * (width * height);
+            return result;
+        }
     }
-    fn get_perimeter() -> u32 {
-        let result = 2 * (width * height);
-        return result;
-    }
+
+    let rectangle: Rectangle = {
+        .width = 12,
+        .height = 13,
+    }; // ok
 }
 
-fn operate_on_rectangle(rec: Rectangle) {
-    let area: u32 = rec.get_area();
-    let perimeter: u32 = rec.get_perimeter();
-}
-
-struct Circle {
-    radius: u32,
-    x_cord: i32,
-    y_cord: i32,
-}
-
-fn new_radius_of_circle(c: mut Circle, r: u32) -> Circle {
-    c.radius = r;
-    return c;
-}
-
-fn new_circle() {
-    let c: Circle = Circle {
-        .radius = 1,
-        . x_cord = -1,
-        .
-        y_cord = -1
-    };
-}
-// no private fields and methods in structs
-struct Big {
-    value1: i32 = 0,
-    value2: i32 = -1,
-    fn () {
-        let c: u32 = 12;
-        let d: u32 = 13;
-        let e: u32 = add(c, d);
-        let f: u31 = d |> add(@, c) |> add(@, c);
-        if (c == d) {
-            let f: u32 = c; // start of lifetime of f
-        } //  end of lifetime of f
-    },
-
-    fn add(first: u32, second: u32) -> u32 {
-        return first + second;
-    },
-}
+let wrong_rectangle: Rectangle = {
+    .width = 12,
+    .height = 13,
+}; // 'error[194: 1]: cannot find "Rectangle" structure in the scope.'
 
 // main function is the starting point of the program.
-// TODO: It currently does not have any parameters and does not return.
+// NOTE: It currently does not have any parameters and does not return.
 fn main () {
 }
 
-// TODO: document inheritance
-struct Base {
-    x: u32,
-}
-
-struct Derived inherits Base {
-    y: u32,
-}
-
-fn test_inheritance() {
-    let a: Base { .x = 12, };
-    let b: Derived {
-        .x = a.x,
-        .y = 13,
-    };
-}
