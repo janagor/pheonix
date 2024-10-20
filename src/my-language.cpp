@@ -1,10 +1,45 @@
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
-
+#include "../inc/repl.hpp"
 #include <iostream>
 #include <iterator>
 #include <cstdlib>
+namespace po = boost::program_options;
 using namespace std;
+
+constexpr const char* PHEONIX =
+R"(                          j    |
+  .                         u _ (
+' c                        .   t t
+f Y            u  v            t r
+ n  u           ccczc      t  t:.  t
+  uu uv        vzz zzc    tr jj  ft
+ v  vvv`cxcc   zzn   X  `nnnx xrr'
+X  vccczczzzzzXXXj    vcvvvuuuunnn. X
+ `YX    XzzXXXYYYYzU  Xzzzzzc-  'U
+         XfYYYYUUUUUU.UUYYYYX  {
+          Y    UUJJJJCCC'  I `
+               JJCCCCC0Q
+              J'ClLCLL  x0
+                 LLLQ
+            . LL QQQ
+          x L^ rQQ1.
+         u    Q0.0
+        cc   0  O
+       `X   Ov  ff c
+           . zz  Z   zz.
+            'UU Y mmm.YXX
+             CC C'mmm   U
+             0.0Q.  tm
+               OO
+______ _        }             _
+| ___ \ |                    (_)
+| |_/ / |__   ___  ___  _ __  ___  __
+|  __/| '_ \ / _ \/ _ \| '_ \| \ \/ /
+| |   | | | |  __/ (_) | | | | |>  < 
+\_|   |_| |_|\___|\___/|_| |_|_/_/\_\
+)";
+
+
 
 int main(int ac, char* av[])
 {
@@ -17,12 +52,16 @@ int main(int ac, char* av[])
         po::options_description desc("Options");
         desc.add_options()
             ("help,h", "produce help message")
-            ("lexer,l", "create a file with lexer output (with .l extention)")
-            ("parser,p", "create a file with result of syntax analysis (with .p extention)")
-            ("semantic,s", "create a file with result of semantic analysis (with .s extention)")
+            ("lexer,l", "create a file with lexer output \
+(with .l extention)")
+            ("parser,p", "create a file with result of syntax analysis \
+(with .p extention)")
+            ("semantic,s", "create a file with result of semantic analysis \
+(with .s extention)")
             (
                 "intermediate_representation,i", 
-                "create a file with result of intermediate representation(with .ir extention)"
+                "create a file with result of intermediate representation \
+(with .ir extention)"
             )
         ;
 
@@ -43,7 +82,9 @@ int main(int ac, char* av[])
         po::notify(vm);
 
         if (vm.empty()) {
+            cout << PHEONIX;
             cout << "Interpreter loop is running." << endl;
+            repl::start(cin, cout);
             return EXIT_SUCCESS;
         } 
         if (vm.count("help")) {
