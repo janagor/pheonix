@@ -20,7 +20,25 @@ enum TokenType : int {
     PLUS,
     MINUS,
     STAR,
-    SLASH
+    SLASH,
+    EQUALS,
+    LPARENT,
+    RPARENT,
+    LBRACES,
+    RBRACES,
+    LBRACKETS,
+    RBRACKETS,
+    SINGLE_QUOTE,
+    DOUBLE_QUOTE,
+    COLON,
+    SEMICOLON,
+    COMMA,
+    DOT
+
+
+    
+
+
     /* */
 };
 
@@ -38,24 +56,21 @@ struct Lexem {
 };
 
 struct Lexer {
+private:
+    // void skipWhitesAndComms();
+    void readChar();
+    Lexem nextLexem();
 public:
-    Lexer(std::istream& istream) : istream_(istream), position(0), readPosition(1), line(1), column(1){
+    Lexer(std::istream& istream) : istream_(istream), offset(1), line(1), column(1){
         ch = istream_.get();
-        position = readPosition;
-        readPosition++;
     }
     std::vector<Lexem> lexerize();
 private:
     std::istream& istream_;
-    int position;
-    int readPosition;
     char ch;
+    int offset;
     int line;
     int column;
-    // void readChar();
-    // char peak();
-    // void skipWhitesAndComms();
-    Lexem nextLexem();
 };
 
 } // namespace lexer;
