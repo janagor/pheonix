@@ -1,36 +1,27 @@
+#include "../inc/lexer.hpp"
 #include <string>
 
-using namespace std;
+namespace lexer {
 
-enum Keyword : int {
-    LET,
-    STRUCT,
-    RETURN,
-    /* */
-};
-
-enum TokenType : int {
-    PLUS,
-    MINUS,
-    STAR,
-    SLASH,
-    /* */
-};
-
-struct Lex {
-    TokenType tType;
-    int line;
-    int column;
-};
-
-struct Lexer {
-    string input;
-    int position;
-    int readPosition;
-    char ch;
-
-    void readChar();
-    char peak();
+Lexem Lexer::nextLexem() {
+    switch (ch) {
+    case EOF:
+        return Lexem{Token(END_OF_FILE), line, column};
+    default:
+        return Lexem{Token(END_OF_FILE), line, column};
+    }
 }
 
-int main () {}
+std::vector<Lexem> Lexer::lexerize() {
+    std::vector<Lexem> result;
+    while (true) {
+        Lexem l = nextLexem();
+        result.emplace_back(l);
+        if (l.token.tokenType == 0){
+            return result;
+        }
+
+    }
+}
+
+} // namespace lexer

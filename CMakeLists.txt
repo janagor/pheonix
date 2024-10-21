@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(my-language VERSION 1.0)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(COMPILER_FLAGS "-Werror -Wextra -Wall")
@@ -24,6 +24,7 @@ include_directories(inc)
 include_directories(tests)
 
 set(SOURCE_FILES
+    src/lexer.cpp
     src/repl.cpp
 )
 
