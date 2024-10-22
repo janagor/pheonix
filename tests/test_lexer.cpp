@@ -80,7 +80,8 @@ BOOST_AUTO_TEST_CASE(testBracketsAndSigns) {
 
 BOOST_AUTO_TEST_CASE(testOneLineComments) {
     string input =
-"//abcdefg    \t\t!@@#$\n++// kaczuszka";
+"//abcdefg    \t\t!@@#$\n\
+++// kaczuszka";
     vector<Lexem> expected {
         {Token(ONE_LINE_COMMENT, "//abcdefg    \t\t!@@#$"), 1, 1},
         {Token(PLUS), 2, 1},
@@ -104,6 +105,46 @@ BOOST_AUTO_TEST_CASE(testOneLineComments2) {
         {Token(ONE_LINE_COMMENT, "//abcdefg    \t\t!@@#$"), 1, 1},
         {Token(ONE_LINE_COMMENT, "//"), 2, 1},
         {Token(END_OF_FILE), 2, 3},
+    };
+    std::istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testMultilineComments) {
+    string input =
+"/*abcdefll\n\
+\n\
+\n\
+;'.,:1*/+=";
+    vector<Lexem> expected {
+        {Token(MULTILINE_COMMENT, "/*abcdefll\n\n\n;'.,:1*/"), 1, 1},
+        {Token(PLUS), 4, 9},
+        {Token(EQUALS), 4, 10},
+        {Token(END_OF_FILE), 4, 11},
+    };
+    std::istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testMultilineComments2) {
+    string input =
+"/*abcdefll\n\
+\n\
+\n\
+;'.,:1*/";
+    vector<Lexem> expected {
+        {Token(MULTILINE_COMMENT, "/*abcdefll\n\n\n;'.,:1*/"), 1, 1},
+        {Token(END_OF_FILE), 4, 9},
     };
     std::istringstream in(input);
     Lexer l(in);

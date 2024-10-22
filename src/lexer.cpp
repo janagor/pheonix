@@ -1,11 +1,15 @@
 #include "../inc/lexer.hpp"
 #include <string>
+#include <cassert>
 
 namespace lexer {
 
 Lexem Lexer::nextLexem() {
     skipWhiteSpaces();
     char pk = 0;
+    int saved_line;
+    int saved_column;
+    std::string comment;
     switch (ch) {
     case EOF:
         return Lexem{Token(END_OF_FILE), line, column};
@@ -24,11 +28,20 @@ Lexem Lexer::nextLexem() {
         break;
     case '/':
         pk = istream_.peek();
-        if (pk == '/') {
-            int saved_line = line;
-            int saved_column = column;
-            std::string comment = getStringUntilNewLineEnd();
+        switch (pk){
+        case '/':
+            saved_line = line;
+            saved_column = column;
+            comment = getStringUntilNewLineEnd();
             return Lexem{Token(ONE_LINE_COMMENT, comment), saved_line, saved_column};
+            break;
+        case '*':
+            saved_line = line;
+            saved_column = column;
+            comment = getMultilineComment();
+            return Lexem{Token(MULTILINE_COMMENT, comment), saved_line, saved_column};
+        default:
+                break;
         }
         return Lexem{Token(SLASH), line, column};
         break;
@@ -69,7 +82,9 @@ Lexem Lexer::nextLexem() {
         return Lexem{Token(DOT), line, column};
         break;
     default:
-        return Lexem{Token(END_OF_FILE), line, column};
+        std::cout << "something else" << std::endl;
+        return Lexem{Token(DOT), line, column};
+        break;
     }
 }
 
@@ -128,6 +143,38 @@ std::vector<Lexem> Lexer::lexerize() {
         }
         readChar();
     }
+}
+std::string Lexer::getMultilineComment() {
+    // TODO: what if comment is not ended properly
+    // state 1: /
+    std::string buffer = "";
+    buffer += ch;
+    assert(ch == '/');
+    // state 2: *
+    readChar();
+    assert(ch == '*');
+    buffer += ch;
+    assert(buffer == "/*");
+    // state 3: *
+    readChar();
+    while (true) {
+        switch (ch) {
+        case '*':
+            buffer += ch;
+            readChar();
+            if (ch == '/') {
+                buffer += ch;
+                return buffer;
+            }
+            buffer += ch;
+            readChar();
+            break;
+        default:
+            buffer += ch;
+            readChar();
+        }
+    }
+    // state 4: /
 }
 
 } // namespace lexer

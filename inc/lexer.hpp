@@ -36,7 +36,7 @@ enum TokenType : int {
     DOT,
 
     ONE_LINE_COMMENT,
-    DOUBLE_LINE_COMMENT,
+    MULTILINE_COMMENT,
 
 
     
@@ -65,6 +65,7 @@ private:
     void readChar();
     Lexem nextLexem();
     std::string getStringUntilNewLineEnd();
+    std::string getMultilineComment();
 public:
     Lexer(std::istream& istream) : istream_(istream), offset(1), line(1), column(1){
         ch = istream_.get();
