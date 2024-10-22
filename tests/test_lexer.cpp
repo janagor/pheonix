@@ -78,3 +78,39 @@ BOOST_AUTO_TEST_CASE(testBracketsAndSigns) {
     compareLexemVectors(expected, result);
 }
 
+BOOST_AUTO_TEST_CASE(testOneLineComments) {
+    string input =
+"//abcdefg    \t\t!@@#$\n++// kaczuszka";
+    vector<Lexem> expected {
+        {Token(ONE_LINE_COMMENT, "//abcdefg    \t\t!@@#$"), 1, 1},
+        {Token(PLUS), 2, 1},
+        {Token(PLUS), 2, 2},
+        {Token(ONE_LINE_COMMENT, "// kaczuszka"), 2, 3},
+        {Token(END_OF_FILE), 2, 15},
+    };
+    std::istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testOneLineComments2) {
+    string input =
+"//abcdefg    \t\t!@@#$\n//";
+    vector<Lexem> expected {
+        {Token(ONE_LINE_COMMENT, "//abcdefg    \t\t!@@#$"), 1, 1},
+        {Token(ONE_LINE_COMMENT, "//"), 2, 1},
+        {Token(END_OF_FILE), 2, 3},
+    };
+    std::istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
