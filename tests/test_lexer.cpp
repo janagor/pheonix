@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(testEmptyInput) {
     vector<Lexem> expected {
         {Token(END_OF_FILE), 1, 1},
     };
-    std::istringstream in(input);
+    istringstream in(input);
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(testOperators) {
         {Token(MINUS), 1, 5},
         {Token(END_OF_FILE), 1, 6},
     };
-    std::istringstream in(input);
+    istringstream in(input);
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(testBracketsAndSigns) {
         {Token(DOT), 1, 12},
         {Token(END_OF_FILE), 1, 13},
     };
-    std::istringstream in(input);
+    istringstream in(input);
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(testOneLineComments) {
         {Token(ONE_LINE_COMMENT, "// kaczuszka"), 2, 3},
         {Token(END_OF_FILE), 2, 15},
     };
-    std::istringstream in(input);
+    istringstream in(input);
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(testOneLineComments2) {
         {Token(ONE_LINE_COMMENT, "//"), 2, 1},
         {Token(END_OF_FILE), 2, 3},
     };
-    std::istringstream in(input);
+    istringstream in(input);
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(testMultilineComments) {
         {Token(EQUALS), 4, 10},
         {Token(END_OF_FILE), 4, 11},
     };
-    std::istringstream in(input);
+    istringstream in(input);
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
@@ -146,7 +146,32 @@ BOOST_AUTO_TEST_CASE(testMultilineComments2) {
         {Token(UNFINISHED_COMMENT, "/*abcdefll\n\n\n;'.,:1"), 1, 1},
         {Token(END_OF_FILE), 4, 7},
     };
-    std::istringstream in(input);
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testIdentifiers) {
+    string input =
+"abcd123\n\
+abcd\n\
+++==a__12311\n\
+";
+    vector<Lexem> expected {
+        {Token(IDENTIFIER, "abcd123"), 1, 1},
+        {Token(IDENTIFIER, "abcd"), 2, 1},
+        {Token(PLUS), 3, 1},
+        {Token(PLUS), 3, 2},
+        {Token(EQUALS), 3, 3},
+        {Token(EQUALS), 3, 4},
+        {Token(IDENTIFIER, "a__12311"), 3, 5},
+        {Token(END_OF_FILE), 4, 1},
+    };
+    istringstream in(input);
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 

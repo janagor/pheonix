@@ -40,6 +40,9 @@ enum TokenType : int {
     MULTILINE_COMMENT,
     UNFINISHED_COMMENT,
 
+    LITERAL,
+    IDENTIFIER // letter {letter | number | '_'};
+
 
     
 
@@ -59,7 +62,6 @@ struct Lexem {
     Token token;
     int line;
     int column;
-    // for some reason on lecture presentation there is also offset of the lexem in the source
 };
 
 struct Lexer {
@@ -69,6 +71,8 @@ private:
     Lexem nextLexem();
     std::string getStringUntilNewLineEnd();
     Token handleMultilineCommentToken();
+Token handleLiteral();
+Token handleIdentifier();
 public:
     Lexer(std::istream& istream) : istream_(istream), offset(1), line(1), column(1){
         ch = istream_.get();

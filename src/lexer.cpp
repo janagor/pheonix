@@ -10,7 +10,7 @@ Lexem Lexer::nextLexem() {
     int saved_line;
     int saved_column;
     std::string comment;
-    Token commentTkn;
+    Token token;
     switch (ch) {
     case EOF:
         return Lexem{Token(END_OF_FILE), line, column};
@@ -39,8 +39,8 @@ Lexem Lexer::nextLexem() {
         case '*':
             saved_line = line;
             saved_column = column;
-            commentTkn = handleMultilineCommentToken();
-            return Lexem{commentTkn, saved_line, saved_column};
+            token = handleMultilineCommentToken();
+            return Lexem{token, saved_line, saved_column};
             break;
         default:
             break;
@@ -84,8 +84,14 @@ Lexem Lexer::nextLexem() {
         return Lexem{Token(DOT), line, column};
         break;
     default:
-        std::cout << "something else" << std::endl;
-        return Lexem{Token(DOT), line, column};
+    // LITERAL, // letter {letter | number | '_'};
+        saved_line = line;
+        saved_column = column;
+        if (!isalpha(ch)) {
+            return Lexem {Token(ERROR), saved_line, saved_column};
+        }
+        token = handleIdentifier();
+        return Lexem{token, saved_line, saved_column};
         break;
     }
 }
@@ -182,6 +188,17 @@ Token Lexer::handleMultilineCommentToken() {
             readChar();
         }
     }
+}
+
+Token Lexer::handleIdentifier(){
+    std::string buffer = "";
+    buffer += ch;
+    readChar();
+    while (isalnum(ch) || ch=='_') {
+        buffer += ch;
+        readChar();
+    }
+    return Token(IDENTIFIER, buffer);
 }
 
 } // namespace lexer
