@@ -141,10 +141,10 @@ BOOST_AUTO_TEST_CASE(testMultilineComments2) {
 "/*abcdefll\n\
 \n\
 \n\
-;'.,:1*/";
+;'.,:1";
     vector<Lexem> expected {
-        {Token(MULTILINE_COMMENT, "/*abcdefll\n\n\n;'.,:1*/"), 1, 1},
-        {Token(END_OF_FILE), 4, 9},
+        {Token(UNFINISHED_COMMENT, "/*abcdefll\n\n\n;'.,:1"), 1, 1},
+        {Token(END_OF_FILE), 4, 7},
     };
     std::istringstream in(input);
     Lexer l(in);

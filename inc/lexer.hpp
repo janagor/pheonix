@@ -16,7 +16,8 @@ enum Keyword : int {
 };
 
 enum TokenType : int {
-    END_OF_FILE = 0,
+    ERROR = 0,
+    END_OF_FILE,
     PLUS,
     MINUS,
     STAR,
@@ -37,6 +38,7 @@ enum TokenType : int {
 
     ONE_LINE_COMMENT,
     MULTILINE_COMMENT,
+    UNFINISHED_COMMENT,
 
 
     
@@ -46,6 +48,7 @@ enum TokenType : int {
 };
 
 struct Token {
+    Token() : tokenType(ERROR), value(std::nullopt) {}
     Token(TokenType t) : tokenType(t), value(std::nullopt) {}
     Token(TokenType t, std::string val) : tokenType(t), value(val) {}
     TokenType tokenType;
@@ -65,7 +68,7 @@ private:
     void readChar();
     Lexem nextLexem();
     std::string getStringUntilNewLineEnd();
-    std::string getMultilineComment();
+    Token handleMultilineCommentToken();
 public:
     Lexer(std::istream& istream) : istream_(istream), offset(1), line(1), column(1){
         ch = istream_.get();

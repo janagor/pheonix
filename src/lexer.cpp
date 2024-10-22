@@ -10,6 +10,7 @@ Lexem Lexer::nextLexem() {
     int saved_line;
     int saved_column;
     std::string comment;
+    Token commentTkn;
     switch (ch) {
     case EOF:
         return Lexem{Token(END_OF_FILE), line, column};
@@ -38,10 +39,11 @@ Lexem Lexer::nextLexem() {
         case '*':
             saved_line = line;
             saved_column = column;
-            comment = getMultilineComment();
-            return Lexem{Token(MULTILINE_COMMENT, comment), saved_line, saved_column};
+            commentTkn = handleMultilineCommentToken();
+            return Lexem{commentTkn, saved_line, saved_column};
+            break;
         default:
-                break;
+            break;
         }
         return Lexem{Token(SLASH), line, column};
         break;
@@ -138,14 +140,13 @@ std::vector<Lexem> Lexer::lexerize() {
     while (true) {
         Lexem l = nextLexem();
         result.emplace_back(l);
-        if (l.token.tokenType == 0){
+        if (l.token.tokenType == END_OF_FILE){
             return result;
         }
         readChar();
     }
 }
-std::string Lexer::getMultilineComment() {
-    // TODO: what if comment is not ended properly
+Token Lexer::handleMultilineCommentToken() {
     // state 1: /
     std::string buffer = "";
     buffer += ch;
@@ -163,18 +164,24 @@ std::string Lexer::getMultilineComment() {
             buffer += ch;
             readChar();
             if (ch == '/') {
+                // state 4: /
                 buffer += ch;
-                return buffer;
+                return Token(MULTILINE_COMMENT, buffer);
+            }
+            if (ch == EOF) {
+                return Token(UNFINISHED_COMMENT, buffer);
             }
             buffer += ch;
             readChar();
+            break;
+        case EOF:
+            return Token(UNFINISHED_COMMENT, buffer);
             break;
         default:
             buffer += ch;
             readChar();
         }
     }
-    // state 4: /
 }
 
 } // namespace lexer
