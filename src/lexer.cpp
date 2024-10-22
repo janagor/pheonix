@@ -4,6 +4,15 @@
 
 namespace lexer {
 
+std::optional<TokenType> searchForKeyword(std::string& word) {
+    auto token = Keywords.find(word);
+    if (token != Keywords.end()) {
+        return token->second;
+    }
+    return {};
+
+}
+
 Lexem Lexer::nextLexem() {
     skipWhiteSpaces();
     char pk = 0;
@@ -87,8 +96,12 @@ Lexem Lexer::nextLexem() {
     // LITERAL, // letter {letter | number | '_'};
         saved_line = line;
         saved_column = column;
-        if (!isalpha(ch)) {
+        if (!isalnum(ch)) {
             return Lexem {Token(ERROR), saved_line, saved_column};
+        }
+        if (isdigit(ch)) {
+            token = handleLiteral();
+            return Lexem{token, saved_line, saved_column};
         }
         token = handleIdentifier();
         return Lexem{token, saved_line, saved_column};
@@ -198,7 +211,32 @@ Token Lexer::handleIdentifier(){
         buffer += ch;
         readChar();
     }
+
+    std::optional<TokenType> result =  searchForKeyword(buffer);
+    if(result)
+    return Token(*result);
+
     return Token(IDENTIFIER, buffer);
+}
+
+Token Lexer::handleLiteral(){
+    std::string buffer = "";
+    buffer += ch;
+    readChar();
+    while (isdigit(ch)) {
+        buffer += ch;
+        readChar();
+    }
+    if (!(isalnum(ch) || ch=='_')){
+    return Token(LITERAL, buffer);
+    }
+
+    while (isalnum(ch) || ch=='_') {
+        buffer += ch;
+        readChar();
+    }
+
+    return Token(ERROR_LITERAL, buffer);
 }
 
 } // namespace lexer

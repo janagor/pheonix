@@ -180,3 +180,69 @@ abcd\n\
     compareLexemVectors(expected, result);
 }
 
+BOOST_AUTO_TEST_CASE(testIntegerLiterals) {
+    string input =
+"123\n\
+abcd12 1230\n\
+**789 a__12311";
+    vector<Lexem> expected {
+        {Token(LITERAL, "123"), 1, 1},
+        {Token(IDENTIFIER, "abcd12"), 2, 1},
+        {Token(LITERAL, "1230"), 2, 8},
+        {Token(STAR), 3, 1},
+        {Token(STAR), 3, 2},
+        {Token(LITERAL, "789"), 3, 3},
+        {Token(IDENTIFIER, "a__12311"), 3, 7},
+        {Token(END_OF_FILE), 3, 15},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testIntegerLiteralsError) {
+    string input =
+"123_\n\
+abcd12 1230\n\
+**789a a__12311";
+    vector<Lexem> expected {
+        {Token(ERROR_LITERAL, "123_"), 1, 1},
+        {Token(IDENTIFIER, "abcd12"), 2, 1},
+        {Token(LITERAL, "1230"), 2, 8},
+        {Token(STAR), 3, 1},
+        {Token(STAR), 3, 2},
+        {Token(ERROR_LITERAL, "789a"), 3, 3},
+        {Token(IDENTIFIER, "a__12311"), 3, 8},
+        {Token(END_OF_FILE), 3, 16},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testKeywords) {
+    string input =
+"123 if while";
+    vector<Lexem> expected {
+        {Token(LITERAL, "123"), 1, 1},
+        {Token(IF), 1, 5},
+        {Token(WHILE), 1, 8},
+        {Token(END_OF_FILE), 1, 13},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+

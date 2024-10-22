@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <optional>
+#include <map>
 
 namespace lexer {
 
@@ -17,6 +18,7 @@ enum Keyword : int {
 
 enum TokenType : int {
     ERROR = 0,
+    ERROR_LITERAL, // ex. 123a 123adfs
     END_OF_FILE,
     PLUS,
     MINUS,
@@ -41,14 +43,24 @@ enum TokenType : int {
     UNFINISHED_COMMENT,
 
     LITERAL,
-    IDENTIFIER // letter {letter | number | '_'};
-
+    IDENTIFIER, // letter {letter | number | '_'};
+    
+    NOT_A_KEYWORD,
+    IF,
+    WHILE
 
     
 
 
     /* */
 };
+
+static const std::map<std::string, TokenType> Keywords = {
+    {"if", IF},
+    {"while", WHILE},
+};
+
+std::optional<TokenType> searchForKeyword(std::string& word);
 
 struct Token {
     Token() : tokenType(ERROR), value(std::nullopt) {}
