@@ -255,8 +255,8 @@ Token Lexer::handleString(){
             case '"':
                 buffer += R"(")";
                 break;
-            case '\n':
-                buffer += R"(")";
+            case 'n':
+                buffer += '\n';
                 break;
             default:
                 buffer += ch;

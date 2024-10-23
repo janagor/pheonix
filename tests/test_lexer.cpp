@@ -281,3 +281,25 @@ R"("kaczuszka mowi \"Hau, Hau!\"")";
     compareLexemVectors(expected, result);
 }
 
+BOOST_AUTO_TEST_CASE(testStringsWithNewLineCharacterInside) {
+    string input =
+R"("kaczuszka mowi:
+- hello!
+- hello!")";
+    vector<Lexem> expected {
+        {Token(STRING,
+"kaczuszka mowi:\n\
+- hello!\n\
+- hello!"
+               ), 1, 1},
+        {Token(END_OF_FILE), 3, 10},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
