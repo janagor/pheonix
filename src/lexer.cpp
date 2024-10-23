@@ -246,6 +246,25 @@ Token Lexer::handleString(){
     std::string buffer = "";
     readChar();
     while (ch != '"' && ch !=EOF) {
+        if (ch == '\\') {
+            readChar();
+            switch (ch) {
+            case '\\':
+                buffer += R"(/)";
+                break;
+            case '"':
+                buffer += R"(")";
+                break;
+            case '\n':
+                buffer += R"(")";
+                break;
+            default:
+                buffer += ch;
+            }
+            readChar();
+            continue;
+
+        }
         buffer += ch;
         readChar();
     }

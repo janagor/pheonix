@@ -265,3 +265,19 @@ R"("kaczuszka"
     compareLexemVectors(expected, result);
 }
 
+BOOST_AUTO_TEST_CASE(testStringsWithDoubleQuotesInside) {
+    string input =
+R"("kaczuszka mowi \"Hau, Hau!\"")";
+    vector<Lexem> expected {
+        {Token(STRING, "kaczuszka mowi \"Hau, Hau!\""), 1, 1},
+        {Token(END_OF_FILE), 1, 31},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
