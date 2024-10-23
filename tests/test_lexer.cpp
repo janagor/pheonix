@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(testOperators) {
 }
 
 BOOST_AUTO_TEST_CASE(testBracketsAndSigns) {
-    string input = R"((){}[]"':;,.)";
+    string input = R"((){}[]'':;,.)";
     vector<Lexem> expected {
         {Token(LPARENT), 1, 1},
         {Token(RPARENT), 1, 2},
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(testBracketsAndSigns) {
         {Token(RBRACES), 1, 4},
         {Token(LBRACKETS), 1, 5},
         {Token(RBRACKETS), 1, 6},
-        {Token(DOUBLE_QUOTE), 1, 7},
+        {Token(SINGLE_QUOTE), 1, 7},
         {Token(SINGLE_QUOTE), 1, 8},
         {Token(COLON), 1, 9},
         {Token(SEMICOLON), 1, 10},
@@ -157,10 +157,10 @@ BOOST_AUTO_TEST_CASE(testMultilineComments2) {
 
 BOOST_AUTO_TEST_CASE(testIdentifiers) {
     string input =
-"abcd123\n\
-abcd\n\
-++==a__12311\n\
-";
+R"(abcd123
+abcd
+++==a__12311
+)";
     vector<Lexem> expected {
         {Token(IDENTIFIER, "abcd123"), 1, 1},
         {Token(IDENTIFIER, "abcd"), 2, 1},
@@ -182,9 +182,9 @@ abcd\n\
 
 BOOST_AUTO_TEST_CASE(testIntegerLiterals) {
     string input =
-"123\n\
-abcd12 1230\n\
-**789 a__12311";
+R"(123
+abcd12 1230
+**789 a__12311)";
     vector<Lexem> expected {
         {Token(LITERAL, "123"), 1, 1},
         {Token(IDENTIFIER, "abcd12"), 2, 1},
@@ -206,9 +206,9 @@ abcd12 1230\n\
 
 BOOST_AUTO_TEST_CASE(testIntegerLiteralsError) {
     string input =
-"123_\n\
-abcd12 1230\n\
-**789a a__12311";
+R"(123_
+abcd12 1230
+**789a a__12311)";
     vector<Lexem> expected {
         {Token(ERROR_LITERAL, "123_"), 1, 1},
         {Token(IDENTIFIER, "abcd12"), 2, 1},
@@ -236,6 +236,25 @@ BOOST_AUTO_TEST_CASE(testKeywords) {
         {Token(IF), 1, 5},
         {Token(WHILE), 1, 8},
         {Token(END_OF_FILE), 1, 13},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testStringsWithoutSpecialCharacters) {
+    string input =
+R"("kaczuszka"
+
+"cos    ")";
+    vector<Lexem> expected {
+        {Token(STRING, "kaczuszka"), 1, 1},
+        {Token(STRING, "cos    "), 3, 1},
+        {Token(END_OF_FILE), 3, 10},
     };
     istringstream in(input);
     Lexer l(in);

@@ -75,7 +75,10 @@ Lexem Lexer::nextLexem() {
         return Lexem{Token(RBRACKETS), line, column};
         break;
     case '"':
-        return Lexem{Token(DOUBLE_QUOTE), line, column};
+        saved_line = line;
+        saved_column = column;
+        token = handleString();
+        return Lexem{token, saved_line, saved_column};
         break;
     case '\'':
         return Lexem{Token(SINGLE_QUOTE), line, column};
@@ -237,6 +240,20 @@ Token Lexer::handleLiteral(){
     }
 
     return Token(ERROR_LITERAL, buffer);
+}
+
+Token Lexer::handleString(){
+    std::string buffer = "";
+    readChar();
+    while (ch != '"' && ch !=EOF) {
+        buffer += ch;
+        readChar();
+    }
+    if (ch=='"'){
+        readChar();
+        return Token(STRING, buffer);
+    }
+    return Token(ERROR_STRING, buffer);
 }
 
 } // namespace lexer

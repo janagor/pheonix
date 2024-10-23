@@ -19,6 +19,7 @@ enum Keyword : int {
 enum TokenType : int {
     ERROR = 0,
     ERROR_LITERAL, // ex. 123a 123adfs
+    ERROR_STRING,
     END_OF_FILE,
     PLUS,
     MINUS,
@@ -45,6 +46,9 @@ enum TokenType : int {
     LITERAL,
     IDENTIFIER, // letter {letter | number | '_'};
     
+    STRING,
+
+
     NOT_A_KEYWORD,
     IF,
     WHILE
@@ -85,6 +89,7 @@ private:
     Token handleMultilineCommentToken();
 Token handleLiteral();
 Token handleIdentifier();
+Token handleString();
 public:
     Lexer(std::istream& istream) : istream_(istream), offset(1), line(1), column(1){
         ch = istream_.get();
