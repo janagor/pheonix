@@ -96,14 +96,13 @@ Lexem Lexer::nextLexem() {
         return Lexem{Token(DOT), line, column};
         break;
     default:
-    // LITERAL, // letter {letter | number | '_'};
         saved_line = line;
         saved_column = column;
         if (!isalnum(ch)) {
             return Lexem {Token(ERROR), saved_line, saved_column};
         }
         if (isdigit(ch)) {
-            token = handleLiteral();
+            token = handleNumber();
             return Lexem{token, saved_line, saved_column};
         }
         token = handleIdentifier();
@@ -222,24 +221,38 @@ Token Lexer::handleIdentifier(){
     return Token(IDENTIFIER, buffer);
 }
 
-Token Lexer::handleLiteral(){
+Token Lexer::handleNumber(){
     std::string buffer = "";
     buffer += ch;
     readChar();
+    bool doubleFlag = false;
     while (isdigit(ch)) {
         buffer += ch;
         readChar();
     }
-    if (!(isalnum(ch) || ch=='_')){
-    return Token(LITERAL, buffer);
+    if (ch == '.') {
+        doubleFlag = true;
+        buffer += ch;
+        readChar();
+        while (isdigit(ch)) {
+            buffer += ch;
+            readChar();
+        }
     }
 
+    if (!(isalnum(ch) || ch=='_')){
+        if (doubleFlag)
+            return Token(FLOAT, buffer);
+        return Token(INTEGER, buffer);
+    }
+
+    // for better error information
     while (isalnum(ch) || ch=='_') {
         buffer += ch;
         readChar();
     }
 
-    return Token(ERROR_LITERAL, buffer);
+    return Token(ERROR_NUMBER, buffer);
 }
 
 Token Lexer::handleString(){

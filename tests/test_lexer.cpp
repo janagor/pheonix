@@ -186,12 +186,12 @@ R"(123
 abcd12 1230
 **789 a__12311)";
     vector<Lexem> expected {
-        {Token(LITERAL, "123"), 1, 1},
+        {Token(INTEGER, "123"), 1, 1},
         {Token(IDENTIFIER, "abcd12"), 2, 1},
-        {Token(LITERAL, "1230"), 2, 8},
+        {Token(INTEGER, "1230"), 2, 8},
         {Token(STAR), 3, 1},
         {Token(STAR), 3, 2},
-        {Token(LITERAL, "789"), 3, 3},
+        {Token(INTEGER, "789"), 3, 3},
         {Token(IDENTIFIER, "a__12311"), 3, 7},
         {Token(END_OF_FILE), 3, 15},
     };
@@ -210,12 +210,12 @@ R"(123_
 abcd12 1230
 **789a a__12311)";
     vector<Lexem> expected {
-        {Token(ERROR_LITERAL, "123_"), 1, 1},
+        {Token(ERROR_NUMBER, "123_"), 1, 1},
         {Token(IDENTIFIER, "abcd12"), 2, 1},
-        {Token(LITERAL, "1230"), 2, 8},
+        {Token(INTEGER, "1230"), 2, 8},
         {Token(STAR), 3, 1},
         {Token(STAR), 3, 2},
-        {Token(ERROR_LITERAL, "789a"), 3, 3},
+        {Token(ERROR_NUMBER, "789a"), 3, 3},
         {Token(IDENTIFIER, "a__12311"), 3, 8},
         {Token(END_OF_FILE), 3, 16},
     };
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(testKeywords) {
     string input =
 "123 if while";
     vector<Lexem> expected {
-        {Token(LITERAL, "123"), 1, 1},
+        {Token(INTEGER, "123"), 1, 1},
         {Token(IF), 1, 5},
         {Token(WHILE), 1, 8},
         {Token(END_OF_FILE), 1, 13},
@@ -255,6 +255,23 @@ R"("kaczuszka"
         {Token(STRING, "kaczuszka"), 1, 1},
         {Token(STRING, "cos    "), 3, 1},
         {Token(END_OF_FILE), 3, 10},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+BOOST_AUTO_TEST_CASE(testStringsWithoutSpecialCharactersWithNewLine) {
+    string input =
+R"("kaczuszka
+
+cos    ")";
+    vector<Lexem> expected {
+        {Token(STRING, "kaczuszka\n\ncos    "), 1, 1},
+        {Token(END_OF_FILE), 3, 9},
     };
     istringstream in(input);
     Lexer l(in);
@@ -293,6 +310,56 @@ R"("kaczuszka mowi:
 - hello!"
                ), 1, 1},
         {Token(END_OF_FILE), 3, 10},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testFloat) {
+    string input =
+R"(1.12345)";
+    vector<Lexem> expected {
+        {Token(FLOAT, "1.12345"), 1, 1},
+        {Token(END_OF_FILE), 1, 8},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testFloat2) {
+    string input =
+R"(1.12345 0.0)";
+    vector<Lexem> expected {
+        {Token(FLOAT, "1.12345"), 1, 1},
+        {Token(FLOAT, "0.0"), 1, 9},
+        {Token(END_OF_FILE), 1, 12},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testFloatWithoutNumbersAfterDot) {
+    string input =
+R"(1.12345 0.)";
+    vector<Lexem> expected {
+        {Token(FLOAT, "1.12345"), 1, 1},
+        {Token(FLOAT, "0."), 1, 9},
+        {Token(END_OF_FILE), 1, 11},
     };
     istringstream in(input);
     Lexer l(in);
