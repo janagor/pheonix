@@ -4,109 +4,142 @@
 
 namespace lexer {
 
-std::optional<TokenType> searchForKeyword(std::string& word) {
-    auto token = Keywords.find(word);
-    if (token != Keywords.end()) {
-        return token->second;
-    }
-    return {};
-
-}
-
 Lexem Lexer::nextLexem() {
     skipWhiteSpaces();
-    char pk = 0;
-    int saved_line;
-    int saved_column;
+    int sline = line;
+    int scolumn = column;
     std::string comment;
     Token token;
+
     switch (ch) {
     case EOF:
-        return Lexem{Token(END_OF_FILE), line, column};
+        return Lexem{Token(END_OF_FILE), sline, scolumn};
         break;
     case '+':
-        return Lexem{Token(PLUS), line, column};
+        readChar();
+        return Lexem{Token(PLUS), sline, scolumn};
         break;
     case '-':
-        return Lexem{Token(MINUS), line, column};
+        readChar();
+        if (ch == '>') {
+            readChar();
+            return Lexem{Token(RARROW), sline, scolumn};
+        }
+        return Lexem{Token(MINUS), sline, scolumn};
         break;
+
+    case '<':
+        readChar();
+        if (ch == '=') {
+            readChar();
+            return Lexem{Token(LEQ), sline, scolumn};
+        }
+        if (ch == '-') {
+            readChar();
+            return Lexem{Token(LARROW), sline, scolumn};
+        }
+        return Lexem{Token(LESS), sline, scolumn};
+        break;
+    case '>':
+        readChar();
+        if (ch == '=') {
+            readChar();
+            return Lexem{Token(GEQ), sline, scolumn};
+        }
+        return Lexem{Token(GREATER), sline, scolumn};
+        break;
+
     case '=':
-        return Lexem{Token(EQUALS), line, column};
+        readChar();
+        if (ch == '=') {
+            readChar();
+            return Lexem{Token(EQUALS), sline, scolumn};
+        }
+        return Lexem{Token(ASSIGN), sline, scolumn};
         break;
+
     case '*':
-        return Lexem{Token(STAR), line, column};
+        readChar();
+        return Lexem{Token(STAR), sline, scolumn};
         break;
     case '/':
-        pk = istream_.peek();
-        switch (pk){
+        switch (peek){
         case '/':
-            saved_line = line;
-            saved_column = column;
-            comment = getStringUntilNewLineEnd();
-            return Lexem{Token(ONE_LINE_COMMENT, comment), saved_line, saved_column};
+            token = handleOnelineCommentToken();
+            return Lexem{token, sline, scolumn};
             break;
         case '*':
-            saved_line = line;
-            saved_column = column;
             token = handleMultilineCommentToken();
-            return Lexem{token, saved_line, saved_column};
+            return Lexem{token, sline, scolumn};
             break;
         default:
             break;
         }
-        return Lexem{Token(SLASH), line, column};
+            readChar();
+            return Lexem{Token(SLASH), sline, scolumn};
         break;
+
     case '(':
-        return Lexem{Token(LPARENT), line, column};
+        readChar();
+        return Lexem{Token(LPARENT), sline, scolumn};
         break;
     case ')':
-        return Lexem{Token(RPARENT), line, column};
+        readChar();
+        return Lexem{Token(RPARENT), sline, scolumn};
         break;
     case '{':
-        return Lexem{Token(LBRACES), line, column};
+        readChar();
+        return Lexem{Token(LBRACE), sline, scolumn};
         break;
     case '}':
-        return Lexem{Token(RBRACES), line, column};
+        readChar();
+        return Lexem{Token(RBRACE), sline, scolumn};
         break;
     case '[':
-        return Lexem{Token(LBRACKETS), line, column};
+        readChar();
+        return Lexem{Token(LBRACKET), sline, scolumn};
         break;
     case ']':
-        return Lexem{Token(RBRACKETS), line, column};
+        readChar();
+        return Lexem{Token(RBRACKET), sline, scolumn};
         break;
+
     case '"':
-        saved_line = line;
-        saved_column = column;
         token = handleString();
-        return Lexem{token, saved_line, saved_column};
+        return Lexem{token, sline, scolumn};
         break;
     case '\'':
-        return Lexem{Token(SINGLE_QUOTE), line, column};
+        readChar();
+        return Lexem{Token(SINGLE_QUOTE), sline, scolumn};
         break;
     case ':':
-        return Lexem{Token(COLON), line, column};
+        readChar();
+        return Lexem{Token(COLON), sline, scolumn};
         break;
     case ';':
-        return Lexem{Token(SEMICOLON), line, column};
+        readChar();
+        return Lexem{Token(SEMICOLON), sline, scolumn};
         break;
     case ',':
-        return Lexem{Token(COMMA), line, column};
+        readChar();
+        return Lexem{Token(COMMA), sline, scolumn};
         break;
     case '.':
-        return Lexem{Token(DOT), line, column};
+        readChar();
+        return Lexem{Token(DOT), sline, scolumn};
         break;
+
     default:
-        saved_line = line;
-        saved_column = column;
         if (!isalnum(ch)) {
-            return Lexem {Token(ERROR), saved_line, saved_column};
+            readChar();
+            return Lexem {Token(ERROR), sline, scolumn};
         }
         if (isdigit(ch)) {
             token = handleNumber();
-            return Lexem{token, saved_line, saved_column};
+            return Lexem{token, sline, scolumn};
         }
         token = handleIdentifier();
-        return Lexem{token, saved_line, saved_column};
+        return Lexem{token, sline, scolumn};
         break;
     }
 }
@@ -117,21 +150,26 @@ void Lexer::readChar() {
         column = 0;
     }
     if (ch == EOF) {
+    peek = ch;
         return;
     }
     ch = istream_.get();
+    peek = istream_.peek();
     ++offset;
     ++column;
 
 }
 
-std::string Lexer::getStringUntilNewLineEnd() {
+Token Lexer::handleOnelineCommentToken() {
     std::string buffer = "";
+    buffer += ch;
+    readChar();
     while (true) {
         switch (ch) {
         case '\n':
         case EOF:
-            return buffer;
+            readChar();
+            return Token(ONE_LINE_COMMENT, buffer);
             break;
         default:
             buffer += ch;
@@ -164,14 +202,13 @@ std::vector<Lexem> Lexer::lexerize() {
         if (l.token.tokenType == END_OF_FILE){
             return result;
         }
-        readChar();
     }
 }
 Token Lexer::handleMultilineCommentToken() {
     // state 1: /
     std::string buffer = "";
-    buffer += ch;
     assert(ch == '/');
+    buffer += ch;
     // state 2: *
     readChar();
     assert(ch == '*');
@@ -187,6 +224,7 @@ Token Lexer::handleMultilineCommentToken() {
             if (ch == '/') {
                 // state 4: /
                 buffer += ch;
+                readChar();
                 return Token(MULTILINE_COMMENT, buffer);
             }
             if (ch == EOF) {
@@ -214,18 +252,18 @@ Token Lexer::handleIdentifier(){
         readChar();
     }
 
-    std::optional<TokenType> result =  searchForKeyword(buffer);
+    std::optional<TokenType> result = searchForKeyword(buffer);
     if(result)
-    return Token(*result);
+        return Token(*result);
 
     return Token(IDENTIFIER, buffer);
 }
 
 Token Lexer::handleNumber(){
     std::string buffer = "";
+    bool doubleFlag = false;
     buffer += ch;
     readChar();
-    bool doubleFlag = false;
     while (isdigit(ch)) {
         buffer += ch;
         readChar();
@@ -239,15 +277,14 @@ Token Lexer::handleNumber(){
             readChar();
         }
     }
-
-    if (!(isalnum(ch) || ch=='_')){
+    if (!(isalpha(ch) || ch == '_')){
         if (doubleFlag)
-            return Token(FLOAT, buffer);
+            return Token(DBL, buffer);
         return Token(INTEGER, buffer);
     }
 
     // for better error information
-    while (isalnum(ch) || ch=='_') {
+    while (isalnum(ch) || ch == '_') {
         buffer += ch;
         readChar();
     }
@@ -287,5 +324,15 @@ Token Lexer::handleString(){
     }
     return Token(ERROR_STRING, buffer);
 }
+
+std::optional<TokenType> searchForKeyword(std::string& word) {
+    auto token = Keywords.find(word);
+    if (token != Keywords.end()) {
+        return token->second;
+    }
+    return {};
+
+}
+
 
 } // namespace lexer

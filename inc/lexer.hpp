@@ -9,60 +9,90 @@
 
 namespace lexer {
 
-enum Keyword : int {
-    LET,
-    STRUCT,
-    RETURN
-    /* */
-};
+// enum Keyword : int {
+//     LET,
+//     STRUCT,
+//     RETURN,
+//     FOR,
+//     WHILE,
+//     MUT,
+//     
+//     INT,
+//     STR,
+//     DBL
+//
+//     /* */
+// };
 
 enum TokenType : int {
     ERROR = 0,
     ERROR_NUMBER, // ex. 123a 123adfs
     ERROR_STRING,
+    UNFINISHED_COMMENT,
+
     END_OF_FILE,
+
     PLUS,
     MINUS,
     STAR,
     SLASH,
+    ASSIGN,
+
     EQUALS,
+    LESS,
+    LEQ,
+    GREATER,
+    GEQ,
+
     LPARENT,
     RPARENT,
-    LBRACES,
-    RBRACES,
-    LBRACKETS,
-    RBRACKETS,
+    LBRACE,
+    RBRACE,
+    LBRACKET,
+    RBRACKET,
+
     SINGLE_QUOTE,
     DOUBLE_QUOTE,
     COLON,
     SEMICOLON,
     COMMA,
     DOT,
+    RARROW,
+    LARROW,
 
     ONE_LINE_COMMENT,
     MULTILINE_COMMENT,
-    UNFINISHED_COMMENT,
 
     INTEGER,
-    IDENTIFIER, // letter {letter | number | '_'};
-    FLOAT,
-    
+    DOUBLE,
     STRING,
-
+    IDENTIFIER, // letter {letter | number | '_'};
 
     NOT_A_KEYWORD,
-    IF,
-    WHILE
-
-    
-
-
     /* */
+    LET,
+    STRUCT,
+    RETURN,
+    WHILE,
+    MUT,
+    IF,
+    
+    INT,
+    STR,
+    DBL
 };
 
 static const std::map<std::string, TokenType> Keywords = {
     {"if", IF},
     {"while", WHILE},
+
+    {"let", LET},
+    {"struct", STRUCT},
+    {"return",RETURN },
+    {"mut", MUT},
+    {"int", INT},
+    {"str", STR},
+    {"dbl", DBL},
 };
 
 std::optional<TokenType> searchForKeyword(std::string& word);
@@ -86,7 +116,7 @@ private:
     void skipWhiteSpaces();
     void readChar();
     Lexem nextLexem();
-    std::string getStringUntilNewLineEnd();
+    Token handleOnelineCommentToken();
     Token handleMultilineCommentToken();
     Token handleNumber();
     Token handleIdentifier();
@@ -94,11 +124,13 @@ private:
 public:
     Lexer(std::istream& istream) : istream_(istream), offset(1), line(1), column(1){
         ch = istream_.get();
+        peek = istream_.peek();
     }
     std::vector<Lexem> lexerize();
 private:
     std::istream& istream_;
     char ch;
+    char peek;
     int offset;
     int line;
     int column;

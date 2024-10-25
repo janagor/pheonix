@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(testOperators) {
     string input = R"(+=*/-)";
     vector<Lexem> expected {
         {Token(PLUS), 1, 1},
-        {Token(EQUALS), 1, 2},
+        {Token(ASSIGN), 1, 2},
         {Token(STAR), 1, 3},
         {Token(SLASH), 1, 4},
         {Token(MINUS), 1, 5},
@@ -57,10 +57,10 @@ BOOST_AUTO_TEST_CASE(testBracketsAndSigns) {
     vector<Lexem> expected {
         {Token(LPARENT), 1, 1},
         {Token(RPARENT), 1, 2},
-        {Token(LBRACES), 1, 3},
-        {Token(RBRACES), 1, 4},
-        {Token(LBRACKETS), 1, 5},
-        {Token(RBRACKETS), 1, 6},
+        {Token(LBRACE), 1, 3},
+        {Token(RBRACE), 1, 4},
+        {Token(LBRACKET), 1, 5},
+        {Token(RBRACKET), 1, 6},
         {Token(SINGLE_QUOTE), 1, 7},
         {Token(SINGLE_QUOTE), 1, 8},
         {Token(COLON), 1, 9},
@@ -80,13 +80,13 @@ BOOST_AUTO_TEST_CASE(testBracketsAndSigns) {
 
 BOOST_AUTO_TEST_CASE(testOneLineComments) {
     string input =
-"//abcdefg    \t\t!@@#$\n\
-++// kaczuszka";
+"//abcdefg1123\n\
+++//3kaczuszka";
     vector<Lexem> expected {
-        {Token(ONE_LINE_COMMENT, "//abcdefg    \t\t!@@#$"), 1, 1},
+        {Token(ONE_LINE_COMMENT, "//abcdefg1123"), 1, 1},
         {Token(PLUS), 2, 1},
         {Token(PLUS), 2, 2},
-        {Token(ONE_LINE_COMMENT, "// kaczuszka"), 2, 3},
+        {Token(ONE_LINE_COMMENT, "//3kaczuszka"), 2, 3},
         {Token(END_OF_FILE), 2, 15},
     };
     istringstream in(input);
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(testMultilineComments) {
     vector<Lexem> expected {
         {Token(MULTILINE_COMMENT, "/*abcdefll\n\n\n;'.,:1*/"), 1, 1},
         {Token(PLUS), 4, 9},
-        {Token(EQUALS), 4, 10},
+        {Token(ASSIGN), 4, 10},
         {Token(END_OF_FILE), 4, 11},
     };
     istringstream in(input);
@@ -167,7 +167,6 @@ abcd
         {Token(PLUS), 3, 1},
         {Token(PLUS), 3, 2},
         {Token(EQUALS), 3, 3},
-        {Token(EQUALS), 3, 4},
         {Token(IDENTIFIER, "a__12311"), 3, 5},
         {Token(END_OF_FILE), 4, 1},
     };
@@ -180,6 +179,24 @@ abcd
     compareLexemVectors(expected, result);
 }
 
+BOOST_AUTO_TEST_CASE(testIntegerLiteralsEasier) {
+    string input =
+R"(123
+111112 1230)";
+    vector<Lexem> expected {
+        {Token(INTEGER, "123"), 1, 1},
+        {Token(INTEGER, "111112"), 2, 1},
+        {Token(INTEGER, "1230"), 2, 8},
+        {Token(END_OF_FILE), 2, 12},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
 BOOST_AUTO_TEST_CASE(testIntegerLiterals) {
     string input =
 R"(123
@@ -307,8 +324,7 @@ R"("kaczuszka mowi:
         {Token(STRING,
 "kaczuszka mowi:\n\
 - hello!\n\
-- hello!"
-               ), 1, 1},
+- hello!"), 1, 1},
         {Token(END_OF_FILE), 3, 10},
     };
     istringstream in(input);
@@ -324,7 +340,7 @@ BOOST_AUTO_TEST_CASE(testFloat) {
     string input =
 R"(1.12345)";
     vector<Lexem> expected {
-        {Token(FLOAT, "1.12345"), 1, 1},
+        {Token(DBL, "1.12345"), 1, 1},
         {Token(END_OF_FILE), 1, 8},
     };
     istringstream in(input);
@@ -340,8 +356,8 @@ BOOST_AUTO_TEST_CASE(testFloat2) {
     string input =
 R"(1.12345 0.0)";
     vector<Lexem> expected {
-        {Token(FLOAT, "1.12345"), 1, 1},
-        {Token(FLOAT, "0.0"), 1, 9},
+        {Token(DBL, "1.12345"), 1, 1},
+        {Token(DBL, "0.0"), 1, 9},
         {Token(END_OF_FILE), 1, 12},
     };
     istringstream in(input);
@@ -357,9 +373,61 @@ BOOST_AUTO_TEST_CASE(testFloatWithoutNumbersAfterDot) {
     string input =
 R"(1.12345 0.)";
     vector<Lexem> expected {
-        {Token(FLOAT, "1.12345"), 1, 1},
-        {Token(FLOAT, "0."), 1, 9},
+        {Token(DBL, "1.12345"), 1, 1},
+        {Token(DBL, "0."), 1, 9},
         {Token(END_OF_FILE), 1, 11},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testAll1) {
+    string input =
+R"(let kaczka = if (a == 21)
+while(x < 12) { x = x + 0.; }
+let mut b = 123->str;
+)";
+    vector<Lexem> expected {
+        {Token(LET), 1, 1},
+        {Token(IDENTIFIER, "kaczka"), 1, 5},
+        {Token(ASSIGN), 1, 12},
+        {Token(IF), 1, 14},
+        {Token(LPARENT), 1, 17},
+        {Token(IDENTIFIER, "a"), 1, 18},
+        {Token(EQUALS), 1, 20},
+        {Token(INTEGER, "21"), 1, 23},
+        {Token(RPARENT), 1, 25},
+
+        {Token(WHILE), 2, 1},
+        {Token(LPARENT), 2, 6},
+        {Token(IDENTIFIER, "x"), 2, 7},
+        {Token(LESS), 2, 9},
+        {Token(INTEGER, "12"), 2, 11},
+        {Token(RPARENT), 2, 13},
+        {Token(LBRACE), 2, 15},
+        {Token(IDENTIFIER, "x"), 2, 17},
+        {Token(ASSIGN), 2, 19},
+        {Token(IDENTIFIER, "x"), 2, 21},
+        {Token(PLUS), 2, 23},
+        {Token(DBL, "0."), 2, 25},
+        {Token(SEMICOLON), 2, 27},
+        {Token(RBRACE), 2, 29},
+
+        {Token(LET), 3, 1},
+        {Token(MUT), 3, 5},
+        {Token(IDENTIFIER, "b"), 3, 9},
+        {Token(ASSIGN), 3, 11},
+        {Token(INTEGER, "123"), 3, 13},
+        {Token(RARROW), 3, 16},
+        {Token(STR), 3,18},
+        {Token(SEMICOLON), 3, 21},
+
+        {Token(END_OF_FILE), 4, 1}
     };
     istringstream in(input);
     Lexer l(in);
