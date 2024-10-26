@@ -2,13 +2,13 @@
 
 #include <sstream>
 #include <string>
+#include <variant>
 #include <vector>
 #include <iostream>
 #include <optional>
 #include <map>
 
 namespace lexer {
-
 // enum Keyword : int {
 //     LET,
 //     STRUCT,
@@ -105,15 +105,22 @@ struct Token {
     Token() : tokenType(ERROR), value(std::nullopt) {}
     Token(TokenType t) : tokenType(t), value(std::nullopt) {}
     Token(TokenType t, std::string val) : tokenType(t), value(val) {}
+    bool operator==(const Token& t) const;
+
     TokenType tokenType;
-    std::optional<std::string> value;
+    std::optional< std::variant<int, std::string > > value;
 };
+std::ostream& operator<<(std::ostream& os, const std::optional<std::variant<int, std::string>>& opt);
+std::ostream& operator<<(std::ostream& os, const Token& t);
 
 struct Lexem {
     Token token;
     int line;
     int column;
+    bool operator==(const Lexem& l) const;
 };
+std::ostream& operator<<(std::ostream& os, const Lexem& l);
+
 
 struct Lexer {
 private:

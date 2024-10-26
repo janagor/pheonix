@@ -4,6 +4,34 @@
 
 namespace lexer {
 
+bool Token::operator==(const Token& t) const {
+    return this->tokenType == t.tokenType && this->value == t.value;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::optional<std::variant<int, std::string>>& opt) {
+    if (opt) {
+        std::visit([&os](const auto& value) {
+            os << value;
+        }, *opt);
+    } else {
+        os << "!empty!";
+    }
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Token& t) {
+    os << "Token(tokenType:" << t.tokenType << "value:" << t.value << ")";
+    return os;
+}
+
+bool Lexem::operator==(const Lexem& l) const {
+    return this->token==l.token && this->line==l.line && this->column==l.column;
+}
+
+std::ostream& operator<<(std::ostream& os, const Lexem& l) {
+    os << "Lexem(token:" << l.token << ", line:" << l.line << ", column:" << l.column << ")";
+    return os;
+}
 Lexem Lexer::nextLexem() {
     skipWhiteSpaces();
     int sline = line;

@@ -9,13 +9,11 @@ void compareLexemVectors(const vector<Lexem>& expected, const vector<Lexem>& rec
     BOOST_CHECK_EQUAL(expected.size(), received.size());
 
     for (size_t i = 0; i < expected.size(); ++i) {
-        BOOST_CHECK_EQUAL(expected[i].token.tokenType, received[i].token.tokenType);
-        BOOST_CHECK_EQUAL(expected[i].token.value.has_value(), received[i].token.value.has_value());
-        if (expected[i].token.value.has_value(), received[i].token.value.has_value()) 
-            BOOST_CHECK_EQUAL(*expected[i].token.value, *received[i].token.value);
-
-        BOOST_CHECK_EQUAL(expected[i].line, received[i].line);
-        BOOST_CHECK_EQUAL(expected[i].column, received[i].column);
+        BOOST_CHECK_EQUAL(expected[i], received[i]);
+        // BOOST_CHECK_EQUAL(expected[i].token, received[i].token);
+        //
+        // BOOST_CHECK_EQUAL(expected[i].line, received[i].line);
+        // BOOST_CHECK_EQUAL(expected[i].column, received[i].column);
     }
 }
 
