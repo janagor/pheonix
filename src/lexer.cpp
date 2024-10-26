@@ -360,8 +360,6 @@ std::optional<TokenType> searchForKeyword(std::string& word) {
         return token->second;
     }
     return {};
-
 }
-
 
 } // namespace lexer
