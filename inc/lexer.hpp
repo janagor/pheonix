@@ -105,12 +105,14 @@ struct Token {
     Token() : tokenType(ERROR), value(std::nullopt) {}
     Token(TokenType t) : tokenType(t), value(std::nullopt) {}
     Token(TokenType t, std::string val) : tokenType(t), value(val) {}
+    Token(TokenType t, int val) : tokenType(t), value(val) {}
+    Token(TokenType t, double val) : tokenType(t), value(val) {}
     bool operator==(const Token& t) const;
 
     TokenType tokenType;
-    std::optional< std::variant<int, std::string > > value;
+    std::optional< std::variant<int, double, std::string > > value;
 };
-std::ostream& operator<<(std::ostream& os, const std::optional<std::variant<int, std::string>>& opt);
+std::ostream& operator<<(std::ostream& os, const std::optional<std::variant<int, double, std::string>>& opt);
 std::ostream& operator<<(std::ostream& os, const Token& t);
 
 struct Lexem {

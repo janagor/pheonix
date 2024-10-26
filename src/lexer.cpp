@@ -1,6 +1,7 @@
 #include "../inc/lexer.hpp"
 #include <string>
 #include <cassert>
+#include <cstdlib>
 
 namespace lexer {
 
@@ -8,7 +9,7 @@ bool Token::operator==(const Token& t) const {
     return this->tokenType == t.tokenType && this->value == t.value;
 }
 
-std::ostream& operator<<(std::ostream& os, const std::optional<std::variant<int, std::string>>& opt) {
+std::ostream& operator<<(std::ostream& os, const std::optional<std::variant<int, double, std::string>>& opt) {
     if (opt) {
         std::visit([&os](const auto& value) {
             os << value;
@@ -307,8 +308,8 @@ Token Lexer::handleNumber(){
     }
     if (!(isalpha(ch) || ch == '_')){
         if (doubleFlag)
-            return Token(DBL, buffer);
-        return Token(INTEGER, buffer);
+            return Token(DOUBLE, stod(buffer));
+        return Token(INTEGER, stoi(buffer));
     }
 
     // for better error information

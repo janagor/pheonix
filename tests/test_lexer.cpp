@@ -182,9 +182,9 @@ BOOST_AUTO_TEST_CASE(testIntegerLiteralsEasier) {
 R"(123
 111112 1230)";
     vector<Lexem> expected {
-        {Token(INTEGER, "123"), 1, 1},
-        {Token(INTEGER, "111112"), 2, 1},
-        {Token(INTEGER, "1230"), 2, 8},
+        {Token(INTEGER, stoi("123")), 1, 1},
+        {Token(INTEGER, stoi("111112")), 2, 1},
+        {Token(INTEGER, stoi("1230")), 2, 8},
         {Token(END_OF_FILE), 2, 12},
     };
     istringstream in(input);
@@ -201,12 +201,12 @@ R"(123
 abcd12 1230
 **789 a__12311)";
     vector<Lexem> expected {
-        {Token(INTEGER, "123"), 1, 1},
+        {Token(INTEGER, stoi("123")), 1, 1},
         {Token(IDENTIFIER, "abcd12"), 2, 1},
-        {Token(INTEGER, "1230"), 2, 8},
+        {Token(INTEGER, stoi("1230")), 2, 8},
         {Token(STAR), 3, 1},
         {Token(STAR), 3, 2},
-        {Token(INTEGER, "789"), 3, 3},
+        {Token(INTEGER, stoi("789")), 3, 3},
         {Token(IDENTIFIER, "a__12311"), 3, 7},
         {Token(END_OF_FILE), 3, 15},
     };
@@ -227,7 +227,7 @@ abcd12 1230
     vector<Lexem> expected {
         {Token(ERROR_NUMBER, "123_"), 1, 1},
         {Token(IDENTIFIER, "abcd12"), 2, 1},
-        {Token(INTEGER, "1230"), 2, 8},
+        {Token(INTEGER, stoi("1230")), 2, 8},
         {Token(STAR), 3, 1},
         {Token(STAR), 3, 2},
         {Token(ERROR_NUMBER, "789a"), 3, 3},
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(testKeywords) {
     string input =
 "123 if while";
     vector<Lexem> expected {
-        {Token(INTEGER, "123"), 1, 1},
+        {Token(INTEGER, stoi("123")), 1, 1},
         {Token(IF), 1, 5},
         {Token(WHILE), 1, 8},
         {Token(END_OF_FILE), 1, 13},
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(testFloat) {
     string input =
 R"(1.12345)";
     vector<Lexem> expected {
-        {Token(DBL, "1.12345"), 1, 1},
+        {Token(DOUBLE, stod("1.12345")), 1, 1},
         {Token(END_OF_FILE), 1, 8},
     };
     istringstream in(input);
@@ -354,8 +354,8 @@ BOOST_AUTO_TEST_CASE(testFloat2) {
     string input =
 R"(1.12345 0.0)";
     vector<Lexem> expected {
-        {Token(DBL, "1.12345"), 1, 1},
-        {Token(DBL, "0.0"), 1, 9},
+        {Token(DOUBLE, stod("1.12345")), 1, 1},
+        {Token(DOUBLE, stod("0.0")), 1, 9},
         {Token(END_OF_FILE), 1, 12},
     };
     istringstream in(input);
@@ -371,8 +371,8 @@ BOOST_AUTO_TEST_CASE(testFloatWithoutNumbersAfterDot) {
     string input =
 R"(1.12345 0.)";
     vector<Lexem> expected {
-        {Token(DBL, "1.12345"), 1, 1},
-        {Token(DBL, "0."), 1, 9},
+        {Token(DOUBLE, stod("1.12345")), 1, 1},
+        {Token(DOUBLE, stod("0.")), 1, 9},
         {Token(END_OF_FILE), 1, 11},
     };
     istringstream in(input);
@@ -398,11 +398,11 @@ let mut b = 123->str;
         {Token(LPARENT), 1, 17},
         {Token(IDENTIFIER, "a"), 1, 18},
         {Token(EQUALS), 1, 20},
-        {Token(INTEGER, "21"), 1, 23},
+        {Token(INTEGER, stoi("21")), 1, 23},
         {Token(RPARENT), 1, 25},
 
         {Token(LBRACE), 1, 27},
-        {Token(INTEGER, "12"), 1, 29},
+        {Token(INTEGER, stoi("12")), 1, 29},
         {Token(RBRACE), 1, 32},
         {Token(ELSE), 1, 34},
         {Token(LBRACE), 1, 39},
@@ -414,14 +414,14 @@ let mut b = 123->str;
         {Token(LPARENT), 2, 6},
         {Token(IDENTIFIER, "x"), 2, 7},
         {Token(LESS), 2, 9},
-        {Token(INTEGER, "12"), 2, 11},
+        {Token(INTEGER, stoi("12")), 2, 11},
         {Token(RPARENT), 2, 13},
         {Token(LBRACE), 2, 15},
         {Token(IDENTIFIER, "x"), 2, 17},
         {Token(ASSIGN), 2, 19},
         {Token(IDENTIFIER, "x"), 2, 21},
         {Token(PLUS), 2, 23},
-        {Token(DBL, "0."), 2, 25},
+        {Token(DOUBLE, stod("0.")), 2, 25},
         {Token(SEMICOLON), 2, 27},
         {Token(RBRACE), 2, 29},
 
@@ -429,7 +429,7 @@ let mut b = 123->str;
         {Token(MUT), 3, 5},
         {Token(IDENTIFIER, "b"), 3, 9},
         {Token(ASSIGN), 3, 11},
-        {Token(INTEGER, "123"), 3, 13},
+        {Token(INTEGER, stoi("123")), 3, 13},
         {Token(RARROW), 3, 16},
         {Token(STR), 3,18},
         {Token(SEMICOLON), 3, 21},
