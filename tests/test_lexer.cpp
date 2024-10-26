@@ -388,7 +388,7 @@ R"(1.12345 0.)";
 
 BOOST_AUTO_TEST_CASE(testAll1) {
     string input =
-R"(let kaczka = if (a == 21)
+R"(let kaczka = if (a == 21) { 12 } else { "kaczka" };
 while(x < 12) { x = x + 0.; }
 let mut b = 123->str;
 )";
@@ -402,6 +402,15 @@ let mut b = 123->str;
         {Token(EQUALS), 1, 20},
         {Token(INTEGER, "21"), 1, 23},
         {Token(RPARENT), 1, 25},
+
+        {Token(LBRACE), 1, 27},
+        {Token(INTEGER, "12"), 1, 29},
+        {Token(RBRACE), 1, 32},
+        {Token(ELSE), 1, 34},
+        {Token(LBRACE), 1, 39},
+        {Token(STRING, "kaczka"), 1, 41},
+        {Token(RBRACE), 1, 50},
+        {Token(SEMICOLON), 1, 51},
 
         {Token(WHILE), 2, 1},
         {Token(LPARENT), 2, 6},

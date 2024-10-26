@@ -63,33 +63,37 @@ enum TokenType : int {
     ONE_LINE_COMMENT,
     MULTILINE_COMMENT,
 
-    INTEGER,
-    DOUBLE,
     STRING,
     IDENTIFIER, // letter {letter | number | '_'};
 
-    NOT_A_KEYWORD,
-    /* */
+    INTEGER,
+    DOUBLE,
     LET,
     STRUCT,
     RETURN,
     WHILE,
     MUT,
     IF,
+    ELSE,
     
     INT,
     STR,
-    DBL
+    DBL,
+
+    NOT_A_KEYWORD,
+    /* */
 };
 
 static const std::map<std::string, TokenType> Keywords = {
     {"if", IF},
+    {"else", ELSE},
     {"while", WHILE},
 
     {"let", LET},
     {"struct", STRUCT},
     {"return",RETURN },
     {"mut", MUT},
+
     {"int", INT},
     {"str", STR},
     {"dbl", DBL},
