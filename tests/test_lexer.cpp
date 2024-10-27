@@ -3,6 +3,7 @@
 #include "../inc/lexer.hpp"
 #include <cassert>
 using namespace std;
+using namespace token;
 using namespace lexer;
 
 void compareLexemVectors(const vector<Lexem>& expected, const vector<Lexem>& received) {

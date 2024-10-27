@@ -3,6 +3,7 @@
 #include "../inc/parser.hpp"
 #include <cassert>
 using namespace std;
+using namespace token;
 using namespace lexer;
 using namespace parser;
 
@@ -38,7 +39,7 @@ BOOST_AUTO_TEST_CASE(testIntegerAddition) {
 
     BOOST_CHECK_EQUAL(resultT->left, 12);
     BOOST_CHECK_EQUAL(resultT->right, 12);
-    BOOST_CHECK_EQUAL(resultT->op, lexer::PLUS);
+    BOOST_CHECK_EQUAL(resultT->op, PLUS);
     delete resultT;
 }
 
@@ -53,6 +54,6 @@ BOOST_AUTO_TEST_CASE(testIntegerSubtraction) {
 
     BOOST_CHECK_EQUAL(resultT->left, 12);
     BOOST_CHECK_EQUAL(resultT->right, 12);
-    BOOST_CHECK_EQUAL(resultT->op, lexer::MINUS);
+    BOOST_CHECK_EQUAL(resultT->op, MINUS);
     delete resultT;
 }

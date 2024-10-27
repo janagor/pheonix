@@ -23,7 +23,7 @@ Node* Parser::parseIntegerLiteral() {
 Node* Parser::parseAdditiveExpression() {
     int left = std::get<int>(*current.token.value);
     readLex();
-    lexer::TokenType op = current.token.tokenType;
+    token::TokenType op = current.token.tokenType;
     readLex();
     int right = std::get<int>(*current.token.value);
     Node* ae = new AdditiveExpression(left, right, op);
@@ -32,7 +32,7 @@ Node* Parser::parseAdditiveExpression() {
 }
 
 void Parser::readLex() {
-    if (current.token.tokenType == lexer::END_OF_FILE) {
+    if (current.token.tokenType == token::END_OF_FILE) {
         return;
     }
     current = peek;
@@ -43,10 +43,10 @@ void Parser::readLex() {
 std::optional<Node*> Parser::parse() {
     Node* root;
     switch (current.token.tokenType) {
-    case lexer::INTEGER:
+    case token::INTEGER:
         switch (peek.token.tokenType) {
-        case lexer::PLUS:
-        case lexer::MINUS:
+        case token::PLUS:
+        case token::MINUS:
             root = parseAdditiveExpression();
             return root;
             break;

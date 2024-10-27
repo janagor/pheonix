@@ -46,8 +46,8 @@ struct Literal: Node {
 struct AdditiveExpression: virtual Node {
     int left;
     int right;
-    lexer::TokenType op;
-    AdditiveExpression(int l, int r, lexer::TokenType t): Node(), left(l), right(r), op(t) {};
+    token::TokenType op;
+    AdditiveExpression(int l, int r, token::TokenType t): Node(), left(l), right(r), op(t) {};
 };
 
 //  struct StringLiteral: virtual Node {

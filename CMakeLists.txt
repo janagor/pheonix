@@ -24,12 +24,14 @@ include_directories(inc)
 include_directories(tests)
 
 set(SOURCE_FILES
+    src/token.cpp
     src/lexer.cpp
     src/repl.cpp
     src/parser.cpp
 )
 
 set(HEADER_FILES
+    inc/token.hpp
     inc/repl.hpp
     inc/lexer.hpp
     inc/parser.hpp
