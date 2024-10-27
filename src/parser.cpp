@@ -17,16 +17,47 @@ Node* Parser::parseIntegerLiteral() {
     return il;
 }
 
+
+
+
+Node* Parser::parseAdditiveExpression() {
+    int left = std::get<int>(*current.token.value);
+    readLex();
+    lexer::TokenType op = current.token.tokenType;
+    readLex();
+    int right = std::get<int>(*current.token.value);
+    Node* ae = new AdditiveExpression(left, right, op);
+    return ae;
+
+}
+
+void Parser::readLex() {
+    if (current.token.tokenType == lexer::END_OF_FILE) {
+        return;
+    }
+    current = peek;
+    peek = lexer.nextLexem();
+
+}
+
 std::optional<Node*> Parser::parse() {
     Node* root;
     switch (current.token.tokenType) {
     case lexer::INTEGER:
+        switch (peek.token.tokenType) {
+        case lexer::PLUS:
+        case lexer::MINUS:
+            root = parseAdditiveExpression();
+            return root;
+            break;
+        default:
         root = parseIntegerLiteral();
         return root;
+        }
         break;
+
     default:
         return std::nullopt;
-        break;
     }
     return std::nullopt;
 }

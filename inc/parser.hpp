@@ -42,6 +42,14 @@ struct Literal: Node {
     IntegerLiteral(int val): Node(), value(val) {};
 
 };
+
+struct AdditiveExpression: virtual Node {
+    int left;
+    int right;
+    lexer::TokenType op;
+    AdditiveExpression(int l, int r, lexer::TokenType t): Node(), left(l), right(r), op(t) {};
+};
+
 //  struct StringLiteral: virtual Node {
 //     std::string value;
 //     StringLiteral(): Node() {};
@@ -59,11 +67,13 @@ public:
         current = lexer.nextLexem();
         peek = lexer.nextLexem();
     }
-    
     Node* generateParsingTree();
-    Node* parseIntegerLiteral();
 
     std::optional<Node*> parse();
+private:
+    Node* parseIntegerLiteral();
+    Node* parseAdditiveExpression();
+    void readLex();
 private:
     lexer::Lexer lexer;
     std::istream& istream_;

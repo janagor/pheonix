@@ -26,16 +26,33 @@ BOOST_AUTO_TEST_CASE(testInteger) {
     BOOST_CHECK_EQUAL(resultT->value, 12);
     delete resultT;
 }
-//
-// BOOST_AUTO_TEST_CASE(testIntegerAddition) {
-//     string input = R"(12 + 12)";
-//
-//     istringstream in(input);
-//     Parser p(in);
-//
-//     Node* result = p.generateParsingTree();
-//     IntegerLiteral* resultT = dynamic_cast<IntegerLiteral*>(result);
-//
-//     BOOST_CHECK_EQUAL(resultT->value, 12);
-//     delete resultT;
-// }
+
+BOOST_AUTO_TEST_CASE(testIntegerAddition) {
+    string input = R"(12 + 12)";
+
+    istringstream in(input);
+    Parser p(in);
+
+    Node* result = p.generateParsingTree();
+    AdditiveExpression* resultT = dynamic_cast<AdditiveExpression*>(result);
+
+    BOOST_CHECK_EQUAL(resultT->left, 12);
+    BOOST_CHECK_EQUAL(resultT->right, 12);
+    BOOST_CHECK_EQUAL(resultT->op, lexer::PLUS);
+    delete resultT;
+}
+
+BOOST_AUTO_TEST_CASE(testIntegerSubtraction) {
+    string input = R"(12 - 12)";
+
+    istringstream in(input);
+    Parser p(in);
+
+    Node* result = p.generateParsingTree();
+    AdditiveExpression* resultT = dynamic_cast<AdditiveExpression*>(result);
+
+    BOOST_CHECK_EQUAL(resultT->left, 12);
+    BOOST_CHECK_EQUAL(resultT->right, 12);
+    BOOST_CHECK_EQUAL(resultT->op, lexer::MINUS);
+    delete resultT;
+}
