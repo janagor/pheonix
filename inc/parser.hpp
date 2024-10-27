@@ -9,34 +9,25 @@ struct Node {
 
 };
 
-struct Program: public Node {
-    std::vector<Node*> features;
-    Program(): Node(), features() {};
-};
-
-struct Statement: virtual Node {
-    Statement(): Node() {};
-};
-
-struct Expression: virtual Node {
-    Expression* expression;
-    Expression(): Node() {};
-};
-
-struct Literal: Node {
-    Literal* literal;
-    Literal(): Node() {};
-};
-//  struct BoolLiteral: virtual Node {
-//     bool value;
-//     BoolLiteral(): Node() {};
-//
+// struct Program: public Node {
+//     std::vector<Node*> features;
+//     Program(): Node(), features() {};
 // };
-//  struct FloatLiteral: virtual Node {
-//     double value;
-//     FloatLiteral(): Node() {};
 //
+// struct Statement: virtual Node {
+//     Statement(): Node() {};
 // };
+//
+// struct Expression: virtual Node {
+//     Expression* expression;
+//     Expression(): Node() {};
+// };
+//
+// struct Literal: Node {
+//     Literal* literal;
+//     Literal(): Node() {};
+// };
+
  struct IntegerLiteral: virtual Node {
     int value;
     IntegerLiteral(int val): Node(), value(val) {};
@@ -50,33 +41,41 @@ struct AdditiveExpression: virtual Node {
     AdditiveExpression(int l, int r, token::TokenType t): Node(), left(l), right(r), op(t) {};
 };
 
+struct MultiplicativeExpression: virtual Node {
+    int left;
+    int right;
+    token::TokenType op;
+    MultiplicativeExpression(int l, int r, token::TokenType t): Node(), left(l), right(r), op(t) {};
+};
+
 //  struct StringLiteral: virtual Node {
 //     std::string value;
 //     StringLiteral(): Node() {};
 //
 // };
 
-struct ArithmeticExpression: Node {
-    
-};
-
+// struct ArithmeticExpression: Node {
+//     
+// };
+//
 
 struct Parser {
+private:
+    Node* parseIntegerLiteral();
+Node* parseMultiplicativeExpression();
+    Node* parseAdditiveExpression();
+    void readLex();
+
 public:
-    Parser(std::istream& istream) : lexer(istream), istream_(istream) {
+    Parser(std::istream& istream) : lexer(istream) {
         current = lexer.nextLexem();
         peek = lexer.nextLexem();
     }
     Node* generateParsingTree();
-
     std::optional<Node*> parse();
-private:
-    Node* parseIntegerLiteral();
-    Node* parseAdditiveExpression();
-    void readLex();
+
 private:
     lexer::Lexer lexer;
-    std::istream& istream_;
     lexer::Lexem current;
     lexer::Lexem peek;
 };

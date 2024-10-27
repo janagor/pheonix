@@ -57,3 +57,33 @@ BOOST_AUTO_TEST_CASE(testIntegerSubtraction) {
     BOOST_CHECK_EQUAL(resultT->op, MINUS);
     delete resultT;
 }
+
+BOOST_AUTO_TEST_CASE(testIntegerMultiplication) {
+    string input = R"(12 * 12)";
+
+    istringstream in(input);
+    Parser p(in);
+
+    Node* result = p.generateParsingTree();
+    MultiplicativeExpression* resultT = dynamic_cast<MultiplicativeExpression*>(result);
+
+    BOOST_CHECK_EQUAL(resultT->left, 12);
+    BOOST_CHECK_EQUAL(resultT->right, 12);
+    BOOST_CHECK_EQUAL(resultT->op, STAR);
+    delete resultT;
+}
+
+BOOST_AUTO_TEST_CASE(testIntegerDevision) {
+    string input = R"(12 / 12)";
+
+    istringstream in(input);
+    Parser p(in);
+
+    Node* result = p.generateParsingTree();
+    MultiplicativeExpression* resultT = dynamic_cast<MultiplicativeExpression*>(result);
+
+    BOOST_CHECK_EQUAL(resultT->left, 12);
+    BOOST_CHECK_EQUAL(resultT->right, 12);
+    BOOST_CHECK_EQUAL(resultT->op, SLASH);
+    delete resultT;
+}

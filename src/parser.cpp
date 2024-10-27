@@ -20,6 +20,16 @@ Node* Parser::parseIntegerLiteral() {
 
 
 
+Node* Parser::parseMultiplicativeExpression() {
+    int left = std::get<int>(*current.token.value);
+    readLex();
+    token::TokenType op = current.token.tokenType;
+    readLex();
+    int right = std::get<int>(*current.token.value);
+    Node* me = new MultiplicativeExpression(left, right, op);
+    return me;
+}
+
 Node* Parser::parseAdditiveExpression() {
     int left = std::get<int>(*current.token.value);
     readLex();
@@ -28,7 +38,6 @@ Node* Parser::parseAdditiveExpression() {
     int right = std::get<int>(*current.token.value);
     Node* ae = new AdditiveExpression(left, right, op);
     return ae;
-
 }
 
 void Parser::readLex() {
@@ -50,6 +59,12 @@ std::optional<Node*> Parser::parse() {
             root = parseAdditiveExpression();
             return root;
             break;
+        case token::STAR:
+        case token::SLASH:
+            root = parseMultiplicativeExpression();
+            return root;
+            break;
+
         default:
         root = parseIntegerLiteral();
         return root;
