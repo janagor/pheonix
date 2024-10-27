@@ -128,7 +128,6 @@ struct Lexer {
 private:
     void skipWhiteSpaces();
     void readChar();
-    Lexem nextLexem();
     Token handleOnelineCommentToken();
     Token handleMultilineCommentToken();
     Token handleNumber();
@@ -139,6 +138,8 @@ public:
         ch = istream_.get();
         peek = istream_.peek();
     }
+
+    Lexem nextLexem();
     std::vector<Lexem> lexerize();
 private:
     std::istream& istream_;

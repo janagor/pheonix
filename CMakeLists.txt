@@ -26,11 +26,13 @@ include_directories(tests)
 set(SOURCE_FILES
     src/lexer.cpp
     src/repl.cpp
+    src/parser.cpp
 )
 
 set(HEADER_FILES
     inc/repl.hpp
     inc/lexer.hpp
+    inc/parser.hpp
 )
 
 enable_testing()
@@ -43,7 +45,6 @@ if(Boost_FOUND)
     )
     target_link_libraries(my-language Boost::program_options)
 
-    include_directories(${Boost_INCLUDE_DIRS})
     add_executable(
     test_lexer
         tests/test_lexer.cpp
@@ -51,7 +52,15 @@ if(Boost_FOUND)
     )
     target_link_libraries(test_lexer Boost::unit_test_framework)
 
+    add_executable(
+    test_parser
+        tests/test_parser.cpp
+        ${SOURCE_FILES} ${HEADER_FILES}
+    )
+    target_link_libraries(test_parser Boost::unit_test_framework)
+
     add_test(NAME test_lexer COMMAND test_lexer)
+    add_test(NAME test_parser COMMAND test_parser)
 else()
     message(FATAL_ERROR "Boost not found!")
 endif()
