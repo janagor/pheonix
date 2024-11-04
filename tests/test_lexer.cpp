@@ -11,10 +11,6 @@ void compareLexemVectors(const vector<Lexem>& expected, const vector<Lexem>& rec
 
     for (size_t i = 0; i < expected.size(); ++i) {
         BOOST_CHECK_EQUAL(expected[i], received[i]);
-        // BOOST_CHECK_EQUAL(expected[i].token, received[i].token);
-        //
-        // BOOST_CHECK_EQUAL(expected[i].line, received[i].line);
-        // BOOST_CHECK_EQUAL(expected[i].column, received[i].column);
     }
 }
 
@@ -210,6 +206,35 @@ abcd12 1230
         {Token(INTEGER, 789), 3, 3},
         {Token(IDENTIFIER, "a__12311"), 3, 7},
         {Token(END_OF_FILE), 3, 15},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(testIntegerMany) {
+    string input =
+R"(1 2 3 4 5 6 7 8 9 10 11 12+13)";
+    vector<Lexem> expected {
+        {Token(INTEGER, 1), 1, 1},
+        {Token(INTEGER, 2), 1, 3},
+        {Token(INTEGER, 3), 1, 5},
+        {Token(INTEGER, 4), 1, 7},
+        {Token(INTEGER, 5), 1, 9},
+        {Token(INTEGER, 6), 1, 11},
+        {Token(INTEGER, 7), 1, 13},
+        {Token(INTEGER, 8), 1, 15},
+        {Token(INTEGER, 9), 1, 17},
+        {Token(INTEGER, 10), 1, 19},
+        {Token(INTEGER, 11), 1, 22},
+        {Token(INTEGER, 12), 1, 25},
+        {Token(PLUS), 1, 27},
+        {Token(INTEGER, 13), 1, 28},
+        {Token(END_OF_FILE), 1, 30},
     };
     istringstream in(input);
     Lexer l(in);

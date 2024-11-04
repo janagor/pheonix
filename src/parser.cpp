@@ -1,4 +1,3 @@
-
 #include "../inc/parser.hpp"
 #include <string>
 #include <cassert>
@@ -6,71 +5,69 @@
 
 namespace parser {
 
-Node* Parser::generateParsingTree() {
-    std::optional<Node*> maybeResult;
+std::unique_ptr<Node> Parser::generateParsingTree() {
+    std::optional<std::unique_ptr<Node>> maybeResult;
     maybeResult = parse();
-    if (maybeResult) return *maybeResult;
+    if (maybeResult) return std::move(*maybeResult);
     return nullptr; // add sensible handling of empty
 }
-Node* Parser::parseIntegerLiteral() {
-    Node* il = new IntegerLiteral(std::get<int>(*current.token.value));
-    return il;
+
+std::string MultiplicativeExpression::toString() const  {
+    return "(AdditiveExpression: left=" + left->toString() + 
+    ", operator=[" + (op==token::STAR ? "*" : "/" )+
+    "], right=" + right->toString() + ")";
+}
+std::string IntegerLiteral::toString() const {
+    return "(IntegerLiteral: value=" + std::to_string(value) + ")";
+}
+std::string AdditiveExpression::toString() const  {
+    return "(AdditiveExpression: left=" + left->toString() + 
+    ", operator=[" + (op==token::PLUS ? "+" : "-" ) +
+    "], right=" + right->toString() + ")";
+
 }
 
-
-
-
-Node* Parser::parseMultiplicativeExpression() {
-    int left = std::get<int>(*current.token.value);
+std::unique_ptr<Node> Parser::parseIntegerLiteral() {
+    int val = std::get<int>(*current.token.value);
     readLex();
-    token::TokenType op = current.token.tokenType;
-    readLex();
-    int right = std::get<int>(*current.token.value);
-    Node* me = new MultiplicativeExpression(left, right, op);
-    return me;
+    return std::make_unique<IntegerLiteral>(val);
 }
 
-Node* Parser::parseAdditiveExpression() {
-    int left = std::get<int>(*current.token.value);
-    readLex();
-    token::TokenType op = current.token.tokenType;
-    readLex();
-    int right = std::get<int>(*current.token.value);
-    Node* ae = new AdditiveExpression(left, right, op);
-    return ae;
+std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
+    auto left = parseIntegerLiteral();
+    while (current.token.tokenType == token::STAR || current.token.tokenType == token::SLASH) {
+        token::TokenType op = current.token.tokenType;
+        readLex();
+        auto right = parseIntegerLiteral();
+        return std::move(std::make_unique<MultiplicativeExpression>(std::move(left), std::move(right), op));
+    }
+        return left;
 }
+
+std::unique_ptr<Node> Parser::parseAdditiveExpression() {
+    auto left = parseMultiplicativeExpression();
+    while (current.token.tokenType == token::PLUS || current.token.tokenType == token::MINUS) {
+        token::TokenType op = current.token.tokenType;
+        readLex();
+        auto right = parseMultiplicativeExpression();
+        return std::move(std::make_unique<AdditiveExpression>(std::move(left), std::move(right), op));
+    }
+    return left;
+} 
 
 void Parser::readLex() {
     if (current.token.tokenType == token::END_OF_FILE) {
         return;
     }
-    current = peek;
-    peek = lexer.nextLexem();
-
+    current = lexer.nextLexem();
 }
 
-std::optional<Node*> Parser::parse() {
-    Node* root;
+std::optional<std::unique_ptr<Node>> Parser::parse() {
+    std::unique_ptr<Node> root;
     switch (current.token.tokenType) {
     case token::INTEGER:
-        switch (peek.token.tokenType) {
-        case token::PLUS:
-        case token::MINUS:
-            root = parseAdditiveExpression();
-            return root;
-            break;
-        case token::STAR:
-        case token::SLASH:
-            root = parseMultiplicativeExpression();
-            return root;
-            break;
-
-        default:
-        root = parseIntegerLiteral();
-        return root;
-        }
+        return std::move(parseAdditiveExpression());
         break;
-
     default:
         return std::nullopt;
     }

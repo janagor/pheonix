@@ -10,17 +10,20 @@ namespace token {
 
 enum TokenType : int {
     ERROR = 0,
-    ERROR_NUMBER, // ex. 123a 123adfs
+    ERROR_NUMBER,
     ERROR_STRING,
     UNFINISHED_COMMENT,
 
     END_OF_FILE,
 
+    ONE_LINE_COMMENT,
+    MULTILINE_COMMENT,
+
+    ASSIGN,
     PLUS,
     MINUS,
     STAR,
     SLASH,
-    ASSIGN,
 
     EQUALS,
     LESS,
@@ -44,43 +47,49 @@ enum TokenType : int {
     RARROW,
     LARROW,
 
-    ONE_LINE_COMMENT,
-    MULTILINE_COMMENT,
-
+    IDENTIFIER,
     STRING,
-    IDENTIFIER, // letter {letter | number | '_'};
-
     INTEGER,
     DOUBLE,
+
+    FN,
     LET,
-    STRUCT,
-    RETURN,
-    WHILE,
     MUT,
+    RETURN,
+
     IF,
     ELSE,
-    
+    WHILE,
+
     INT,
     STR,
     DBL,
+    BOL,
+
+    TRUE,
+    FALSE,
 
     NOT_A_KEYWORD,
     /* */
 };
 
 static const std::map<std::string, TokenType> Keywords = {
+    {"fn", FN},
+    {"let", LET},
+    {"mut", MUT},
+    {"return",RETURN},
+
     {"if", IF},
     {"else", ELSE},
     {"while", WHILE},
 
-    {"let", LET},
-    {"struct", STRUCT},
-    {"return",RETURN },
-    {"mut", MUT},
-
     {"int", INT},
     {"str", STR},
+    {"bol", BOL},
     {"dbl", DBL},
+
+    {"true", TRUE},
+    {"false", FALSE},
 };
 
 std::optional<TokenType> searchForKeyword(std::string& word);

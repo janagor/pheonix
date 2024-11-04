@@ -1,83 +1,56 @@
 #pragma once
 #include "lexer.hpp"
 #include <typeinfo>
+#include <memory>
 
 namespace parser {
 struct Node {
-    Node() {};
-    virtual ~Node(){};
-
+    virtual ~Node() = default;
+    virtual std::string toString() const = 0;
 };
 
-// struct Program: public Node {
-//     std::vector<Node*> features;
-//     Program(): Node(), features() {};
-// };
-//
-// struct Statement: virtual Node {
-//     Statement(): Node() {};
-// };
-//
-// struct Expression: virtual Node {
-//     Expression* expression;
-//     Expression(): Node() {};
-// };
-//
-// struct Literal: Node {
-//     Literal* literal;
-//     Literal(): Node() {};
-// };
-
- struct IntegerLiteral: virtual Node {
+ struct IntegerLiteral: public Node {
     int value;
     IntegerLiteral(int val): Node(), value(val) {};
-
+    virtual std::string toString() const override;
 };
 
-struct AdditiveExpression: virtual Node {
-    int left;
-    int right;
+struct AdditiveExpression: public Node {
+    std::unique_ptr<Node> left;
+    std::unique_ptr<Node> right;
     token::TokenType op;
-    AdditiveExpression(int l, int r, token::TokenType t): Node(), left(l), right(r), op(t) {};
+    AdditiveExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r, token::TokenType t):
+        Node(), left(std::move(l)), right(std::move(r)), op(t) {};
+    std::string toString() const override;
 };
 
-struct MultiplicativeExpression: virtual Node {
-    int left;
-    int right;
+struct MultiplicativeExpression: public Node {
+    std::unique_ptr<Node> left;
+    std::unique_ptr<Node> right;
     token::TokenType op;
-    MultiplicativeExpression(int l, int r, token::TokenType t): Node(), left(l), right(r), op(t) {};
+    MultiplicativeExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r, token::TokenType t):
+        Node(), left(std::move(l)), right(std::move(r)), op(t) {};
+    std::string toString() const override;
 };
-
-//  struct StringLiteral: virtual Node {
-//     std::string value;
-//     StringLiteral(): Node() {};
-//
-// };
-
-// struct ArithmeticExpression: Node {
-//     
-// };
-//
 
 struct Parser {
 private:
-    Node* parseIntegerLiteral();
-Node* parseMultiplicativeExpression();
-    Node* parseAdditiveExpression();
+    std::unique_ptr<Node> parseIntegerLiteral();
+std::unique_ptr<Node> parseMultiplicativeExpression();
+    std::unique_ptr<Node> parseAdditiveExpression();
     void readLex();
 
 public:
     Parser(std::istream& istream) : lexer(istream) {
         current = lexer.nextLexem();
-        peek = lexer.nextLexem();
     }
-    Node* generateParsingTree();
-    std::optional<Node*> parse();
+    std::unique_ptr<Node> generateParsingTree();
+    std::optional<std::unique_ptr<Node>> parse();
 
 private:
     lexer::Lexer lexer;
     lexer::Lexem current;
-    lexer::Lexem peek;
+    // lexer::Lexem peek;
 };
 
 } // namespace parser
