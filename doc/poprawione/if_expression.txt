@@ -1,0 +1,33 @@
+let i = 12;
+let mut result = 0;
+
+// if statement is an expression so it returns value
+let if_result = if (i < 2) {
+    result = 1;
+    null
+} else if (i < 6) {
+    result = 2;
+} else {
+    result = 3;
+};
+
+let if_result_not_null = if (i < 2) {
+    result = 1;
+    result
+} else if (i < 6) {
+    result = 2;
+    result
+} else {
+    result = 3;
+    result
+};
+result = 12;
+if (true) {
+    let result = 21;
+    // result=21
+};
+// result=12
+
+print(if_result->str);
+print(if_result_not_null->str);
+

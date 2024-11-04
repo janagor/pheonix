@@ -1,0 +1,48 @@
+fn example_function(arg) {
+    print(arg)
+}
+
+fn gets_function(function) {
+    return function;
+}
+
+print(gets_function(example_function)("Hello")) // `Hello`
+
+
+fn function_with_return_value() {
+    let x = 1 -> int;
+    return x; // or just: x
+}
+
+fn function_without_return_value() {
+    let x = 1->int;
+}
+
+fn function_without_return_value_with_keyword() {
+    return;
+}
+fn change(mut param1, param2) {
+    param1 = 12; // ok.
+    // param2 = 12;
+}
+
+fn pipe_like_operation() {
+    let a = 1;
+    let b = 2;
+    let c = b |> add(@, a); // 3, same as add(b, a);
+    let d = 1->str;
+
+    // It is evaluated from left to right.
+    let e = b |> add(@, a) |> add(@, a); // 4
+    let f = ( b |> add(@, a) ) |> add(@, a); // 4
+    // above.
+}
+
+fn add(first, second) {
+    return first + second;
+}
+
+fn higher_function(op) {
+    return op(1, 2);
+}
+

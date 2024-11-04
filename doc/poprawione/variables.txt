@@ -1,0 +1,5 @@
+let a = 12; // int
+let b = 12.12; // flt
+let c = "duck"; // str
+let d = true; // bol
+

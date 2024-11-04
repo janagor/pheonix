@@ -1,0 +1,55 @@
+class Empty {};
+
+let empty = Empty();
+
+struct Person1 {
+    fn init(mut age, weight, height) {
+        self.age = age;
+        self.weight = weight;
+        self.height = height;
+    }
+}
+
+let person = Person1(18, 100, 190);
+
+struct Person2 {
+    fn init(mut age, weight, height) {
+        self.age = age;
+        self.weight = weight;
+        self.height = height;
+    }
+}
+
+let person = Person2(18, 100, 190);
+// person.age = 100; // 'error: cannot assign to an immutable object:
+                     // "person".'
+
+let person = Person2(18, 100, 190);
+person.age = 20; // ok.
+
+struct DancingPerson1 {
+    fn init(mut age, weight, height) {
+        self.age = age;
+        self.weight = weight;
+        self.height = height;
+    }
+    fn dance(){}
+}
+
+let person = DancingPerson1(18, 100, 190);
+person.dance();
+
+struct Base {
+    fn init(x) {
+        self.x = x;
+    }
+}
+
+struct Derived inherits Base {
+    fn init(x, y):
+        super(x);
+        self.y = y;
+}
+
+let a = Base(12);
+let b = Derived(a.x, 13);
