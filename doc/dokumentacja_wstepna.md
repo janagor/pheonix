@@ -84,6 +84,9 @@ innej funkcji, przypisywane do zmiennych itd.,
    assignement_expression = equlity_expression
                           | primary_expression "=" equality_expression ;
 
+           map_expression = relational_expression
+                          | "<>" identifier "<" parameter_list ">"
+
       equality_expression = relational_expression
                           | equality_expression ( "==" | "!=" )
                             relational_expression
@@ -394,12 +397,12 @@ fn gets_function(function) {
 gets_function(example_function)("Hello") // `Hello`
 
 fn function_with_return_value() {
-    let x = 1 -> int;
+    let x = 1 <- int;
     return x; // or just: x
 }
 
 fn function_without_return_value() {
-    let x = 1->int;
+    let x = 1<-int;
 }
 
 fn function_without_return_value_with_keyword() {
