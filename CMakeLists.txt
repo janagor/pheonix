@@ -23,18 +23,22 @@ include_directories(src)
 include_directories(inc)
 include_directories(tests)
 
+set(HEADER_FILES
+    inc/token.hpp
+    inc/repl.hpp
+    inc/node.hpp
+    inc/lexer.hpp
+    inc/parser.hpp
+    inc/visitor.hpp
+)
+
 set(SOURCE_FILES
     src/token.cpp
     src/lexer.cpp
     src/repl.cpp
+    src/node.cpp
     src/parser.cpp
-)
-
-set(HEADER_FILES
-    inc/token.hpp
-    inc/repl.hpp
-    inc/lexer.hpp
-    inc/parser.hpp
+    src/visitor.cpp
 )
 
 enable_testing()

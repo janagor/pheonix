@@ -12,21 +12,6 @@ std::unique_ptr<Node> Parser::generateParsingTree() {
     return nullptr; // add sensible handling of empty
 }
 
-std::string MultiplicativeExpression::toString() const  {
-    return "(AdditiveExpression: left=" + left->toString() + 
-    ", operator=[" + (op==token::STAR ? "*" : "/" )+
-    "], right=" + right->toString() + ")";
-}
-std::string IntegerLiteral::toString() const {
-    return "(IntegerLiteral: value=" + std::to_string(value) + ")";
-}
-std::string AdditiveExpression::toString() const  {
-    return "(AdditiveExpression: left=" + left->toString() + 
-    ", operator=[" + (op==token::PLUS ? "+" : "-" ) +
-    "], right=" + right->toString() + ")";
-
-}
-
 std::unique_ptr<Node> Parser::parseIntegerLiteral() {
     int val = std::get<int>(*current.token.value);
     readLex();
