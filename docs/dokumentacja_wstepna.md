@@ -69,7 +69,7 @@ innej funkcji, przypisywane do zmiennych itd.,
                             | ( "{" { statement - function_declaration } "}" )
                             ) ;
 
-   assignement_expression = identifier "=" logical_expression ;
+   assignement_expression = identifier "=" or_expression ;
 
             or_expression = and_expression
                             { "||" and_expression } ;
