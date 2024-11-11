@@ -48,7 +48,7 @@ innej funkcji, przypisywane do zmiennych itd.,
      variable_declaration = "let" [ "mut"] identifier [ "=" expession ] ";" ;
 
      while_loop_statement = "while"
-                            "(" equality_expression ")"
+                            "(" expression ")"
                             "{"  { statement } "}" ;
 
          return_statement = "return" [ expression ] ";" ;
