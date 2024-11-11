@@ -5,13 +5,6 @@
 
 namespace parser {
 
-std::unique_ptr<Node> Parser::generateParsingTree() {
-    std::optional<std::unique_ptr<Node>> maybeResult;
-    maybeResult = parse();
-    if (maybeResult) return std::move(*maybeResult);
-    return nullptr; // add sensible handling of empty
-}
-
 std::unique_ptr<Node> Parser::parseIntegerLiteral() {
     int val = std::get<int>(*current.token.value);
     readLex();
@@ -19,32 +12,37 @@ std::unique_ptr<Node> Parser::parseIntegerLiteral() {
 }
 
 std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
-    auto left = parseIntegerLiteral();
+    std::unique_ptr<Node> left = parseIntegerLiteral();
     while (current.token.tokenType == token::STAR || current.token.tokenType == token::SLASH) {
         token::TokenType op = current.token.tokenType;
         readLex();
-        auto right = parseIntegerLiteral();
-        return std::move(std::make_unique<MultiplicativeExpression>(std::move(left), std::move(right), op));
+        std::unique_ptr<Node> right = parseIntegerLiteral();
+        return std::make_unique<MultiplicativeExpression>(std::move(left), std::move(right), op);
     }
         return left;
 }
 
 std::unique_ptr<Node> Parser::parseAdditiveExpression() {
     auto left = parseMultiplicativeExpression();
-    while (current.token.tokenType == token::PLUS || current.token.tokenType == token::MINUS) {
+    while (
+        current.token.tokenType == token::PLUS
+        || current.token.tokenType == token::MINUS
+    ) {
         token::TokenType op = current.token.tokenType;
         readLex();
         auto right = parseMultiplicativeExpression();
-        return std::move(std::make_unique<AdditiveExpression>(std::move(left), std::move(right), op));
+        return std::make_unique<AdditiveExpression>(
+            std::move(left), std::move(right), op
+        );
     }
     return left;
 } 
 
-void Parser::readLex() {
-    if (current.token.tokenType == token::END_OF_FILE) {
-        return;
-    }
-    current = lexer.nextLexem();
+std::unique_ptr<Node> Parser::generateParsingTree() {
+    std::optional<std::unique_ptr<Node>> maybeResult;
+    maybeResult = parse();
+    if (maybeResult) return std::move(*maybeResult);
+    return nullptr; // add sensible handling of empty
 }
 
 std::optional<std::unique_ptr<Node>> Parser::parse() {
@@ -58,4 +56,12 @@ std::optional<std::unique_ptr<Node>> Parser::parse() {
     }
     return std::nullopt;
 }
+
+void Parser::readLex() {
+    if (current.token.tokenType == token::END_OF_FILE) {
+        return;
+    }
+    current = lexer.nextLexem();
+}
+
 } // parser

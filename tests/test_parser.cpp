@@ -26,12 +26,16 @@ using namespace parser;
 // }
 
 BOOST_AUTO_TEST_CASE(testIntegerAddition) {
-    string input = R"(12 + 12)";
+    string input = R"(12 + 12 * 12)";
 
     istringstream in(input);
     Parser p(in);
     unique_ptr<Node> result = p.generateParsingTree();
     cout << result->toString() << endl;
+    TreeGenVisitor visitor;
+    result->accept(visitor);
+    string r = visitor.getResult();
+    cout << r << std::endl;
 }
 
 // BOOST_AUTO_TEST_CASE(testIntegerSubtraction) {

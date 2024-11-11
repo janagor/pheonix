@@ -8,10 +8,11 @@
 #include "visitor.hpp"
 
 namespace parser {
+
 struct Parser {
 private:
     std::unique_ptr<Node> parseIntegerLiteral();
-std::unique_ptr<Node> parseMultiplicativeExpression();
+    std::unique_ptr<Node> parseMultiplicativeExpression();
     std::unique_ptr<Node> parseAdditiveExpression();
     void readLex();
 
