@@ -55,8 +55,7 @@ innej funkcji, przypisywane do zmiennych itd.,
 
      expression_statement = [ expression ] ";" ;
 
-               expression = assignement_expression
-                          | function_call ;
+               expression = assignement_expression ;
 
             if_statement = if_clause [ else_clause ] ;
 
