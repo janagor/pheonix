@@ -30,8 +30,8 @@ innej funkcji, przypisywane do zmiennych itd.,
    * ciąg znaków (`str`),
    * funkcje,
 * operatory przyjmujące funkcje jako argument:
-   * `@ function_name` - zwraca liczbę argumentów podanych do funkcji,
-   * `number # function_call` - wywołuje funkcję _number_ razy.
+   * `@` - zwraca liczbę argumentów podanych do funkcji,
+   * `#[]` - wywołuje funkcję wielokrotnie razy.
    Zwraca wynik ostatniego wywołania.
 
 # Formalna specyfikacja i składnia **EBNF** realizowanego języka
@@ -55,7 +55,8 @@ innej funkcji, przypisywane do zmiennych itd.,
 
      expression_statement = [ expression ] ";" ;
 
-               expression = assignement_expression ;
+               expression = assignement_expression 
+                          | or_expression ;
 
           expression_list = [ expression { "," expression } ] ;
 
@@ -71,7 +72,7 @@ innej funkcji, przypisywane do zmiennych itd.,
                             | ( "{" { statement - function_declaration } "}" )
                             ) ;
 
-   assignement_expression = identifier "=" or_expression ;
+   assignement_expression = "$" identifier "=" or_expression ;
 
             or_expression = and_expression
                             { "||" and_expression } ;
@@ -107,9 +108,6 @@ multiplicative_expression = execute_expression
                           | "(" expression ")" { "(" expression_list ")" } ;
 
       function_identifier = identifier ;
-
-            function_call = identifier "(" expression_list ")"
-                            { "(" expression_list ")" } ;
 
      function_declaration = "fn" identifier
                             enclosed_parameter_list function_body ;
@@ -306,14 +304,14 @@ let mut d = true; // bol - mutowalny
 
 ```
 let mut a = 1 <- str; // "1"
-a = 1.12 <- str; // "1.12"
-a = true <- str; // "true"
-a = 1 <- dbl; // 1.0
-a = 1.21 <- int; // 1
-a = "1.12" <- dbl; // 1.12
-a = "1.12" <- int; // 1
-a = "true" <- bol; // true
-// a = "1" <- bol; // błąd, typ bol nie jest reprezentowany przez liczbę.
+$a = 1.12 <- str; // "1.12"
+$a = true <- str; // "true"
+$a = 1 <- dbl; // 1.0
+$a = 1.21 <- int; // 1
+$a = "1.12" <- dbl; // 1.12
+$a = "1.12" <- int; // 1
+$a = "true" <- bol; // true
+// $a = "1" <- bol; // błąd, typ bol nie jest reprezentowany przez liczbę.
 ```
 
 4. Dodawanie zmiennych
@@ -323,7 +321,7 @@ let mut a = 1;
 let mut b = 2;
 a + b; // 3
 a <- flt + b <- flt; / 3.0
-a = "Hello"; b = " World";
+$a = "Hello"; $b = " World";
 a + b; // "Hello World"
 ```
 
@@ -356,7 +354,7 @@ print(example); // fn: example(_, _)
 ```
 let mut result = 0;
 if (true) {
-    result = 1;
+    $result = 1;
 }
 print(result); // 1
 ```
@@ -366,9 +364,9 @@ print(result); // 1
 
 let mut result = 0;
 if (false) {
-    result = 1;
+    $result = 1;
 } else {
-    result = 2;
+    $result = 2;
 }
 print(result); // 2
 ```
@@ -379,7 +377,7 @@ print(result); // 2
 let mut i = 1;
 
 while (i < 10) {
-    i = i + 1;
+    $i = i + 1;
 }
 print(i); // 10
 ```
@@ -388,9 +386,9 @@ print(i); // 10
 
 ```
 fn example(arg1, arg2) {
-    // arg1 = 12; // błąd
+    // $arg1 = 12; // błąd
     let mut a = arg1;
-    a = 12; // ok, `a` to inna zmienna
+    $a = 12; // ok, `a` to inna zmienna
     // ...
 }
 ```
@@ -399,7 +397,7 @@ fn example(arg1, arg2) {
 
 ```
 fn example(arg1, arg2) {
-    arg1 = 12; // ok
+    $arg1 = 12; // ok
     // ...
 }
 ```
@@ -433,7 +431,7 @@ print(b); // 2
 let mut a = 0;
 
 fn increment(mut a) {
-    a = a + 1;
+    $a = a + 1;
     return a;
 }
 fn add_one(a) {
@@ -441,9 +439,9 @@ fn add_one(a) {
 }
 
 if (a != 0) {
-    a = increment;
+    $a = increment;
 } else {
-    a = add_one;
+    $a = add_one;
 }
 let mut b = 12;
 let c = a(b);
@@ -491,7 +489,7 @@ let a = 3#add_one[1]; // 1
 
 ```
 fn inc_and_ret(mut a) {
-    return a = a + 1;
+    return $a = a + 1;
 
 }
 let mut a = 0;
@@ -528,7 +526,7 @@ fn notify_user(payment) {
           current_sum<-str);
 }
 fn make_deposit(value) {
-    current_sum = current_sum + value;
+    $current_sum = current_sum + value;
     notify_user(payment);
     return current_sum;
 }
