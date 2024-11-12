@@ -475,7 +475,7 @@ fn add_one(a) {
     return a + 1;
 
 }
-let a = 3#add_one(1); // 1
+let a = 3#add_one[1]; // 1
 // równoznacze z: add_one(1);add_one(1); let a = add_one(1);
 ```
 
@@ -487,7 +487,7 @@ fn inc_and_ret(mut a) {
 
 }
 let mut a = 0;
-let b = 3#inc_and_return(a);
+let b = 3#inc_and_return[a];
 // równoznacze z: inc_and_ret(a);inc_and_ret(a);let b = inc_and_ret(a);
 print(b); // 3
 print(3); // 3
@@ -505,4 +505,31 @@ fn fibonacci(num) {
     }
 }
 let a = fibonacci(5); // 5
+```
+
+19. Przykład wykorzystania operatora `# [ ]`
+
+```
+let one_time_payment=100;
+let mut current_sum=0;
+
+fn notify_user(payment) {
+    print("A payment of " +
+          payment<-str +
+          " has been made. The balance in your account is" + 
+          current_sum<-str);
+}
+fn make_deposit(value) {
+    current_sum = current_sum + value;
+    notify_user(payment);
+    return current_sum;
+}
+// making many small deposits with notification
+let balance = 5 # make_deposit[one_time_payment]; // balance==500
+// A payment of 100 has been made. The balance in your account is 100.
+// A payment of 100 has been made. The balance in your account is 200.
+// A payment of 100 has been made. The balance in your account is 300.
+// A payment of 100 has been made. The balance in your account is 400.
+// A payment of 100 has been made. The balance in your account is 500.
+
 ```
