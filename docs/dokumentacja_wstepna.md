@@ -57,6 +57,8 @@ innej funkcji, przypisywane do zmiennych itd.,
 
                expression = assignement_expression ;
 
+          expression_list = [ expression { "," expression } ] ;
+
             if_statement = if_clause [ else_clause ] ;
 
                 if_clause = "if"
@@ -93,20 +95,21 @@ multiplicative_expression = execute_expression
                             { ( "*" | "/" )
                             execute_expression } ;
 
-       execute_expression = cast_expression # function_call;
+       execute_expression = cast_expression # function_identifier "[" expression_list "]" ;
 
           cast_expression = prefix_expression "<-" type_name ;
 
-        prefix_expression = "@" identifier
+        prefix_expression = "@" function_identifier
                           | "!" primary_expression ;
 
-       primary_expression = identifier
-                          | function_call
+       primary_expression = identifier { "(" expression_list ")" { "(" expression_list ")" } } ;
                           | literal
-                          | "(" expression ")" { enclosed_parameter_list } ;
+                          | "(" expression ")" { "(" expression_list ")" } ;
 
-            function_call = identifier enclosed_parameter_list
-                            { enclosed_parameter_list } ;
+      function_identifier = identifier ;
+
+            function_call = identifier "(" expression_list ")"
+                            { "(" expression_list ")" } ;
 
      function_declaration = "fn" identifier
                             enclosed_parameter_list function_body ;
