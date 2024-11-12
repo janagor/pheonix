@@ -30,7 +30,7 @@ innej funkcji, przypisywane do zmiennych itd.,
    * ciąg znaków (`str`),
    * funkcje,
 * operatory przyjmujące funkcje jako argument:
-   * `@ function_name` - zwraca liczbę argumentów funkcji,
+   * `@ function_name` - zwraca liczbę argumentów podanych do funkcji,
    * `number # function_call` - wywołuje funkcję _number_ razy.
    Zwraca wynik ostatniego wywołania.
 
@@ -453,9 +453,14 @@ print(c); // 13
 ```
 fn has_two_args(first, second) {
     // ...
+    if (@has_two_args != 2) {
+        print("Should have given 2 args");
+    } else {
+        print("given args are: " + first<-str + " and " + second<-str);
+    }
 }
-let a = @ has_two_args; // 2
-// let c = @12; // błąd, 12 nie jest funkcją
+has_two_args(12); // "Should have given 2 args"
+has_two_args(12, 2); // "given args are 12 and 2"
 ```
 
 15. Operator `#` z funkcją bez argumentów mutowalnych bez zwracanej wartości
@@ -533,3 +538,24 @@ let balance = 5 # make_deposit[one_time_payment]; // balance==500
 // A payment of 100 has been made. The balance in your account is 500.
 
 ```
+19. Przykład wykorzystania operatora `@`
+
+```
+func handle_event(type, x, y) {
+    if (@handle_event) == 1 {
+        print("Got event: " + typ<-str)
+    }
+    if (@handle_event) == 2 {
+        print("Got event: " + typ<-str + " at x=" + x<-str)
+    }
+    if (@handle_event) == 3 {
+        print("Got event: " + typ<-str + " at x=" + x<-str + ", y=" + y<-str)
+    }
+}
+
+// Przykłady użycia
+handle_event("click")             // "Got event: click"
+handle_event("move", 100) //  "Got event: move at x=100"
+handle_event("touch", 120, 250) // "Got event: touch at x=120. y=250"
+```
+
