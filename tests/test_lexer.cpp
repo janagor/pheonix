@@ -2,9 +2,33 @@
 #include <boost/test/unit_test.hpp>
 #include "../inc/lexer.hpp"
 #include <cassert>
+#include <map>
 using namespace std;
 using namespace token;
 using namespace lexer;
+
+// helpers
+const map<const string, const Token> ONE_LETTER_SPECIAL_CHARS {
+    { "+", Token(PLUS) },
+    { "-", Token(MINUS) },
+    { "=", Token(ASSIGN) },
+    { "!", Token(BASH) },
+    { "@", Token(AT) },
+    { "#", Token(HASH) },
+    { "&", Token(AMPERSAND) },
+    { ".", Token(DOT) },
+    { ",", Token(COMMA) },
+    { ";", Token(SEMICOLON) },
+    { "(", Token(LPARENT) },
+    { ")", Token(RPARENT) },
+    { "{", Token(LBRACE) },
+    { "}", Token(RBRACE) },
+    { "[", Token(LBRACKET) },
+    { "]", Token(RBRACKET) },
+};
+
+
+const string ALL_CHARACTERS_STRING = "abcdefghijklmnopqrstuwxyz0123456789!@#$%";
 
 void compareLexemVectors(const vector<Lexem>& expected, const vector<Lexem>& received) {
     BOOST_CHECK_EQUAL(expected.size(), received.size());
@@ -13,6 +37,43 @@ void compareLexemVectors(const vector<Lexem>& expected, const vector<Lexem>& rec
         BOOST_CHECK_EQUAL(expected[i], received[i]);
     }
 }
+
+// test cases
+BOOST_AUTO_TEST_CASE(testAllOneLetterKey) {
+    for (const auto& [key, value] : ONE_LETTER_SPECIAL_CHARS) {
+        string input = key;
+        vector<Lexem> expected {
+            {Token(value), 1, 1},
+            {Token(END_OF_FILE), 1, 2},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = l.lexerize();
+
+        BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+        compareLexemVectors(expected, result);
+    }
+}
+
+// BOOST_AUTO_TEST_CASE(testNumbersFrom0to100) {
+//     for (int i = 0; i < 100; ++i) {
+//         string input = to_string(i);
+//         int shift = input.length();
+//         vector<Lexem> expected {
+//             {Token(INTEGER, i), 1, 1},
+//             {Token(END_OF_FILE), 1, 1 + shift},
+//         };
+//         istringstream in(input);
+//         Lexer l(in);
+//         vector<Lexem> result = l.lexerize();
+//
+//         BOOST_CHECK_EQUAL(expected.size(), result.size());
+//
+//         compareLexemVectors(expected, result);
+//     }
+// }
+
 
 BOOST_AUTO_TEST_CASE(testEmptyInput) {
     string input = R"()";
@@ -47,8 +108,8 @@ BOOST_AUTO_TEST_CASE(testOperators) {
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testBracketsAndSigns) {
-    string input = R"((){}[]'':;,.)";
+BOOST_AUTO_TEST_CASE(testBrackets) {
+    string input = R"((){}[])";
     vector<Lexem> expected {
         {Token(LPARENT), 1, 1},
         {Token(RPARENT), 1, 2},
@@ -56,13 +117,7 @@ BOOST_AUTO_TEST_CASE(testBracketsAndSigns) {
         {Token(RBRACE), 1, 4},
         {Token(LBRACKET), 1, 5},
         {Token(RBRACKET), 1, 6},
-        {Token(SINGLE_QUOTE), 1, 7},
-        {Token(SINGLE_QUOTE), 1, 8},
-        {Token(COLON), 1, 9},
-        {Token(SEMICOLON), 1, 10},
-        {Token(COMMA), 1, 11},
-        {Token(DOT), 1, 12},
-        {Token(END_OF_FILE), 1, 13},
+        {Token(END_OF_FILE), 1, 7},
     };
     istringstream in(input);
     Lexer l(in);

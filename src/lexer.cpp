@@ -24,10 +24,6 @@ Lexem Lexer::nextLexem() {
     case EOF:
         return Lexem{token::Token(token::END_OF_FILE), sline, scolumn};
         break;
-    case '+':
-        readChar();
-        return Lexem{token::Token(token::PLUS), sline, scolumn};
-        break;
     case '-':
         readChar();
         if (ch == '>') {
@@ -36,7 +32,6 @@ Lexem Lexer::nextLexem() {
         }
         return Lexem{token::Token(token::MINUS), sline, scolumn};
         break;
-
     case '<':
         readChar();
         if (ch == '=') {
@@ -49,6 +44,7 @@ Lexem Lexer::nextLexem() {
         }
         return Lexem{token::Token(token::LESS), sline, scolumn};
         break;
+
     case '>':
         readChar();
         if (ch == '=') {
@@ -67,10 +63,6 @@ Lexem Lexer::nextLexem() {
         return Lexem{token::Token(token::ASSIGN), sline, scolumn};
         break;
 
-    case '*':
-        readChar();
-        return Lexem{token::Token(token::STAR), sline, scolumn};
-        break;
     case '/':
         switch (peek){
         case '/':
@@ -112,18 +104,37 @@ Lexem Lexer::nextLexem() {
         readChar();
         return Lexem{token::Token(token::RBRACKET), sline, scolumn};
         break;
-
+    case '+':
+        readChar();
+        return Lexem{token::Token(token::PLUS), sline, scolumn};
+        break;
+    case '!':
+        readChar();
+        return Lexem{token::Token(token::BASH), sline, scolumn};
+        break;
+    case '*':
+        readChar();
+        return Lexem{token::Token(token::STAR), sline, scolumn};
+        break;
     case '"':
         token = handleString();
         return Lexem{token, sline, scolumn};
         break;
-    case '\'':
+    case '@':
         readChar();
-        return Lexem{token::Token(token::SINGLE_QUOTE), sline, scolumn};
+        return Lexem{token::Token(token::AT), sline, scolumn};
         break;
-    case ':':
+    case '$':
         readChar();
-        return Lexem{token::Token(token::COLON), sline, scolumn};
+        return Lexem{token::Token(token::DOLAR), sline, scolumn};
+        break;
+    case '#':
+        readChar();
+        return Lexem{token::Token(token::HASH), sline, scolumn};
+        break;
+    case '&':
+        readChar();
+        return Lexem{token::Token(token::AMPERSAND), sline, scolumn};
         break;
     case ';':
         readChar();
