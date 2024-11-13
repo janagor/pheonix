@@ -30,8 +30,8 @@ innej funkcji, przypisywane do zmiennych itd.,
    * ciąg znaków (`str`),
    * funkcje,
 * operatory przyjmujące funkcje jako argument:
-   * `@` - zwraca liczbę argumentów podanych do funkcji,
-   * `#[]` - wywołuje funkcję wielokrotnie razy.
+   * `@()` - zwraca liczbę argumentów podanych do funkcji,
+   * `#()[]` - wywołuje funkcję wielokrotnie razy.
    Zwraca wynik ostatniego wywołania.
 
 # Formalna specyfikacja i składnia **EBNF** realizowanego języka
@@ -96,11 +96,11 @@ multiplicative_expression = execute_expression
                             { ( "*" | "/" )
                             execute_expression } ;
 
-       execute_expression = cast_expression # expression "[" expression_list "]" ;
+       execute_expression = cast_expression # "(" expression ")" "[" expression_list "]" ;
 
           cast_expression = prefix_expression "<-" type_name ;
 
-        prefix_expression = "@" expression
+        prefix_expression = "@" "(" expression ")"
                           | "!" primary_expression ;
 
        primary_expression = identifier { "(" expression_list ")" { "(" expression_list ")" } } ;
@@ -447,12 +447,12 @@ print(b); // 12
 print(c); // 13
 ```
 
-14. Operator `@`
+14. Operator `@()`
 
 ```
 fn has_two_args(first, second) {
     // ...
-    if (@has_two_args != 2) {
+    if (@(has_two_args) != 2) {
         print("Should have given 2 args");
     } else {
         print("given args are: " + first<-str + " and " + second<-str);
@@ -462,13 +462,13 @@ has_two_args(12); // "Should have given 2 args"
 has_two_args(12, 2); // "given args are 12 and 2"
 ```
 
-15. Operator `#` z funkcją bez argumentów mutowalnych bez zwracanej wartości
+15. Operator `#()[]` z funkcją bez argumentów mutowalnych bez zwracanej wartości
 
 ```
 fn show(a) {
     print(a);
 }
-3 # show("Hello"); // HelloHelloHello
+3 #(show)["Hello"]; // HelloHelloHello
 /* równoznaczne z: show("Hello");show("Hello");show("Hello");
 ```
 
@@ -479,7 +479,7 @@ fn add_one(a) {
     return a + 1;
 
 }
-let a = 3#add_one[1]; // 1
+let a = 3#(add_one)[1]; // 1
 // równoznacze z: add_one(1);add_one(1); let a = add_one(1);
 ```
 
@@ -491,7 +491,7 @@ fn inc_and_ret(mut a) {
 
 }
 let mut a = 0;
-let b = 3#inc_and_return[a];
+let b = 3#(inc_and_return)[a];
 // równoznacze z: inc_and_ret(a);inc_and_ret(a);let b = inc_and_ret(a);
 print(b); // 3
 print(3); // 3
@@ -511,7 +511,7 @@ fn fibonacci(num) {
 let a = fibonacci(5); // 5
 ```
 
-19. Przykład wykorzystania operatora `# [ ]`
+19. Przykład wykorzystania operatora `#()[ ]`
 
 ```
 let one_time_payment=100;
@@ -529,7 +529,7 @@ fn make_deposit(value) {
     return current_sum;
 }
 // making many small deposits with notification
-let balance = 5 # make_deposit[one_time_payment]; // balance==500
+let balance = 5 #(make_deposit)[one_time_payment]; // balance==500
 // A payment of 100 has been made. The balance in your account is 100.
 // A payment of 100 has been made. The balance in your account is 200.
 // A payment of 100 has been made. The balance in your account is 300.
@@ -537,17 +537,17 @@ let balance = 5 # make_deposit[one_time_payment]; // balance==500
 // A payment of 100 has been made. The balance in your account is 500.
 
 ```
-19. Przykład wykorzystania operatora `@`
+19. Przykład wykorzystania operatora `@()`
 
 ```
 func handle_event(type, x, y) {
-    if (@handle_event == 1) {
+    if (@(handle_event) == 1) {
         print("Got event: " + typ<-str)
     }
-    if (@handle_event == 2) {
+    if (@(handle_event) == 2) {
         print("Got event: " + typ<-str + " at x=" + x<-str)
     }
-    if (@handle_event == 3) {
+    if (@(handle_event) == 3) {
         print("Got event: " + typ<-str + " at x=" + x<-str + ", y=" + y<-str)
     }
 }
