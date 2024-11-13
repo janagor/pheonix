@@ -96,18 +96,16 @@ multiplicative_expression = execute_expression
                             { ( "*" | "/" )
                             execute_expression } ;
 
-       execute_expression = cast_expression # function_identifier "[" expression_list "]" ;
+       execute_expression = cast_expression # expression "[" expression_list "]" ;
 
           cast_expression = prefix_expression "<-" type_name ;
 
-        prefix_expression = "@" function_identifier
+        prefix_expression = "@" expression
                           | "!" primary_expression ;
 
        primary_expression = identifier { "(" expression_list ")" { "(" expression_list ")" } } ;
                           | literal
                           | "(" expression ")" { "(" expression_list ")" } ;
-
-      function_identifier = identifier ;
 
      function_declaration = "fn" identifier
                             enclosed_parameter_list function_body ;
