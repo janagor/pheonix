@@ -23,9 +23,10 @@ typ,
 * instrukcje warunkowe `if`, `else`,
 * funkcje są obiektami pierwszej klasy: mogą być przekazywana jako parametr
 innej funkcji, przypisywane do zmiennych itd.,
+* funkcje nie mogą być przeciążone,
 * typy danych:
    * całkowitoliczbowy (`int`),
-   * zmiennopozycyjny (`dbl`),
+   * zmiennopozycyjny (`flt`),
    * logiczny (`bol`)
    * ciąg znaków (`str`),
    * funkcje,
@@ -76,10 +77,10 @@ innej funkcji, przypisywane do zmiennych itd.,
             or_expression = and_expression
                             { "||" and_expression } ;
 
-            and_expression = comparison_expression
+           and_expression = comparison_expression
                             { "&&" comparison_expression } ;
 
-       comparison_expression = relational_expression
+    comparison_expression = relational_expression
                             { ( "==" | "!=" )
                             relational_expression } ;
 
@@ -131,7 +132,7 @@ multiplicative_expression = cast_expression
                           | integer_literal
                           | string_literal ;
 
-                type_name = "bol" | "dbl" | "int" | "str" ;
+                type_name = "bol" | "flt" | "int" | "str" ;
 
              bool_literal = "true" | "false" ;
 
@@ -215,12 +216,11 @@ Options:
  * PLUS, MINUS, STAR, SLASH, ASSIGN,
  * EQUALS, LESS, LEQ, GREATER, GEQ, OR, AND, NOT, AT, HASHTAG
  * LPARENT, RPARENT, LBRACE, RBRACE, LBRACKET, RBRACKET,
- * SINGLE_QUOTE, DOUBLE_QUOTE, DOUBLE_QUOTE, SEMICOLON, COMMA, DOT, RARROW,
- LARROW,
- * IDENTIFIER, STRING, INTEGER, DOUBLE,
+ * DOUBLE_QUOTE, SEMICOLON, COMMA, DOT, RARROW, LARROW,
+ * IDENTIFIER, STRING, INTEGER, FLOAT,
  * FN, LET, MUT, RETURN,
  * IF, ELSE, WHILE,
- * INT, STR, DBL, BOL,
+ * INT, STR, FLT, BOL,
  * TRUE, FALSE,
  * NOT_A_KEYWORD,
 
@@ -228,7 +228,7 @@ Lista słów kluczowych:
 
  * fn, let, return, mut,
  * if, else, while,
- * int, str, bol, dbl,
+ * int, str, bol, flt,
  * true, false.
 
 Lista węzłów drzewa AST:
@@ -304,15 +304,23 @@ let mut d = true; // bol - mutowalny
 3. Zmiana typu danych
 
 ```
-let mut a = 1 <- str; // "1"
+let mut a = 0;
+
+// zmiana na stringa
+$a = 1 <- str; // "1"
 $a = 1.12 <- str; // "1.12"
 $a = true <- str; // "true"
-$a = 1 <- dbl; // 1.0
-$a = 1.21 <- int; // 1
-$a = "1.12" <- dbl; // 1.12
-$a = "1.12" <- int; // 1
-$a = "true" <- bol; // true
-// $a = "1" <- bol; // błąd, typ bol nie jest reprezentowany przez liczbę.
+
+// zmiana na float
+$a = 12 <- flt; // 12.0
+$a = true <- flt; // 1.0
+
+// zmiana na inta
+$a = 1.2 <- int; // 1
+$a = true <- int; // 1
+
+// zmiana na boola
+$a = 1 <- bol; // true
 ```
 
 4. Dodawanie zmiennych
@@ -336,9 +344,13 @@ a+b; // 3 ok.
 a-b; // -1 ok.
 a*b; // 2 ok.
 a/b; // 0 ok.
+a%b; // 0 ok.
 ```
 
 6. Funkcja **print()**
+
+Funkcja print jest funkcją wbudowaną. Przyjmuje ona 1 argument jednego z typów:
+`str`, `int`, `bol`, `flt` lub funkcję i wyświetla ją na wyjście standardowe.
 
 ```
 fn example(arg1, arg2){}
@@ -347,7 +359,7 @@ print(1); // 1
 print("Hello world"); // Hello world
 print(1.12); // 1.12
 print(true); // true
-print(example); // fn: example(_, _)
+print(example); // function(_,_)
 ```
 
 7. Instrukcje warunkowe : if
@@ -390,7 +402,6 @@ fn example(arg1, arg2) {
     // $arg1 = 12; // błąd
     let mut a = arg1;
     $a = 12; // ok, `a` to inna zmienna
-    // ...
 }
 ```
 
@@ -399,7 +410,6 @@ fn example(arg1, arg2) {
 ```
 fn example(arg1, arg2) {
     $arg1 = 12; // ok
-    // ...
 }
 ```
 
@@ -521,14 +531,14 @@ fn double(num) {
 }
 [double](3);
 
-// Wynik na wyjściu standardowym:
 /*
+// Wynik na wyjściu standardowym:
 [input: 3]
 3
 []
 [6]
 [return: 6]
-*/ koniec
+*/
 ```
 
 19. Przykład rekurencji w operatorze `[]()`
@@ -552,8 +562,8 @@ fn is_prime(num) {
 }
 print(is_prime(10));
 
-// Wynik na wyjściu standardowym:
 /*
+// Wynik na wyjściu standardowym:
 [input: 10, 8]
 [10]
 [8]
@@ -574,3 +584,20 @@ print(is_prime(10));
 false
 */
 ```
+
+# Przykładowe typy komunikatów o błędzię
+
+* dodanie dwóch zmiennych różnych typów (wiersz 10, kolumna 12)
+    * `[10:12] error: conficting types using "+" operator.`
+* wywołanie funkcji, która przyjmuje 2 argumenty, z 3 argumentami (wiersz 10, kolumna 12)
+    * `[10:12] error: expected '2' arguments, got '3'.`
+* próba zmiany wartości zmiennej niemutowalnej (wiersz 10, kolumna 12)
+    * `[10:12] error: variable is read-only.`
+* próba redeklaracji zmiennej (wiersz 10, kolumna 12)
+    * `[10:12] error: variable cannot be redeclared.`
+* zbyt długa nazwa zmiennej (wiersz 10, kolumna 12)
+    * `[10:12] error: identifier to long.`
+* overflow (wiersz 10, kolumna 12)
+    * `[10:12] error: overflow encountered.`
+* nieudana próba wykonania operacji kastowania ze `stringa` do `boola` (wiersz 10, kolumna 12)
+    * `[10:12] error: conversion from 'str` to `bol`.`
