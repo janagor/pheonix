@@ -13,7 +13,10 @@ std::unique_ptr<Node> Parser::parseIntegerLiteral() {
 
 std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
     std::unique_ptr<Node> left = parseIntegerLiteral();
-    while (current.token.tokenType == token::STAR || current.token.tokenType == token::SLASH) {
+    while (
+        current.token.tokenType == token::STAR
+        || current.token.tokenType == token::SLASH
+    ) {
         token::TokenType op = current.token.tokenType;
         readLex();
         std::unique_ptr<Node> right = parseIntegerLiteral();

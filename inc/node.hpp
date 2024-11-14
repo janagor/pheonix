@@ -7,14 +7,14 @@
 
 struct Node {
     virtual ~Node() = default;
-    virtual std::string toString() const = 0;
+    virtual std::string toString(const int shift_size) const = 0;
     virtual void accept(Visitor& v) = 0;
 };
 
  struct IntegerLiteral: public Node {
     int value;
     IntegerLiteral(int val): Node(), value(val) {};
-    virtual std::string toString() const override;
+    std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;
 };
 
@@ -24,7 +24,7 @@ struct AdditiveExpression: public Node {
     token::TokenType op;
     AdditiveExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r, token::TokenType t):
         Node(), left(std::move(l)), right(std::move(r)), op(t) {};
-    std::string toString() const override;
+    std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;
 };
 
@@ -34,7 +34,7 @@ struct MultiplicativeExpression: public Node {
     token::TokenType op;
     MultiplicativeExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r, token::TokenType t):
         Node(), left(std::move(l)), right(std::move(r)), op(t) {};
-    std::string toString() const override;
+    std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;
 };
 
