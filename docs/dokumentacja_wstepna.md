@@ -106,7 +106,7 @@ multiplicative_expression = cast_expression
                             )
                             { "(" expression_list ")" } ;
                           | "(" expression ")" { "(" expression_list ")" }
-                          | "[" expression "]" { "(" expression_list ")" }
+                          | "[" expression "]" "(" expression_list ")" { "(" expression_list ")" }
                           | literal ;
 
 
