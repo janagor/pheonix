@@ -30,9 +30,8 @@ innej funkcji, przypisywane do zmiennych itd.,
    * ciąg znaków (`str`),
    * funkcje,
 * operatory przyjmujące funkcje jako argument:
-   * `@()` - zwraca liczbę argumentów podanych do funkcji,
-   * `#()[]` - wywołuje funkcję wielokrotnie razy.
-   Zwraca wynik ostatniego wywołania.
+   * `[]()` - operator `debug` - wyświetla informacje dotyczące wywołania funkcji.
+   * `#(){}` - wyrażenie `lambda`.
 
 # Formalna specyfikacja i składnia **EBNF** realizowanego języka
 ``` EBNF
@@ -63,13 +62,13 @@ innej funkcji, przypisywane do zmiennych itd.,
             if_statement = if_clause [ else_clause ] ;
 
                 if_clause = "if"
-                            "(" relational_expression ")"
-                            "{" { statement - function_declaration } "}" ;
+                            "(" expression ")"
+                            "{" { statement } "}" ;
 
               else_clause = "else"
                             (
                             if_statement
-                            | ( "{" { statement - function_declaration } "}" )
+                            | ( "{" { statement } "}" )
                             ) ;
 
    assignement_expression = "$" identifier "=" or_expression ;
@@ -92,20 +91,24 @@ innej funkcji, przypisywane do zmiennych itd.,
                             { ( "+" | "-" )
                             multiplicative_expression } ;
 
-multiplicative_expression = execute_expression
-                            { ( "*" | "/" )
-                            execute_expression } ;
-
-       execute_expression = cast_expression # "(" expression ")" "[" expression_list "]" ;
+multiplicative_expression = cast_expression
+                            { ( "*" | "/" | "%" )
+                            cast_expression } ;
 
           cast_expression = prefix_expression "<-" type_name ;
 
-        prefix_expression = "@" "(" expression ")"
-                          | "!" primary_expression ;
+        prefix_expression = "!" primary_expression
+                          | "-" primary_expression ;
 
-       primary_expression = identifier { "(" expression_list ")" { "(" expression_list ")" } } ;
-                          | literal
-                          | "(" expression ")" { "(" expression_list ")" } ;
+       primary_expression = ( 
+                            identifier
+                            | ( "#" enclosed_parameter_list function_body )
+                            )
+                            { "(" expression_list ")" } ;
+                          | "(" expression ")" { "(" expression_list ")" }
+                          | "[" expression "]" { "(" expression_list ")" }
+                          | literal ;
+
 
      function_declaration = "fn" identifier
                             enclosed_parameter_list function_body ;
@@ -411,7 +414,7 @@ let a = 1;
 let b = add_one(a); // 2
 ```
 
-12. Argumenty funkcji są przekazywane przez referencję
+13. Argumenty funkcji są przekazywane przez referencję
 
 ```
 fn increment(mut a) {
@@ -424,7 +427,7 @@ print(a); // 2
 print(b); // 2
 ```
 
-13. Funkcje jako zmienne
+14. Funkcje jako zmienne
 ```
 let mut a = 0;
 
@@ -447,58 +450,7 @@ print(b); // 12
 print(c); // 13
 ```
 
-14. Operator `@()`
-
-```
-fn has_two_args(first, second) {
-    // ...
-    if (@(has_two_args) != 2) {
-        print("Should have given 2 args");
-    } else {
-        print("given args are: " + first<-str + " and " + second<-str);
-    }
-}
-has_two_args(12); // "Should have given 2 args"
-has_two_args(12, 2); // "given args are 12 and 2"
-```
-
-15. Operator `#()[]` z funkcją bez argumentów mutowalnych bez zwracanej wartości
-
-```
-fn show(a) {
-    print(a);
-}
-3 #(show)["Hello"]; // HelloHelloHello
-/* równoznaczne z: show("Hello");show("Hello");show("Hello");
-```
-
-16. Operator `#` z funkcją bez argumentów mutowalnych ze zwracaną wartością
-
-```
-fn add_one(a) {
-    return a + 1;
-
-}
-let a = 3#(add_one)[1]; // 1
-// równoznacze z: add_one(1);add_one(1); let a = add_one(1);
-```
-
-17. Operator `#` z funkcją z argumentem mutowalnym
-
-```
-fn inc_and_ret(mut a) {
-    return $a = a + 1;
-
-}
-let mut a = 0;
-let b = 3#(inc_and_return)[a];
-// równoznacze z: inc_and_ret(a);inc_and_ret(a);let b = inc_and_ret(a);
-print(b); // 3
-print(3); // 3
-```
-
-
-18. Rekurencja
+15. Rekurencja
 
 ```
 fn fibonacci(num) {
@@ -511,50 +463,114 @@ fn fibonacci(num) {
 let a = fibonacci(5); // 5
 ```
 
-19. Przykład wykorzystania operatora `#()[ ]`
+17. Operator `#(){}`
+
+Operator `#(){}` zwraca funkcję anonimową, która przyjmuje argumenty, których
+identyfikatory, używane wewnątrz ciała funkcji są wskazane wewnątrz nawiasów
+`()`. Ciało funkcji jest określane wewnątrz nawiasów klamrowych `{}`. Zwracaną
+funkcję można przypisać do zmiennej. Możliwe jest wywołanie rekursywne wewnątrz
+ciała funkcji. 
 
 ```
-let one_time_payment=100;
-let mut current_sum=0;
-
-fn notify_user(payment) {
-    print("A payment of " +
-          payment<-str +
-          " has been made. The balance in your account is" + 
-          current_sum<-str);
+fn add_one(a) {
+    return a + 1;
 }
-fn make_deposit(value) {
-    $current_sum = current_sum + value;
-    notify_user(payment);
-    return current_sum;
+let a = add_one(1); // 2
+let b = #(x){ return x+1; }(1); // 2
+let c = #(x){ return x+1; };
+let d = c(1); // 2
+```
+
+18. Przykład wykorzystania operatora `#(){}`
+
+```
+fn is_prime(num) {
+    let is_prime_rec = #(n, devisor) {
+        if (n <= 1) { return false; }
+        else {
+            if (divisor == 1) { return true; }
+            else {
+                if (n % divisor == 0) { return false; }
+                else { return is_prime_rec(n, divisor - 1); }
+            }
+        }
+    }
+    return is_prime_rec(num, num-1);
 }
-// making many small deposits with notification
-let balance = 5 #(make_deposit)[one_time_payment]; // balance==500
-// A payment of 100 has been made. The balance in your account is 100.
-// A payment of 100 has been made. The balance in your account is 200.
-// A payment of 100 has been made. The balance in your account is 300.
-// A payment of 100 has been made. The balance in your account is 400.
-// A payment of 100 has been made. The balance in your account is 500.
+print(is_prime(7)); // true
+print(is_prime(10));  // false
+```
+
+16. Operator `[]()`
+
+Operator `[]()` służy do wyświetlenia wartości `instrukcji-wyrażeń`, tj.
+wyświetlenia wyrażeń zakończonych znakiem `;`, które interpreter napotka w
+ciele funkcji. Operator nie działa rekurencyjnie - wywołanie funkcji `fx();` wewnątrz
+ciała funkcji `f2` podczas operacji `[f2]();` nie bedzię wyświetlać wartości
+`instrukcji-wyrażeń` znajdujących się wewnątrz `fx`. Wyświetli to wyłącznie
+wartość zwracaną przez wywołanie `fx()`. Operator wyświetla
+argumenty podane do funkcji i wartość przez nią zwracaną. Jeżeli `instrukcja-wyrażenie`
+nie zwraca wartości, to jest to widoczne wewnątrz nawiasów kwadratowych `[]`.
 
 ```
-19. Przykład wykorzystania operatora `@()`
-
-```
-func handle_event(type, x, y) {
-    if (@(handle_event) == 1) {
-        print("Got event: " + typ<-str)
-    }
-    if (@(handle_event) == 2) {
-        print("Got event: " + typ<-str + " at x=" + x<-str)
-    }
-    if (@(handle_event) == 3) {
-        print("Got event: " + typ<-str + " at x=" + x<-str + ", y=" + y<-str)
-    }
+fn double(num) {
+    print(num);
+    let x = 2*num;
+    x;
+    return x;
 }
+[double](3);
 
-// Przykłady użycia
-handle_event("click");             // "Got event: click"
-handle_event("move", 100); //  "Got event: move at x=100"
-handle_event("touch", 120, 250); // "Got event: touch at x=120, y=250"
+// Wynik na wyjściu standardowym:
+/*
+[input: 3]
+3
+[]
+[6]
+[return: 6]
+*/ koniec
 ```
 
+19. Przykład rekurencji w operatorze `[]()`
+
+```
+fn is_prime(num) {
+    let is_prime_rec = #(n, devisor) {
+        n;
+        devisor;
+        if (n <= 1) { return false; }
+        else {
+            if (divisor == 1) { return true; }
+            else {
+                if (n % divisor == 0) { return false; }
+                else { return [is_prime_rec](n, divisor - 1); }
+            }
+        }
+    }
+    let res = is_prime_rec(num, num-1);
+    return res;
+}
+print(is_prime(10));
+
+// Wynik na wyjściu standardowym:
+/*
+[input: 10, 8]
+[10]
+[8]
+[input: 10, 7]
+[10]
+[7]
+[input: 10, 6]
+[10]
+[6]
+[input: 10, 5]
+[10]
+[5]
+[return: false]
+[return: false]
+[return: false]
+[return: false]
+[return: false]
+false
+*/
+```
