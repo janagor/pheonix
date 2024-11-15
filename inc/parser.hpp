@@ -11,9 +11,10 @@ namespace parser {
 
 struct Parser {
 private:
-    std::unique_ptr<Node> parseIntegerLiteral();
-    std::unique_ptr<Node> parseMultiplicativeExpression();
+    std::unique_ptr<Node> parseRelationalExpression();
     std::unique_ptr<Node> parseAdditiveExpression();
+    std::unique_ptr<Node> parseMultiplicativeExpression();
+    std::unique_ptr<Node> parseIntegerLiteral();
     void readLex();
 
 public:

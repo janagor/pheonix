@@ -1,9 +1,33 @@
 #include "../inc/node.hpp"
 #include "../inc/visitor.hpp"
 
-std::string IntegerLiteral::toString(const int shift_size) const {
+std::string RelationalExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    return "(IntegerLiteral:" + s + "value=" + std::to_string(value) + ")";
+    std::string oper;
+    // TODO: create function for handling operators
+    switch (op) {
+    case token::LESS:
+        oper = "<";
+        break;
+    case token::LEQ:
+        oper = "<=";
+        break;
+    case token::GREATER:
+        oper = ">";
+        break;
+    default:
+        oper = ">=";
+    }
+    return "(RelationalExpression:" + s + "left=" + left->toString(shift_size+1) + 
+    "," + s + "operator=[" + (oper)+
+    "]," + s + "right=" + right->toString(shift_size + 1) + ")";
+}
+
+std::string MultiplicativeExpression::toString(const int shift_size) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(MultiplicativeExpression:" + s + "left=" + left->toString(shift_size+1) + 
+    "," + s + "operator=[" + (op==token::STAR ? "*" : "/" )+
+    "]," + s + "right=" + right->toString(shift_size + 1) + ")";
 }
 
 std::string AdditiveExpression::toString(const int shift_size) const  {
@@ -13,15 +37,12 @@ std::string AdditiveExpression::toString(const int shift_size) const  {
     "]," + s + "right=" + right->toString(shift_size + 1) + ")";
 }
 
-std::string MultiplicativeExpression::toString(const int shift_size) const {
-    std::string separator = std::string(shift_size*4, ' ');
-    std::string s = "\n" + separator;
-    return "(MultiplicativeExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[" + (op==token::STAR ? "*" : "/" )+
-    "]," + s + "right=" + right->toString(shift_size + 1) + ")";
+std::string IntegerLiteral::toString(const int shift_size) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(IntegerLiteral:" + s + "value=" + std::to_string(value) + ")";
 }
 
-void IntegerLiteral::accept(Visitor& v) {
+void RelationalExpression::accept(Visitor& v) {
     v.visit(*this);
 }
 
@@ -30,5 +51,9 @@ void AdditiveExpression::accept(Visitor& v) {
 }
 
 void MultiplicativeExpression::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void IntegerLiteral::accept(Visitor& v) {
     v.visit(*this);
 }

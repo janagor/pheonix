@@ -4,26 +4,25 @@
 #include <cstdlib>
 
 namespace parser {
-
-std::unique_ptr<Node> Parser::parseIntegerLiteral() {
-    int val = std::get<int>(*current.token.value);
-    readLex();
-    return std::make_unique<IntegerLiteral>(val);
-}
-
-std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
-    std::unique_ptr<Node> left = parseIntegerLiteral();
+    std::unique_ptr<Node> Parser::parseRelationalExpression() {
+    auto left = parseAdditiveExpression();
     while (
-        current.token.tokenType == token::STAR
-        || current.token.tokenType == token::SLASH
+        current.token.tokenType == token::LESS
+        || current.token.tokenType == token::GREATER
+        || current.token.tokenType == token::LEQ
+        || current.token.tokenType == token::GEQ
     ) {
         token::TokenType op = current.token.tokenType;
         readLex();
-        std::unique_ptr<Node> right = parseIntegerLiteral();
-        return std::make_unique<MultiplicativeExpression>(std::move(left), std::move(right), op);
+        auto right = parseAdditiveExpression();
+        return std::make_unique<RelationalExpression>(
+            std::move(left), std::move(right), op
+        );
     }
-        return left;
+    return left;
+
 }
+
 
 std::unique_ptr<Node> Parser::parseAdditiveExpression() {
     auto left = parseMultiplicativeExpression();
@@ -41,6 +40,28 @@ std::unique_ptr<Node> Parser::parseAdditiveExpression() {
     return left;
 } 
 
+std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
+    std::unique_ptr<Node> left = parseIntegerLiteral();
+    while (
+        current.token.tokenType == token::STAR
+        || current.token.tokenType == token::SLASH
+    ) {
+        token::TokenType op = current.token.tokenType;
+        readLex();
+        std::unique_ptr<Node> right = parseIntegerLiteral();
+        return std::make_unique<MultiplicativeExpression>(
+            std::move(left), std::move(right), op
+        );
+    }
+        return left;
+}
+
+std::unique_ptr<Node> Parser::parseIntegerLiteral() {
+    int val = std::get<int>(*current.token.value);
+    readLex();
+    return std::make_unique<IntegerLiteral>(val);
+}
+
 std::unique_ptr<Node> Parser::generateParsingTree() {
     std::optional<std::unique_ptr<Node>> maybeResult;
     maybeResult = parse();
@@ -52,7 +73,7 @@ std::optional<std::unique_ptr<Node>> Parser::parse() {
     std::unique_ptr<Node> root;
     switch (current.token.tokenType) {
     case token::INTEGER:
-        return std::move(parseAdditiveExpression());
+        return std::move(parseRelationalExpression());
         break;
     default:
         return std::nullopt;
