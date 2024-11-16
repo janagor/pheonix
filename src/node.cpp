@@ -41,10 +41,15 @@ std::string opToString(const token::TokenType& tok) {
     }
 }
 
+std::string AndExpression::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(AndExpression:" + s + "left=" + left->toString(shift_size+1) + 
+    "," + s + "operator=[&&]," + s + "right=" + right->toString(shift_size + 1) + ")";
+}
+
 std::string ComparisonExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string oper = opToString(op);
-    // TODO: create function for handling operators
     return "(ComparisonExpression:" + s + "left=" + left->toString(shift_size+1) + 
     "," + s + "operator=[" + (oper)+
     "]," + s + "right=" + right->toString(shift_size + 1) + ")";
@@ -77,6 +82,10 @@ std::string AdditiveExpression::toString(const int shift_size) const  {
 std::string IntegerLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(IntegerLiteral:" + s + "value=" + std::to_string(value) + ")";
+}
+
+void AndExpression::accept(Visitor& v) {
+    v.visit(*this);
 }
 
 void ComparisonExpression::accept(Visitor& v) {

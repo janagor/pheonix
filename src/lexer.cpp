@@ -143,8 +143,13 @@ Lexem Lexer::nextLexem() {
         break;
     case '&':
         readChar();
+        if (ch == '&') {
+            readChar();
+            return Lexem{token::Token(token::AND), sline, scolumn};
+        }
         return Lexem{token::Token(token::AMPERSAND), sline, scolumn};
         break;
+
     case ';':
         readChar();
         return Lexem{token::Token(token::SEMICOLON), sline, scolumn};

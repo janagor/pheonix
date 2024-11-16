@@ -4,6 +4,9 @@
 std::string TreeGenVisitor::getResult() {
     return result;
 }
+void TreeGenVisitor::visit(AndExpression &re) {
+    result += re.toString(1);
+}
 void TreeGenVisitor::visit(ComparisonExpression &re) {
     result += re.toString(1);
 }
