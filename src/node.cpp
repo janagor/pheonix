@@ -1,20 +1,50 @@
 #include "../inc/node.hpp"
 #include "../inc/visitor.hpp"
 
-std::string ComparisonExpression::toString(const int shift_size=1) const {
-    std::string s = "\n" + std::string(shift_size*4, ' ');
-    std::string oper;
-    // TODO: create function for handling operators
-    switch (op) {
+std::string opToString(const token::TokenType& tok) {
+    switch (tok) {
     case token::EQUALS:
-        oper = "==";
+        return "==";
         break;
     case token::NEQ:
-        oper = "!=";
+        return "!=";
+        break;
+    case token::PLUS:
+        return "+";
+        break;
+    case token::MINUS:
+        return "-";
+        break;
+    case token::STAR:
+        return "*";
+        break;
+    case token::SLASH:
+        return "/";
+        break;
+    case token::PERCENT:
+        return "%";
+        break;
+    case token::LEQ:
+        return "<=";
+        break;
+    case token::LESS:
+        return "<";
+        break;
+    case token::GEQ:
+        return ">=";
+        break;
+    case token::GREATER:
+        return ">";
         break;
     default:
         return "";
     }
+}
+
+std::string ComparisonExpression::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::string oper = opToString(op);
+    // TODO: create function for handling operators
     return "(ComparisonExpression:" + s + "left=" + left->toString(shift_size+1) + 
     "," + s + "operator=[" + (oper)+
     "]," + s + "right=" + right->toString(shift_size + 1) + ")";
@@ -22,21 +52,7 @@ std::string ComparisonExpression::toString(const int shift_size=1) const {
 
 std::string RelationalExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    std::string oper;
-    // TODO: create function for handling operators
-    switch (op) {
-    case token::LESS:
-        oper = "<";
-        break;
-    case token::LEQ:
-        oper = "<=";
-        break;
-    case token::GREATER:
-        oper = ">";
-        break;
-    default:
-        oper = ">=";
-    }
+    std::string oper = opToString(op);
     return "(RelationalExpression:" + s + "left=" + left->toString(shift_size+1) + 
     "," + s + "operator=[" + (oper)+
     "]," + s + "right=" + right->toString(shift_size + 1) + ")";
@@ -44,15 +60,17 @@ std::string RelationalExpression::toString(const int shift_size=1) const {
 
 std::string MultiplicativeExpression::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::string oper = opToString(op);
     return "(MultiplicativeExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[" + (op==token::STAR ? "*" : "/" )+
+    "," + s + "operator=[" + oper +
     "]," + s + "right=" + right->toString(shift_size + 1) + ")";
 }
 
 std::string AdditiveExpression::toString(const int shift_size) const  {
     std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::string oper = opToString(op);
     return "(AdditiveExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[" + (op==token::PLUS ? "+" : "-" ) +
+    "," + s + "operator=[" + oper +
     "]," + s + "right=" + right->toString(shift_size + 1) + ")";
 }
 

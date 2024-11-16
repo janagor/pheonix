@@ -121,6 +121,10 @@ Lexem Lexer::nextLexem() {
         readChar();
         return Lexem{token::Token(token::STAR), sline, scolumn};
         break;
+    case '%':
+        readChar();
+        return Lexem{token::Token(token::PERCENT), sline, scolumn};
+        break;
     case '"':
         token = handleString();
         return Lexem{token, sline, scolumn};

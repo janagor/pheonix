@@ -5,6 +5,8 @@
 #include "token.hpp"
 #include "visitor.hpp"
 
+std::string opToString(const token::TokenType& tok);
+
 struct Node {
     virtual ~Node() = default;
     virtual std::string toString(const int shift_size) const = 0;

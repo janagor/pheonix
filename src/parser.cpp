@@ -61,6 +61,7 @@ std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
     while (
         current.token.tokenType == token::STAR
         || current.token.tokenType == token::SLASH
+        || current.token.tokenType == token::PERCENT
     ) {
         token::TokenType op = current.token.tokenType;
         readLex();

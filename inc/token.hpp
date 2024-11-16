@@ -25,6 +25,7 @@ enum TokenType : int {
     MINUS,
     STAR,
     SLASH,
+    PERCENT,
     DOUBLE_QUOTE,
     HASH,
     AT,
