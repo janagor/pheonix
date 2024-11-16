@@ -1,6 +1,25 @@
 #include "../inc/node.hpp"
 #include "../inc/visitor.hpp"
 
+std::string ComparisonExpression::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::string oper;
+    // TODO: create function for handling operators
+    switch (op) {
+    case token::EQUALS:
+        oper = "==";
+        break;
+    case token::NEQ:
+        oper = "!=";
+        break;
+    default:
+        return "";
+    }
+    return "(ComparisonExpression:" + s + "left=" + left->toString(shift_size+1) + 
+    "," + s + "operator=[" + (oper)+
+    "]," + s + "right=" + right->toString(shift_size + 1) + ")";
+}
+
 std::string RelationalExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string oper;
@@ -40,6 +59,10 @@ std::string AdditiveExpression::toString(const int shift_size) const  {
 std::string IntegerLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(IntegerLiteral:" + s + "value=" + std::to_string(value) + ")";
+}
+
+void ComparisonExpression::accept(Visitor& v) {
+    v.visit(*this);
 }
 
 void RelationalExpression::accept(Visitor& v) {

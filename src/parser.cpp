@@ -4,6 +4,22 @@
 #include <cstdlib>
 
 namespace parser {
+    std::unique_ptr<Node> Parser::parseComparisonExpression() {
+    auto left = parseRelationalExpression();
+    while (
+        current.token.tokenType == token::EQUALS
+        || current.token.tokenType == token::NEQ
+    ) {
+        token::TokenType op = current.token.tokenType;
+        readLex();
+        auto right = parseRelationalExpression();
+        return std::make_unique<ComparisonExpression>(
+            std::move(left), std::move(right), op
+        );
+    }
+    return left;
+
+}
     std::unique_ptr<Node> Parser::parseRelationalExpression() {
     auto left = parseAdditiveExpression();
     while (
@@ -73,7 +89,7 @@ std::optional<std::unique_ptr<Node>> Parser::parse() {
     std::unique_ptr<Node> root;
     switch (current.token.tokenType) {
     case token::INTEGER:
-        return std::move(parseRelationalExpression());
+        return std::move(parseComparisonExpression());
         break;
     default:
         return std::nullopt;

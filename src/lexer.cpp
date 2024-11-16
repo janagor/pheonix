@@ -110,8 +110,13 @@ Lexem Lexer::nextLexem() {
         break;
     case '!':
         readChar();
+        if (ch == '=') {
+            readChar();
+            return Lexem{token::Token(token::NEQ), sline, scolumn};
+        }
         return Lexem{token::Token(token::BASH), sline, scolumn};
         break;
+
     case '*':
         readChar();
         return Lexem{token::Token(token::STAR), sline, scolumn};

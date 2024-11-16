@@ -86,8 +86,25 @@ const map<string, string> trivialCases {
     right=(IntegerLiteral:\n\
         value=123))"
     },
+    {
+"9==123",
+"(ComparisonExpression:\n\
+    left=(IntegerLiteral:\n\
+        value=9),\n\
+    operator=[==],\n\
+    right=(IntegerLiteral:\n\
+        value=123))"
+    },
+    {
+"9!=123",
+"(ComparisonExpression:\n\
+    left=(IntegerLiteral:\n\
+        value=9),\n\
+    operator=[!=],\n\
+    right=(IntegerLiteral:\n\
+        value=123))"
+    },
 };
-
 void testTrivial(const string& input, const string& expected) {
     istringstream in(input);
     Parser p(in);
