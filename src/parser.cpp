@@ -4,6 +4,11 @@
 #include <cstdlib>
 
 namespace parser {
+
+std::unique_ptr<Node> Parser::parseExpression() {
+    return parseOrExpression();
+}
+
 std::unique_ptr<Node> Parser::parseOrExpression() {
     auto left = parseAndExpression();
     while (
@@ -118,7 +123,7 @@ std::optional<std::unique_ptr<Node>> Parser::parse() {
     std::unique_ptr<Node> root;
     switch (current.token.tokenType) {
         case token::INTEGER:
-            return std::move(parseOrExpression());
+            return std::move(parseExpression());
             break;
         default:
             return std::nullopt;
