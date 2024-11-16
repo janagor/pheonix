@@ -120,15 +120,15 @@ std::unique_ptr<Node> Parser::generateParsingTree() {
 }
 
 std::optional<std::unique_ptr<Node>> Parser::parse() {
-    std::unique_ptr<Node> root;
-    switch (current.token.tokenType) {
-        case token::INTEGER:
-            return std::move(parseExpression());
-            break;
-        default:
-            return std::nullopt;
-    }
-    return std::nullopt;
+    // std::unique_ptr<Node> root;
+    // switch (current.token.tokenType) {
+    //     case token::INTEGER:
+    return std::move(parseExpression());
+    //         break;
+    //     default:
+    //         return std::nullopt;
+    // }
+    // return std::nullopt;
 }
 
 void Parser::readLex() {
