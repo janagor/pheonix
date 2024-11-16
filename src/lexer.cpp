@@ -149,6 +149,14 @@ Lexem Lexer::nextLexem() {
         }
         return Lexem{token::Token(token::AMPERSAND), sline, scolumn};
         break;
+    case '|':
+        readChar();
+        if (ch == '|') {
+            readChar();
+            return Lexem{token::Token(token::OR), sline, scolumn};
+        }
+        return Lexem{token::Token(token::PIPE), sline, scolumn};
+        break;
 
     case ';':
         readChar();

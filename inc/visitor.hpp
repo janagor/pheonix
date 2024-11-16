@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+class OrExpression;
 class AndExpression;
 class ComparisonExpression;
 class RelationalExpression;
@@ -10,6 +11,7 @@ class IntegerLiteral;
 
 class Visitor {
 public:
+    virtual void visit(OrExpression&) = 0;
     virtual void visit(AndExpression&) = 0;
     virtual void visit(ComparisonExpression&) = 0;
     virtual void visit(RelationalExpression&) = 0;
@@ -24,6 +26,7 @@ public:
     TreeGenVisitor(): Visitor(), result() {};
     std::string getResult();
 
+    void visit(OrExpression &me) override;
     void visit(AndExpression &me) override;
     void visit(ComparisonExpression &me) override;
     void visit(RelationalExpression &me) override;

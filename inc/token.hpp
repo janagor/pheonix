@@ -30,6 +30,7 @@ enum TokenType : int {
     HASH,
     AT,
     AMPERSAND,
+    PIPE,
     DOLAR,
     SEMICOLON,
     COMMA,
