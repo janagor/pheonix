@@ -114,7 +114,7 @@ Lexem Lexer::nextLexem() {
             readChar();
             return Lexem{token::Token(token::NEQ), sline, scolumn};
         }
-        return Lexem{token::Token(token::BASH), sline, scolumn};
+        return Lexem{token::Token(token::BANG), sline, scolumn};
         break;
 
     case '*':
@@ -342,7 +342,7 @@ token::Token Lexer::handleString(){
             readChar();
             switch (ch) {
             case '\\':
-                buffer += R"(/)";
+                buffer += R"(\)";
                 break;
             case '"':
                 buffer += R"(")";
@@ -350,7 +350,11 @@ token::Token Lexer::handleString(){
             case 'n':
                 buffer += '\n';
                 break;
+            case 't':
+                buffer += '\t';
+                break;
             default:
+                return token::Token(token::ERROR_BACK_SLASH_STRING, "\"" + buffer + "\\");
                 buffer += ch;
             }
             readChar();
@@ -364,7 +368,7 @@ token::Token Lexer::handleString(){
         readChar();
         return token::Token(token::STRING, buffer);
     }
-    return token::Token(token::ERROR_STRING, buffer);
+    return token::Token(token::ERROR_UNFINISHED_STRING, "\"" + buffer);
 }
 
 } // namespace lexer

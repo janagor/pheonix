@@ -12,6 +12,8 @@ enum TokenType : int {
     ERROR = 0,
     ERROR_NUMBER,
     ERROR_STRING,
+    ERROR_BACK_SLASH_STRING,
+    ERROR_UNFINISHED_STRING,
     UNFINISHED_COMMENT,
 
     END_OF_FILE,
@@ -20,7 +22,7 @@ enum TokenType : int {
     MULTILINE_COMMENT,
 
     ASSIGN,
-    BASH,
+    BANG,
     PLUS,
     MINUS,
     STAR,
@@ -67,7 +69,7 @@ enum TokenType : int {
     WHILE,
     INT,
     STR,
-    DBL,
+    FLT,
     BOL,
     TRUE,
     FALSE,
@@ -89,7 +91,7 @@ static const std::map<std::string, TokenType> Keywords = {
     {"int", INT},
     {"str", STR},
     {"bol", BOL},
-    {"dbl", DBL},
+    {"flt", FLT},
 
     {"true", TRUE},
     {"false", FALSE},
