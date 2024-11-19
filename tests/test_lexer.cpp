@@ -176,7 +176,7 @@ const map<const string, const Token> FLOATS {
     },
 };
 
-
+const vector<string> NEW_LINE_CHARACTERS { "\n", "\r", "\r\n", };
 
 // tests cases
 BOOST_AUTO_TEST_CASE(testEmptyInput) {
@@ -295,9 +295,6 @@ BOOST_AUTO_TEST_CASE(testFloats) {
         compareLexemVectors(expected, result);
     }
 }
-///////////////////////////////////////////////////////////////////////////////
-const vector<string> NEW_LINE_CHARACTERS { "\n", "\r", "\r\n", };
-
 BOOST_AUTO_TEST_CASE(testNewLineCharacters) {
     for (const auto& input : NEW_LINE_CHARACTERS) {
         vector<Lexem> expected {
@@ -310,6 +307,141 @@ BOOST_AUTO_TEST_CASE(testNewLineCharacters) {
         compareLexemVectors(expected, result);
     }
 }
+///////////////////////////////////////////////////////////////////////////////
+// examples from the documentation
+BOOST_AUTO_TEST_CASE(Ex1) {
+    string input =
+R"(// These are one line comments.
+/* these
+are
+multiline
+comments */)";
+    vector<Lexem> expected {
+        {Token(ONE_LINE_COMMENT, "// These are one line comments."), 1, 1},
+        {Token(MULTILINE_COMMENT, R"(/* these
+are
+multiline
+comments */)"), 2, 1},
+        {Token(END_OF_FILE), 5, 12},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(Ex2) {
+    string input =
+R"(let a = 12; // int - const
+let mut b = 12.12; // flt - mutowalny
+let c = "duck"; // str - const
+let mut d = true; // bol - mutowalny)";
+    vector<Lexem> expected {
+        {Token(LET), 1, 1},
+        {Token(IDENTIFIER, "a"), 1, 5},
+        {Token(ASSIGN), 1, 7},
+        {Token(INTEGER, 12), 1, 9},
+        {Token(SEMICOLON), 1, 11},
+        {Token(ONE_LINE_COMMENT, "// int - const"), 1, 13},
+
+        {Token(LET), 2, 1},
+        {Token(MUT), 2, 5},
+        {Token(IDENTIFIER, "b"), 2, 9},
+        {Token(ASSIGN), 2, 11},
+        {Token(FLOAT, 12.12), 2, 13},
+        {Token(SEMICOLON), 2, 18},
+        {Token(ONE_LINE_COMMENT, "// flt - mutowalny"), 2, 20},
+
+
+        {Token(LET), 3, 1},
+        {Token(IDENTIFIER, "c"), 3, 5},
+        {Token(ASSIGN), 3, 7},
+        {Token(STRING, "duck"), 3, 9},
+        {Token(SEMICOLON), 3, 15},
+        {Token(ONE_LINE_COMMENT, "// str - const"), 3, 17},
+
+
+        {Token(LET), 4, 1},
+        {Token(MUT), 4, 5},
+        {Token(IDENTIFIER, "d"), 4, 9},
+        {Token(ASSIGN), 4, 11},
+        {Token(TRUE), 4, 13},
+        {Token(SEMICOLON), 4, 17},
+        {Token(ONE_LINE_COMMENT, "// bol - mutowalny"), 4, 19},
+
+        {Token(END_OF_FILE), 4, 37},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    compareLexemVectors(expected, result);
+}
+
+// BOOST_AUTO_TEST_CASE(Ex3) {
+//     string input =
+// R"(let mut a = 0;
+//
+// // zmiana na stringa
+// $a = 1 <- str; // "1"
+// $a = 1.12 <- str; // "1.12"
+// $a = true <- str; // "true"
+//
+// // zmiana na float
+// $a = 12 <- flt; // 12.0
+// $a = true <- flt; // 1.0
+//
+// // zmiana na inta
+// $a = 1.2 <- int; // 1
+// $a = true <- int; // 1
+//
+// // zmiana na boola
+// $a = 1 <- bol; // true)";
+//     vector<Lexem> expected {
+//         {Token(LET), 1, 1},
+//         {Token(MUT), 2, 5},
+//         {Token(IDENTIFIER, "a"), 1, 5},
+//         {Token(ASSIGN), 1, 7},
+//         {Token(INTEGER, 0), 1, 9},
+//
+//         {Token(ONE_LINE_COMMENT, "// int - const"), 3, 1},
+//
+//         {Token(LET), 2, 1},
+//         {Token(IDENTIFIER, "b"), 2, 9},
+//         {Token(ASSIGN), 2, 11},
+//         {Token(FLOAT, 12.12), 2, 13},
+//         {Token(SEMICOLON), 2, 18},
+//         {Token(ONE_LINE_COMMENT, "// flt - mutowalny"), 2, 20},
+//
+//
+//         {Token(LET), 3, 1},
+//         {Token(IDENTIFIER, "c"), 3, 5},
+//         {Token(ASSIGN), 3, 7},
+//         {Token(STRING, "duck"), 3, 9},
+//         {Token(SEMICOLON), 3, 15},
+//         {Token(ONE_LINE_COMMENT, "// str - const"), 3, 17},
+//
+//
+//         {Token(LET), 4, 1},
+//         {Token(MUT), 4, 5},
+//         {Token(IDENTIFIER, "d"), 4, 9},
+//         {Token(ASSIGN), 4, 11},
+//         {Token(TRUE), 4, 13},
+//         {Token(SEMICOLON), 4, 17},
+//         {Token(ONE_LINE_COMMENT, "// bol - mutowalny"), 4, 19},
+//
+//         {Token(END_OF_FILE), 4, 37},
+//     };
+//     istringstream in(input);
+//     Lexer l(in);
+//     vector<Lexem> result = l.lexerize();
+//
+//     BOOST_CHECK_EQUAL(expected.size(), result.size());
+//     compareLexemVectors(expected, result);
+// }
 
 ///////////////////////////////////////////////////////////////////////////////
 BOOST_AUTO_TEST_CASE(testOperators) {

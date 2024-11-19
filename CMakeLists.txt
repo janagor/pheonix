@@ -22,6 +22,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 include_directories(src)
 include_directories(inc)
 include_directories(tests)
+include_directories(app)
 
 set(HEADER_FILES
     inc/token.hpp
@@ -47,6 +48,13 @@ if(Boost_FOUND)
     add_executable(
     my-language
         src/my-language.cpp
+        ${SOURCE_FILES} ${HEADER_FILES}
+    )
+    target_link_libraries(my-language Boost::program_options)
+
+    add_executable(
+    lexer_example
+        app/lexer_example.cpp
         ${SOURCE_FILES} ${HEADER_FILES}
     )
     target_link_libraries(my-language Boost::program_options)
