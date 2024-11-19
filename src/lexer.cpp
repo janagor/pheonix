@@ -316,7 +316,6 @@ token::Token Lexer::handleIdentifier(){
 
 token::Token Lexer::handleNumber(){
     std::string buffer = "";
-    bool floatFlag = false;
     buffer += ch;
     readChar();
 
@@ -324,46 +323,71 @@ token::Token Lexer::handleNumber(){
         buffer += ch;
         readChar();
     }
-    if (ch == '.' && buffer.size() < NUMERIC_MAX_SIZE) {
-        floatFlag = true;
-        buffer += ch;
-        readChar();
-        while (isdigit(ch) && buffer.size() < NUMERIC_MAX_SIZE) {
-            buffer += ch;
+    if (ch == '.')
+        return handleFloat(buffer);
+
+    if (isalpha(ch) || ch == '_')
+        return handleNumericUndefinedRepresentation(buffer);
+
+    if (buffer.size() == NUMERIC_MAX_SIZE) {
+        while (isdigit(ch)) {
             readChar();
         }
+        if (ch == '.')
+            return handleFloat(buffer);
+
+        if (isalnum(ch) || ch == '_')
+            return handleNumericUndefinedRepresentation(buffer);
+        return token::Token(token::ERROR_INTEGER_OUT_OF_BOUND, buffer);
     }
-    bool isCorrect = true;
+
+    try {
+        return token::Token(token::INTEGER, stoi(buffer));
+    } catch (const std::out_of_range& e) {
+        return token::Token(token::ERROR_INTEGER_OUT_OF_BOUND, buffer);
+    }
+}
+
+token::Token Lexer::handleFloat(std::string& buffer){
+    if (buffer.size() < NUMERIC_MAX_SIZE) {
+        buffer += ch;
+        readChar();
+    } else {
+        readChar();
+    }
+
+    while (isdigit(ch) && buffer.size() < NUMERIC_MAX_SIZE) {
+        buffer += ch;
+        readChar();
+    }
+    if (isalpha(ch) || ch == '_')
+        return handleNumericUndefinedRepresentation(buffer);
+
+    if (buffer.size() == NUMERIC_MAX_SIZE) {
+        while (isdigit(ch)) {
+            readChar();
+        }
+        if (isalpha(ch) || ch == '_')
+            return handleNumericUndefinedRepresentation(buffer);
+        return token::Token(token::ERROR_FLOAT_OUT_OF_BOUND, buffer);
+    }
+
+    try {
+        return token::Token(token::FLOAT, stod(buffer));
+    } catch (const std::out_of_range& e) {
+        return token::Token(token::ERROR_FLOAT_OUT_OF_BOUND, buffer);
+    }
+}
+
+token::Token Lexer::handleNumericUndefinedRepresentation(std::string& buffer){
     while ((isalnum(ch) || ch == '_') && buffer.size() < NUMERIC_MAX_SIZE) {
-        isCorrect = false;
         buffer += ch;
         readChar();
     }
-    if ((isalnum(ch) || ch == '_') && buffer.size() == NUMERIC_MAX_SIZE) {
-        while (isalnum(ch) || ch=='_')
+    if (buffer.size() == NUMERIC_MAX_SIZE) {
+        while (isalnum(ch) || ch == '_')
             readChar();
-        if (floatFlag && isCorrect)
-            return token::Token(token::ERROR_FLOAT_OUT_OF_BOUND, buffer);
-        if (isCorrect)
-            return token::Token(token::ERROR_INTEGER_OUT_OF_BOUND, buffer);
     }
-
-    if (isCorrect){
-        if (floatFlag) {
-            try {
-                return token::Token(token::FLOAT, stod(buffer));
-            } catch (const std::out_of_range& e) {
-                return token::Token(token::ERROR_FLOAT_OUT_OF_BOUND, buffer);
-            }
-        }
-
-            try {
-                return token::Token(token::INTEGER, stoi(buffer));
-            } catch (const std::out_of_range& e) {
-                return token::Token(token::ERROR_INTEGER_OUT_OF_BOUND, buffer);
-            }
-    }
-
     return token::Token(token::ERROR_NUMBER_UNDEFINED_REPRESENTATION, buffer);
 }
 

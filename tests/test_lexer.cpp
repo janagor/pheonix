@@ -12,11 +12,11 @@ using namespace std;
 using namespace token;
 using namespace lexer;
 
-// helpers
+// helper
 void compareLexemVectors(const vector<Lexem>& expected, const vector<Lexem>& received) {
     BOOST_CHECK_EQUAL(expected.size(), received.size());
 
-    for (size_t i = 0; i < expected.size(); ++i) {
+    for (size_t i = 0; i < min(expected.size(), received.size()); ++i) {
         BOOST_CHECK_EQUAL(expected[i], received[i]);
     }
 }
@@ -100,9 +100,55 @@ const map<const string, const Token> IDENTIFIERS {
     { string(100, 'a'), Token(IDENTIFIER, string(100, 'a')) },
     { string(99, 'a'), Token(IDENTIFIER, string(99, 'a')) },
     // errors
-    { string(101, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a')) },
-    { string(200, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a')) },
-    { string(1000, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a')) },
+    {
+        string(101, 'a'),
+        Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
+    },
+    {
+        string(200, 'a'),
+        Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
+    },
+    {
+        string(1000, 'a'),
+        Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
+    },
+};
+
+const map<const string, const Token> INTEGERS {
+    { "0", Token(INTEGER, 0) },
+    { "1", Token(INTEGER, 1) },
+    { "213", Token(INTEGER, 213) },
+    {
+        to_string(numeric_limits<int>::max()),
+        Token(INTEGER, numeric_limits<int>::max())
+    },
+    // errors
+    {
+        string(NUMERIC_MAX_SIZE, '1'),
+        Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1'))
+    },
+    {
+        to_string(static_cast<long>(numeric_limits<int>::max()) + 1),
+       Token(
+            ERROR_INTEGER_OUT_OF_BOUND,
+            to_string(static_cast<long>(numeric_limits<int>::max()) + 1)
+        )
+    },
+    {
+        string(NUMERIC_MAX_SIZE+1, '1'),
+        Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1'))
+    },
+    {
+        string("33333" + NUMERIC_MAX_SIZE*2, '1'),
+        Token(
+            ERROR_INTEGER_OUT_OF_BOUND,
+            "33333" + string((NUMERIC_MAX_SIZE-5), '1')
+        )
+    },
+    {
+        string(NUMERIC_MAX_SIZE+10000, '1') + "cniewfiqwndqeu2398rq______",
+        Token(ERROR_NUMBER_UNDEFINED_REPRESENTATION, string(NUMERIC_MAX_SIZE, '1'))
+    },
 };
 
 // tests cases
@@ -123,7 +169,8 @@ BOOST_AUTO_TEST_CASE(testEmptyInput) {
 BOOST_AUTO_TEST_CASE(specialCharsAndKeywords) {
     for (const auto& [key, value] : SPECIAL_CHARS_AND_KEYWORDS) {
         string input = key;
-        size_t shift = input.length() + 1; // NOTE: first character is at the indexes (1, 1)
+        // NOTE: first character is at the indexes (1, 1)
+        size_t shift = input.length() + 1;
         vector<Lexem> expected {
             {value, 1, 1},
             {Token(END_OF_FILE), 1, shift},
@@ -188,8 +235,6 @@ BOOST_AUTO_TEST_CASE(testIdentifiers) {
         compareLexemVectors(expected, result);
     }
 }
-///////////////////////////////////////////////////////////////////////////////
-
 BOOST_AUTO_TEST_CASE(testIntegersFrom0to1000) {
     for (int i = 0; i < 1000; ++i) {
         string input = to_string(i);
@@ -208,29 +253,37 @@ BOOST_AUTO_TEST_CASE(testIntegersFrom0to1000) {
         compareLexemVectors(expected, result);
     }
 }
+///////////////////////////////////////////////////////////////////////////////
 
-const map<const string, const Token> INTEGERS {
-    { "0", Token(INTEGER, 0) },
-    { "1", Token(INTEGER, 1) },
-    { "213", Token(INTEGER, 213) },
-    { to_string(numeric_limits<int>::max()), Token(INTEGER, numeric_limits<int>::max()) },
-    // errors
-    { string(100, '1'), Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')) },
-    { string(101, '1'), Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')) },
-    { string(200, '1'), Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')) },
-    { string(10000, '1'), Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')) },
+const map<const string, const Token> FLOATS {
+    { "0.", Token(FLOAT, stod("0.")) },
+    { "1.", Token(FLOAT, stod("1.")) },
+    { "213.", Token(FLOAT, stod("213.")) },
     {
-        to_string(static_cast<long>(numeric_limits<int>::max()) + 1),
-       Token(
-            ERROR_INTEGER_OUT_OF_BOUND,
-            to_string(static_cast<long>(numeric_limits<int>::max()) + 1)
+        to_string(numeric_limits<double>::max()),
+        Token(FLOAT, stod(to_string(numeric_limits<double>::max())))
+    },
+    // errors
+    {
+        "1." + string(NUMERIC_MAX_SIZE, '1'),
+        Token(ERROR_FLOAT_OUT_OF_BOUND, "1." + string(NUMERIC_MAX_SIZE-2, '1'))
+    },
+    {
+        "0." + string(NUMERIC_MAX_SIZE +200, '1'),
+        Token(ERROR_FLOAT_OUT_OF_BOUND, "0." + string(NUMERIC_MAX_SIZE-2, '1'))
+    },
+    {
+        string(NUMERIC_MAX_SIZE*100, '1') + "." + string(NUMERIC_MAX_SIZE*100, '1'),
+        Token(
+            ERROR_FLOAT_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')
         )
     },
 };
 
 
-BOOST_AUTO_TEST_CASE(testIntegers) {
-    for (const auto& [key, value] : INTEGERS) {
+
+BOOST_AUTO_TEST_CASE(testFloats) {
+    for (const auto& [key, value] : FLOATS) {
         string input = key;
         size_t shift = input.length() + 1;
         vector<Lexem> expected {

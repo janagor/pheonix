@@ -8,7 +8,7 @@
 namespace lexer {
 
 static const int IDENTIFIER_MAX_SIZE = 100;
-static const int NUMERIC_MAX_SIZE = 100;
+static const int NUMERIC_MAX_SIZE = 1200;
 
 struct Lexem {
     token::Token token;
@@ -26,6 +26,8 @@ private:
     token::Token handleOnelineCommentToken();
     token::Token handleMultilineCommentToken();
     token::Token handleNumber();
+    token::Token handleFloat(std::string& buffer);
+    token::Token handleNumericUndefinedRepresentation(std::string& buffer);
     token::Token handleIdentifier();
     token::Token handleString();
 public:
