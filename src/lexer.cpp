@@ -6,11 +6,15 @@
 namespace lexer {
 
 bool Lexem::operator==(const Lexem& l) const {
-    return this->token==l.token && this->line==l.line && this->column==l.column;
+    return this->token==l.token &&
+        this->line==l.line &&
+        this->column==l.column;
 }
 
 std::ostream& operator<<(std::ostream& os, const Lexem& l) {
-    os << "Lexem(token:" << l.token << ", line:" << l.line << ", column:" << l.column << ")";
+    os << "Lexem(token:" << l.token 
+        << ", line:" << l.line
+        << ", column:" << l.column << ")";
     return os;
 }
 Lexem Lexer::nextLexem() {
@@ -354,7 +358,9 @@ token::Token Lexer::handleString(){
                 buffer += '\t';
                 break;
             default:
-                return token::Token(token::ERROR_BACK_SLASH_STRING, "\"" + buffer + "\\");
+                return token::Token(
+                    token::ERROR_BACK_SLASH_STRING, "\"" + buffer + "\\"
+                );
                 buffer += ch;
             }
             readChar();
