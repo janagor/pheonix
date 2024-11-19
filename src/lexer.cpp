@@ -19,8 +19,8 @@ std::ostream& operator<<(std::ostream& os, const Lexem& l) {
 }
 Lexem Lexer::nextLexem() {
     skipWhiteSpaces();
-    int sline = line;
-    int scolumn = column;
+    size_t sline = line;
+    size_t scolumn = column;
     std::string comment;
     token::Token token;
 
@@ -316,35 +316,55 @@ token::Token Lexer::handleIdentifier(){
 
 token::Token Lexer::handleNumber(){
     std::string buffer = "";
-    bool doubleFlag = false;
+    bool floatFlag = false;
     buffer += ch;
     readChar();
-    while (isdigit(ch)) {
+
+    while (isdigit(ch) && buffer.size() < NUMERIC_MAX_SIZE) {
         buffer += ch;
         readChar();
     }
-    if (ch == '.') {
-        doubleFlag = true;
+    if (ch == '.' && buffer.size() < NUMERIC_MAX_SIZE) {
+        floatFlag = true;
         buffer += ch;
         readChar();
-        while (isdigit(ch)) {
+        while (isdigit(ch) && buffer.size() < NUMERIC_MAX_SIZE) {
             buffer += ch;
             readChar();
         }
     }
-    if (!(isalpha(ch) || ch == '_')){
-        if (doubleFlag)
-            return token::Token(token::DOUBLE, stod(buffer));
-        return token::Token(token::INTEGER, stoi(buffer));
-    }
-
-    // for better error information
-    while (isalnum(ch) || ch == '_') {
+    bool isCorrect = true;
+    while ((isalnum(ch) || ch == '_') && buffer.size() < NUMERIC_MAX_SIZE) {
+        isCorrect = false;
         buffer += ch;
         readChar();
     }
+    if ((isalnum(ch) || ch == '_') && buffer.size() == NUMERIC_MAX_SIZE) {
+        while (isalnum(ch) || ch=='_')
+            readChar();
+        if (floatFlag && isCorrect)
+            return token::Token(token::ERROR_FLOAT_OUT_OF_BOUND, buffer);
+        if (isCorrect)
+            return token::Token(token::ERROR_INTEGER_OUT_OF_BOUND, buffer);
+    }
 
-    return token::Token(token::ERROR_NUMBER, buffer);
+    if (isCorrect){
+        if (floatFlag) {
+            try {
+                return token::Token(token::FLOAT, stod(buffer));
+            } catch (const std::out_of_range& e) {
+                return token::Token(token::ERROR_FLOAT_OUT_OF_BOUND, buffer);
+            }
+        }
+
+            try {
+                return token::Token(token::INTEGER, stoi(buffer));
+            } catch (const std::out_of_range& e) {
+                return token::Token(token::ERROR_INTEGER_OUT_OF_BOUND, buffer);
+            }
+    }
+
+    return token::Token(token::ERROR_NUMBER_UNDEFINED_REPRESENTATION, buffer);
 }
 
 token::Token Lexer::handleString(){

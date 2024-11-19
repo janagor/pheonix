@@ -8,11 +8,12 @@
 namespace lexer {
 
 static const int IDENTIFIER_MAX_SIZE = 100;
+static const int NUMERIC_MAX_SIZE = 100;
 
 struct Lexem {
     token::Token token;
-    int line;
-    int column;
+    size_t line;
+    size_t column;
     bool operator==(const Lexem& l) const;
 };
 std::ostream& operator<<(std::ostream& os, const Lexem& l);
@@ -39,9 +40,9 @@ private:
     std::istream& istream_;
     char ch;
     char peek;
-    int offset;
-    int line;
-    int column;
+    size_t offset;
+    size_t line;
+    size_t column;
 };
 
 } // namespace lexer;

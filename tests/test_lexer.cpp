@@ -1,11 +1,13 @@
 #define BOOST_TEST_MODULE TestLexer
-#include <boost/test/unit_test.hpp>
-#include "../inc/lexer.hpp"
 #include <cassert>
 #include <map>
 #include <fstream>
 #include <iostream>
 #include <cstdio>
+#include <limits>
+#include <boost/test/unit_test.hpp>
+#include "../inc/lexer.hpp"
+
 using namespace std;
 using namespace token;
 using namespace lexer;
@@ -90,6 +92,19 @@ const map<const string, const Token> STRINGS {
     // { R"("\ )", Token(ERROR_BACK_SLASH_STRING, "\"\"")  }, // TODO:
 };
 
+const map<const string, const Token> IDENTIFIERS {
+    { "normal", Token(IDENTIFIER, "normal") },
+    { "normal123", Token(IDENTIFIER, "normal123") },
+    { "normal__123", Token(IDENTIFIER, "normal__123") },
+    { "NORMAL", Token(IDENTIFIER, "NORMAL") },
+    { string(100, 'a'), Token(IDENTIFIER, string(100, 'a')) },
+    { string(99, 'a'), Token(IDENTIFIER, string(99, 'a')) },
+    // errors
+    { string(101, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a')) },
+    { string(200, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a')) },
+    { string(1000, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a')) },
+};
+
 // tests cases
 BOOST_AUTO_TEST_CASE(testEmptyInput) {
     string input = R"()";
@@ -108,7 +123,7 @@ BOOST_AUTO_TEST_CASE(testEmptyInput) {
 BOOST_AUTO_TEST_CASE(specialCharsAndKeywords) {
     for (const auto& [key, value] : SPECIAL_CHARS_AND_KEYWORDS) {
         string input = key;
-        int shift = input.length() + 1; // NOTE: first character is at the indexes (1, 1)
+        size_t shift = input.length() + 1; // NOTE: first character is at the indexes (1, 1)
         vector<Lexem> expected {
             {value, 1, 1},
             {Token(END_OF_FILE), 1, shift},
@@ -126,7 +141,7 @@ BOOST_AUTO_TEST_CASE(specialCharsAndKeywords) {
 BOOST_AUTO_TEST_CASE(testOneLineComments) {
     for (const auto& [key, value] : ONE_LINE_COMMENTS) {
         string input = key;
-        int shift = input.length() + 1;
+        size_t shift = input.length() + 1;
         vector<Lexem> expected {
             {value, 1, 1},
             {Token(END_OF_FILE), 1, shift},
@@ -145,7 +160,7 @@ BOOST_AUTO_TEST_CASE(testOneLineComments) {
 BOOST_AUTO_TEST_CASE(testStrings) {
     for (const auto& [key, value] : STRINGS) {
         string input = key;
-        int shift = input.length() + 1;
+        size_t shift = input.length() + 1;
         vector<Lexem> expected {
             {value, 1, 1},
             {Token(END_OF_FILE), 1, shift},
@@ -158,11 +173,27 @@ BOOST_AUTO_TEST_CASE(testStrings) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(testIdentifiers) {
+    for (const auto& [key, value] : IDENTIFIERS) {
+        string input = key;
+        size_t shift = input.length() + 1;
+        vector<Lexem> expected {
+            {value, 1, 1},
+            {Token(END_OF_FILE), 1, shift},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = l.lexerize();
+        BOOST_CHECK_EQUAL(expected.size(), result.size());
+        compareLexemVectors(expected, result);
+    }
+}
+///////////////////////////////////////////////////////////////////////////////
 
-BOOST_AUTO_TEST_CASE(testNumbersFrom0to1000) {
+BOOST_AUTO_TEST_CASE(testIntegersFrom0to1000) {
     for (int i = 0; i < 1000; ++i) {
         string input = to_string(i);
-        int shift = input.length() + 1;
+        size_t shift = input.length() + 1;
         vector<Lexem> expected {
             {Token(INTEGER, i), 1, 1},
             {Token(END_OF_FILE), 1, shift},
@@ -177,25 +208,31 @@ BOOST_AUTO_TEST_CASE(testNumbersFrom0to1000) {
         compareLexemVectors(expected, result);
     }
 }
-///////////////////////////////////////////////////////////////////////////////
-const map<const string, const Token> IDENTIFIERS {
-    { "normal", Token(IDENTIFIER, "normal") },
-    { "normal123", Token(IDENTIFIER, "normal123") },
-    { "normal__123", Token(IDENTIFIER, "normal__123") },
-    { "NORMAL", Token(IDENTIFIER, "NORMAL") },
-    { string(100, 'a'), Token(IDENTIFIER, string(100, 'a')) },
-    { string(99, 'a'), Token(IDENTIFIER, string(99, 'a')) },
+
+const map<const string, const Token> INTEGERS {
+    { "0", Token(INTEGER, 0) },
+    { "1", Token(INTEGER, 1) },
+    { "213", Token(INTEGER, 213) },
+    { to_string(numeric_limits<int>::max()), Token(INTEGER, numeric_limits<int>::max()) },
     // errors
-    { string(101, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(100, 'a')) },
-    { string(200, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(100, 'a')) },
-    { string(1000, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(100, 'a')) },
-    // { R"("\ )", Token(ERROR_BACK_SLASH_STRING, "\"\"")  }, // TODO:
+    { string(100, '1'), Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')) },
+    { string(101, '1'), Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')) },
+    { string(200, '1'), Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')) },
+    { string(10000, '1'), Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')) },
+    {
+        to_string(static_cast<long>(numeric_limits<int>::max()) + 1),
+       Token(
+            ERROR_INTEGER_OUT_OF_BOUND,
+            to_string(static_cast<long>(numeric_limits<int>::max()) + 1)
+        )
+    },
 };
 
-BOOST_AUTO_TEST_CASE(testIdentifiers) {
-    for (const auto& [key, value] : IDENTIFIERS) {
+
+BOOST_AUTO_TEST_CASE(testIntegers) {
+    for (const auto& [key, value] : INTEGERS) {
         string input = key;
-        int shift = input.length() + 1;
+        size_t shift = input.length() + 1;
         vector<Lexem> expected {
             {value, 1, 1},
             {Token(END_OF_FILE), 1, shift},
@@ -425,12 +462,12 @@ R"(123_
 abcd12 1230
 **789a a__12311)";
     vector<Lexem> expected {
-        {Token(ERROR_NUMBER, "123_"), 1, 1},
+        {Token(ERROR_NUMBER_UNDEFINED_REPRESENTATION, "123_"), 1, 1},
         {Token(IDENTIFIER, "abcd12"), 2, 1},
         {Token(INTEGER, 1230), 2, 8},
         {Token(STAR), 3, 1},
         {Token(STAR), 3, 2},
-        {Token(ERROR_NUMBER, "789a"), 3, 3},
+        {Token(ERROR_NUMBER_UNDEFINED_REPRESENTATION, "789a"), 3, 3},
         {Token(IDENTIFIER, "a__12311"), 3, 8},
         {Token(END_OF_FILE), 3, 16},
     };
@@ -538,7 +575,7 @@ BOOST_AUTO_TEST_CASE(testFloat) {
     string input =
 R"(1.12345)";
     vector<Lexem> expected {
-        {Token(DOUBLE, 1.12345), 1, 1},
+        {Token(FLOAT, 1.12345), 1, 1},
         {Token(END_OF_FILE), 1, 8},
     };
     istringstream in(input);
@@ -554,8 +591,8 @@ BOOST_AUTO_TEST_CASE(testFloat2) {
     string input =
 R"(1.12345 0.0)";
     vector<Lexem> expected {
-        {Token(DOUBLE, 1.12345), 1, 1},
-        {Token(DOUBLE, 0.0), 1, 9},
+        {Token(FLOAT, 1.12345), 1, 1},
+        {Token(FLOAT, 0.0), 1, 9},
         {Token(END_OF_FILE), 1, 12},
     };
     istringstream in(input);
@@ -571,8 +608,8 @@ BOOST_AUTO_TEST_CASE(testFloatWithoutNumbersAfterDot) {
     string input =
 R"(1.12345 0.)";
     vector<Lexem> expected {
-        {Token(DOUBLE, 1.12345), 1, 1},
-        {Token(DOUBLE, 0.), 1, 9},
+        {Token(FLOAT, 1.12345), 1, 1},
+        {Token(FLOAT, 0.), 1, 9},
         {Token(END_OF_FILE), 1, 11},
     };
     istringstream in(input);
@@ -621,7 +658,7 @@ let mut b = 123->str;
         {Token(ASSIGN), 2, 19},
         {Token(IDENTIFIER, "x"), 2, 21},
         {Token(PLUS), 2, 23},
-        {Token(DOUBLE, 0.), 2, 25},
+        {Token(FLOAT, 0.), 2, 25},
         {Token(SEMICOLON), 2, 27},
         {Token(RBRACE), 2, 29},
 
@@ -691,7 +728,7 @@ let mut b = 123->str;
         {Token(ASSIGN), 2, 19},
         {Token(IDENTIFIER, "x"), 2, 21},
         {Token(PLUS), 2, 23},
-        {Token(DOUBLE, 0.), 2, 25},
+        {Token(FLOAT, 0.), 2, 25},
         {Token(SEMICOLON), 2, 27},
         {Token(RBRACE), 2, 29},
 

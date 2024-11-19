@@ -107,7 +107,7 @@ std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
 }
 
 std::unique_ptr<Node> Parser::parseIntegerLiteral() {
-    int val = std::get<int>(*current.token.value);
+    int val = static_cast<int>(std::get<int>(*current.token.value));
     readLex();
     return std::make_unique<IntegerLiteral>(val);
 }
