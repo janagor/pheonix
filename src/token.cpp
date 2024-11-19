@@ -7,7 +7,10 @@ bool Token::operator==(const Token& t) const {
     return this->tokenType == t.tokenType && this->value == t.value;
 }
 
-std::ostream& operator<<(std::ostream& os, const std::optional<std::variant<int, double, std::string>>& opt) {
+std::ostream& operator<<(
+    std::ostream& os,
+    const std::optional<std::variant<int, double, std::string>>& opt
+) {
     if (opt) {
         std::visit([&os](const auto& value) {
             os << value;

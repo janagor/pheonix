@@ -151,6 +151,33 @@ const map<const string, const Token> INTEGERS {
     },
 };
 
+const map<const string, const Token> FLOATS {
+    { "0.", Token(FLOAT, stod("0.")) },
+    { "1.", Token(FLOAT, stod("1.")) },
+    { "213.", Token(FLOAT, stod("213.")) },
+    {
+        to_string(numeric_limits<double>::max()),
+        Token(FLOAT, stod(to_string(numeric_limits<double>::max())))
+    },
+    // errors
+    {
+        "1." + string(NUMERIC_MAX_SIZE, '1'),
+        Token(ERROR_FLOAT_OUT_OF_BOUND, "1." + string(NUMERIC_MAX_SIZE-2, '1'))
+    },
+    {
+        "0." + string(NUMERIC_MAX_SIZE +200, '1'),
+        Token(ERROR_FLOAT_OUT_OF_BOUND, "0." + string(NUMERIC_MAX_SIZE-2, '1'))
+    },
+    {
+        string(NUMERIC_MAX_SIZE*100, '1') + "." + string(NUMERIC_MAX_SIZE*100, '1'),
+        Token(
+            ERROR_FLOAT_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')
+        )
+    },
+};
+
+
+
 // tests cases
 BOOST_AUTO_TEST_CASE(testEmptyInput) {
     string input = R"()";
@@ -253,35 +280,6 @@ BOOST_AUTO_TEST_CASE(testIntegersFrom0to1000) {
         compareLexemVectors(expected, result);
     }
 }
-///////////////////////////////////////////////////////////////////////////////
-
-const map<const string, const Token> FLOATS {
-    { "0.", Token(FLOAT, stod("0.")) },
-    { "1.", Token(FLOAT, stod("1.")) },
-    { "213.", Token(FLOAT, stod("213.")) },
-    {
-        to_string(numeric_limits<double>::max()),
-        Token(FLOAT, stod(to_string(numeric_limits<double>::max())))
-    },
-    // errors
-    {
-        "1." + string(NUMERIC_MAX_SIZE, '1'),
-        Token(ERROR_FLOAT_OUT_OF_BOUND, "1." + string(NUMERIC_MAX_SIZE-2, '1'))
-    },
-    {
-        "0." + string(NUMERIC_MAX_SIZE +200, '1'),
-        Token(ERROR_FLOAT_OUT_OF_BOUND, "0." + string(NUMERIC_MAX_SIZE-2, '1'))
-    },
-    {
-        string(NUMERIC_MAX_SIZE*100, '1') + "." + string(NUMERIC_MAX_SIZE*100, '1'),
-        Token(
-            ERROR_FLOAT_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')
-        )
-    },
-};
-
-
-
 BOOST_AUTO_TEST_CASE(testFloats) {
     for (const auto& [key, value] : FLOATS) {
         string input = key;
@@ -297,6 +295,22 @@ BOOST_AUTO_TEST_CASE(testFloats) {
         compareLexemVectors(expected, result);
     }
 }
+///////////////////////////////////////////////////////////////////////////////
+const vector<string> NEW_LINE_CHARACTERS { "\n", "\r", "\r\n", };
+
+BOOST_AUTO_TEST_CASE(testNewLineCharacters) {
+    for (const auto& input : NEW_LINE_CHARACTERS) {
+        vector<Lexem> expected {
+            {Token(END_OF_FILE), 2, 1},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = l.lexerize();
+        BOOST_CHECK_EQUAL(expected.size(), result.size());
+        compareLexemVectors(expected, result);
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 BOOST_AUTO_TEST_CASE(testOperators) {
     string input = R"(+=*/-)";

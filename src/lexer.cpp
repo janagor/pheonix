@@ -192,9 +192,22 @@ Lexem Lexer::nextLexem() {
 
 void Lexer::readChar() {
     if (ch == '\n') {
+        // Linux
         ++line;
         column = 0;
     }
+    if (ch == '\r') {
+        // MacOS or Windows
+        if (peek == '\n') {
+            // Windows
+            ++offset;
+            ch = istream_.get();
+            peek = istream_.peek();
+        }
+        ++line;
+        column = 0;
+    }
+
     if (ch == EOF) {
     peek = ch;
         return;
@@ -213,6 +226,7 @@ token::Token Lexer::handleOnelineCommentToken() {
     while (true) {
         switch (ch) {
         case '\n':
+        case '\r':
         case EOF:
             readChar();
             return token::Token(token::ONE_LINE_COMMENT, buffer);
@@ -231,6 +245,7 @@ void Lexer::skipWhiteSpaces() {
         case ' ':
         case '\t':
         case '\n':
+        case '\r':
             readChar();
             break;
         default:
@@ -342,6 +357,8 @@ token::Token Lexer::handleNumber(){
     }
 
     try {
+        // NOTE: it is expected that std::numeric_limit::<int>lowest() is not
+        // achievable
         return token::Token(token::INTEGER, stoi(buffer));
     } catch (const std::out_of_range& e) {
         return token::Token(token::ERROR_INTEGER_OUT_OF_BOUND, buffer);
