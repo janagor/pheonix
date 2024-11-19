@@ -7,6 +7,8 @@
 
 namespace lexer {
 
+static const int IDENTIFIER_MAX_SIZE = 100;
+
 struct Lexem {
     token::Token token;
     int line;

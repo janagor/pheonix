@@ -18,7 +18,8 @@ void compareLexemVectors(const vector<Lexem>& expected, const vector<Lexem>& rec
         BOOST_CHECK_EQUAL(expected[i], received[i]);
     }
 }
-// input :: expected_output_type maps
+
+// input
 const map<const string, const Token> SPECIAL_CHARS_AND_KEYWORDS {
     { "=", Token(ASSIGN) },
     { "!", Token(BANG) },
@@ -63,58 +64,6 @@ const map<const string, const Token> SPECIAL_CHARS_AND_KEYWORDS {
     { "false", Token(FALSE) },
 };
 
-// test cases
-
-BOOST_AUTO_TEST_CASE(testEmptyInput) {
-    string input = R"()";
-    vector<Lexem> expected {
-        {Token(END_OF_FILE), 1, 1},
-    };
-    istringstream in(input);
-    Lexer l(in);
-    vector<Lexem> result = l.lexerize();
-
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
-
-    compareLexemVectors(expected, result);
-}
-
-BOOST_AUTO_TEST_CASE(specialCharsAndKeywords) {
-    for (const auto& [key, value] : SPECIAL_CHARS_AND_KEYWORDS) {
-        string input = key;
-        int shift = input.length() + 1; // first character is at the indexes (1, 1)
-        vector<Lexem> expected {
-            {value, 1, 1},
-            {Token(END_OF_FILE), 1, shift},
-        };
-        istringstream in(input);
-        Lexer l(in);
-        vector<Lexem> result = l.lexerize();
-
-        BOOST_CHECK_EQUAL(expected.size(), result.size());
-
-        compareLexemVectors(expected, result);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(testNumbersFrom0to100) {
-    for (int i = 0; i < 100; ++i) {
-        string input = to_string(i);
-        int shift = input.length() + 1;
-        vector<Lexem> expected {
-            {Token(INTEGER, i), 1, 1},
-            {Token(END_OF_FILE), 1, shift},
-        };
-        istringstream in(input);
-        Lexer l(in);
-        vector<Lexem> result = l.lexerize();
-
-        BOOST_CHECK_EQUAL(expected.size(), result.size());
-
-        compareLexemVectors(expected, result);
-    }
-}
-
 const map<string, Token> ONE_LINE_COMMENTS {
     { R"(//)", Token(ONE_LINE_COMMENT, "//") },
     { R"(//aa)", Token(ONE_LINE_COMMENT, "//aa") },
@@ -122,24 +71,6 @@ const map<string, Token> ONE_LINE_COMMENTS {
     { R"(//for while let 1 2 &&)", Token(ONE_LINE_COMMENT, "//for while let 1 2 &&") },
     { R"(// c)", Token(ONE_LINE_COMMENT,  "// c") },
 };
-
-BOOST_AUTO_TEST_CASE(testOneLineComments) {
-    for (const auto& [key, value] : ONE_LINE_COMMENTS) {
-        string input = key;
-        int shift = input.length() + 1;
-        vector<Lexem> expected {
-            {value, 1, 1},
-            {Token(END_OF_FILE), 1, shift},
-        };
-        istringstream in(input);
-        Lexer l(in);
-        vector<Lexem> result = l.lexerize();
-
-        BOOST_CHECK_EQUAL(expected.size(), result.size());
-
-        compareLexemVectors(expected, result);
-    }
-}
 
 const map<const string, const Token> STRINGS {
     { R"("")", Token(STRING, "") },
@@ -159,6 +90,58 @@ const map<const string, const Token> STRINGS {
     // { R"("\ )", Token(ERROR_BACK_SLASH_STRING, "\"\"")  }, // TODO:
 };
 
+// tests cases
+BOOST_AUTO_TEST_CASE(testEmptyInput) {
+    string input = R"()";
+    vector<Lexem> expected {
+        {Token(END_OF_FILE), 1, 1},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = l.lexerize();
+
+    BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(specialCharsAndKeywords) {
+    for (const auto& [key, value] : SPECIAL_CHARS_AND_KEYWORDS) {
+        string input = key;
+        int shift = input.length() + 1; // NOTE: first character is at the indexes (1, 1)
+        vector<Lexem> expected {
+            {value, 1, 1},
+            {Token(END_OF_FILE), 1, shift},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = l.lexerize();
+
+        BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+        compareLexemVectors(expected, result);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(testOneLineComments) {
+    for (const auto& [key, value] : ONE_LINE_COMMENTS) {
+        string input = key;
+        int shift = input.length() + 1;
+        vector<Lexem> expected {
+            {value, 1, 1},
+            {Token(END_OF_FILE), 1, shift},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = l.lexerize();
+
+        BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+        compareLexemVectors(expected, result);
+    }
+}
+
+
 BOOST_AUTO_TEST_CASE(testStrings) {
     for (const auto& [key, value] : STRINGS) {
         string input = key;
@@ -176,6 +159,55 @@ BOOST_AUTO_TEST_CASE(testStrings) {
 }
 
 
+BOOST_AUTO_TEST_CASE(testNumbersFrom0to1000) {
+    for (int i = 0; i < 1000; ++i) {
+        string input = to_string(i);
+        int shift = input.length() + 1;
+        vector<Lexem> expected {
+            {Token(INTEGER, i), 1, 1},
+            {Token(END_OF_FILE), 1, shift},
+        };
+        assert(std::get<int>(expected[0].token.value.value()) == i);
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = l.lexerize();
+
+        BOOST_CHECK_EQUAL(expected.size(), result.size());
+
+        compareLexemVectors(expected, result);
+    }
+}
+///////////////////////////////////////////////////////////////////////////////
+const map<const string, const Token> IDENTIFIERS {
+    { "normal", Token(IDENTIFIER, "normal") },
+    { "normal123", Token(IDENTIFIER, "normal123") },
+    { "normal__123", Token(IDENTIFIER, "normal__123") },
+    { "NORMAL", Token(IDENTIFIER, "NORMAL") },
+    { string(100, 'a'), Token(IDENTIFIER, string(100, 'a')) },
+    { string(99, 'a'), Token(IDENTIFIER, string(99, 'a')) },
+    // errors
+    { string(101, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(100, 'a')) },
+    { string(200, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(100, 'a')) },
+    { string(1000, 'a'), Token(ERROR_IDENTIFIER_TOO_LONG, string(100, 'a')) },
+    // { R"("\ )", Token(ERROR_BACK_SLASH_STRING, "\"\"")  }, // TODO:
+};
+
+BOOST_AUTO_TEST_CASE(testIdentifiers) {
+    for (const auto& [key, value] : IDENTIFIERS) {
+        string input = key;
+        int shift = input.length() + 1;
+        vector<Lexem> expected {
+            {value, 1, 1},
+            {Token(END_OF_FILE), 1, shift},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = l.lexerize();
+        BOOST_CHECK_EQUAL(expected.size(), result.size());
+        compareLexemVectors(expected, result);
+    }
+}
+///////////////////////////////////////////////////////////////////////////////
 BOOST_AUTO_TEST_CASE(testOperators) {
     string input = R"(+=*/-)";
     vector<Lexem> expected {
@@ -292,7 +324,7 @@ BOOST_AUTO_TEST_CASE(testMultilineComments2) {
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testIdentifiers) {
+BOOST_AUTO_TEST_CASE(testIdentifiers2) {
     string input =
 R"(abcd123
 abcd

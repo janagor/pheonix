@@ -293,10 +293,19 @@ token::Token Lexer::handleIdentifier(){
     std::string buffer = "";
     buffer += ch;
     readChar();
-    while (isalnum(ch) || ch=='_') {
+    while ((isalnum(ch) || ch=='_') && buffer.size() < IDENTIFIER_MAX_SIZE) {
         buffer += ch;
         readChar();
     }
+    // NOTE: if identifier size may be greater then IDENTIFIER_MAX_SIZE
+    // skipping all the next chars
+    bool overflow_encoutered = false;
+    while (isalnum(ch) || ch=='_') {
+        overflow_encoutered = true;
+        readChar();
+    }
+    if(overflow_encoutered)
+        return token::Token(token::ERROR_IDENTIFIER_TOO_LONG, buffer);
 
     std::optional<token::TokenType> result = token::searchForKeyword(buffer);
     if(result)
