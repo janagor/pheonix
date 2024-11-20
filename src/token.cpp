@@ -16,13 +16,13 @@ std::ostream& operator<<(
             os << value;
         }, *opt);
     } else {
-        os << "!empty!";
+        os << "[]";
     }
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const Token& t) {
-    os << "Token(tokenType:" << t.tokenType << "value:" << t.value << ")";
+    os << "Token(\n\t\ttokenType:``" << TokenTypeToLiteral.at(t.tokenType) << "``, \n\t\tvalue:``" << t.value << "``,\n\t)";
     return os;
 }
 

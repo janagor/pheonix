@@ -12,9 +12,9 @@ bool Lexem::operator==(const Lexem& l) const {
 }
 
 std::ostream& operator<<(std::ostream& os, const Lexem& l) {
-    os << "Lexem(token:" << l.token 
-        << ", line:" << l.line
-        << ", column:" << l.column << ")";
+    os << "Lexem(  token: `" << l.token 
+        << "`,\n\tline: `" << l.line
+        << "`,\n\tcolumn: `" << l.column << "`,\n),";
     return os;
 }
 Lexem Lexer::nextLexem() {

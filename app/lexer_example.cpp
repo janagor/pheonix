@@ -4,7 +4,7 @@
 using namespace std;
 using namespace lexer;
 
-const static vector<string> EXAMPLES = {
+const vector<string> EXAMPLES = {
     // Ex1
     R"(// These are one line comments.
 /* these
