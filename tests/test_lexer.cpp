@@ -1,12 +1,11 @@
-#define BOOST_TEST_MODULE TestLexer
+#include "../inc/lexer.hpp"
+#include <gtest/gtest.h>
 #include <cassert>
 #include <map>
 #include <fstream>
 #include <iostream>
 #include <cstdio>
 #include <limits>
-#include <boost/test/unit_test.hpp>
-#include "../inc/lexer.hpp"
 
 using namespace std;
 using namespace token;
@@ -14,10 +13,10 @@ using namespace lexer;
 
 // helper
 void compareLexemVectors(const vector<Lexem>& expected, const vector<Lexem>& received) {
-    BOOST_CHECK_EQUAL(expected.size(), received.size());
+    EXPECT_EQ(expected.size(), received.size());
 
     for (size_t i = 0; i < min(expected.size(), received.size()); ++i) {
-        BOOST_CHECK_EQUAL(expected[i], received[i]);
+        EXPECT_EQ(expected[i], received[i]);
     }
 }
 
@@ -179,7 +178,7 @@ const map<const string, const Token> FLOATS {
 const vector<string> NEW_LINE_CHARACTERS { "\n", "\r", "\r\n", };
 
 // tests cases
-BOOST_AUTO_TEST_CASE(testEmptyInput) {
+TEST(TestLexer, testEmptyInput) {
     string input = R"()";
     vector<Lexem> expected {
         {Token(END_OF_FILE), 1, 1},
@@ -188,12 +187,12 @@ BOOST_AUTO_TEST_CASE(testEmptyInput) {
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(specialCharsAndKeywords) {
+TEST(TestLexer, specialCharsAndKeywords) {
     for (const auto& [key, value] : SPECIAL_CHARS_AND_KEYWORDS) {
         string input = key;
         // NOTE: first character is at the indexes (1, 1)
@@ -206,13 +205,13 @@ BOOST_AUTO_TEST_CASE(specialCharsAndKeywords) {
         Lexer l(in);
         vector<Lexem> result = l.lexerize();
 
-        BOOST_CHECK_EQUAL(expected.size(), result.size());
+        EXPECT_EQ(expected.size(), result.size());
 
         compareLexemVectors(expected, result);
     }
 }
 
-BOOST_AUTO_TEST_CASE(testOneLineComments) {
+TEST(TestLexer, testOneLineComments) {
     for (const auto& [key, value] : ONE_LINE_COMMENTS) {
         string input = key;
         size_t shift = input.length() + 1;
@@ -224,14 +223,14 @@ BOOST_AUTO_TEST_CASE(testOneLineComments) {
         Lexer l(in);
         vector<Lexem> result = l.lexerize();
 
-        BOOST_CHECK_EQUAL(expected.size(), result.size());
+        EXPECT_EQ(expected.size(), result.size());
 
         compareLexemVectors(expected, result);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(testStrings) {
+TEST(TestLexer, testStrings) {
     for (const auto& [key, value] : STRINGS) {
         string input = key;
         size_t shift = input.length() + 1;
@@ -242,12 +241,12 @@ BOOST_AUTO_TEST_CASE(testStrings) {
         istringstream in(input);
         Lexer l(in);
         vector<Lexem> result = l.lexerize();
-        BOOST_CHECK_EQUAL(expected.size(), result.size());
+        EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
     }
 }
 
-BOOST_AUTO_TEST_CASE(testIdentifiers) {
+TEST(TestLexer, testIdentifiers) {
     for (const auto& [key, value] : IDENTIFIERS) {
         string input = key;
         size_t shift = input.length() + 1;
@@ -258,11 +257,11 @@ BOOST_AUTO_TEST_CASE(testIdentifiers) {
         istringstream in(input);
         Lexer l(in);
         vector<Lexem> result = l.lexerize();
-        BOOST_CHECK_EQUAL(expected.size(), result.size());
+        EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
     }
 }
-BOOST_AUTO_TEST_CASE(testIntegersFrom0to1000) {
+TEST(TestLexer, testIntegersFrom0to1000) {
     for (int i = 0; i < 1000; ++i) {
         string input = to_string(i);
         size_t shift = input.length() + 1;
@@ -275,12 +274,12 @@ BOOST_AUTO_TEST_CASE(testIntegersFrom0to1000) {
         Lexer l(in);
         vector<Lexem> result = l.lexerize();
 
-        BOOST_CHECK_EQUAL(expected.size(), result.size());
+        EXPECT_EQ(expected.size(), result.size());
 
         compareLexemVectors(expected, result);
     }
 }
-BOOST_AUTO_TEST_CASE(testFloats) {
+TEST(TestLexer, testFloats) {
     for (const auto& [key, value] : FLOATS) {
         string input = key;
         size_t shift = input.length() + 1;
@@ -291,11 +290,11 @@ BOOST_AUTO_TEST_CASE(testFloats) {
         istringstream in(input);
         Lexer l(in);
         vector<Lexem> result = l.lexerize();
-        BOOST_CHECK_EQUAL(expected.size(), result.size());
+        EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
     }
 }
-BOOST_AUTO_TEST_CASE(testNewLineCharacters) {
+TEST(TestLexer, testNewLineCharacters) {
     for (const auto& input : NEW_LINE_CHARACTERS) {
         vector<Lexem> expected {
             {Token(END_OF_FILE), 2, 1},
@@ -303,13 +302,13 @@ BOOST_AUTO_TEST_CASE(testNewLineCharacters) {
         istringstream in(input);
         Lexer l(in);
         vector<Lexem> result = l.lexerize();
-        BOOST_CHECK_EQUAL(expected.size(), result.size());
+        EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
     }
 }
 ///////////////////////////////////////////////////////////////////////////////
 // examples from the documentation
-BOOST_AUTO_TEST_CASE(Ex1) {
+TEST(TestLexer, Ex1) {
     string input =
 R"(// These are one line comments.
 /* these
@@ -328,11 +327,11 @@ comments */)"), 2, 1},
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(Ex2) {
+TEST(TestLexer, Ex2) {
     string input =
 R"(let a = 12; // int - const
 let mut b = 12.12; // flt - mutowalny
@@ -377,11 +376,11 @@ let mut d = true; // bol - mutowalny)";
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
     compareLexemVectors(expected, result);
 }
 
-// BOOST_AUTO_TEST_CASE(Ex3) {
+// TEST(TestLexer, Ex3) {
 //     string input =
 // R"(let mut a = 0;
 //
@@ -439,12 +438,12 @@ let mut d = true; // bol - mutowalny)";
 //     Lexer l(in);
 //     vector<Lexem> result = l.lexerize();
 //
-//     BOOST_CHECK_EQUAL(expected.size(), result.size());
+//     EXPECT_EQ(expected.size(), result.size());
 //     compareLexemVectors(expected, result);
 // }
 
 ///////////////////////////////////////////////////////////////////////////////
-BOOST_AUTO_TEST_CASE(testOperators) {
+TEST(TestLexer, testOperators) {
     string input = R"(+=*/-)";
     vector<Lexem> expected {
         {Token(PLUS), 1, 1},
@@ -458,12 +457,12 @@ BOOST_AUTO_TEST_CASE(testOperators) {
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testBrackets) {
+TEST(TestLexer, testBrackets) {
     string input = R"((){}[])";
     vector<Lexem> expected {
         {Token(LPARENT), 1, 1},
@@ -478,12 +477,12 @@ BOOST_AUTO_TEST_CASE(testBrackets) {
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testOneLineComments2) {
+TEST(TestLexer, testOneLineComments2) {
     string input =
 "//abcdefg1123\n\
 ++//3kaczuszka";
@@ -498,12 +497,12 @@ BOOST_AUTO_TEST_CASE(testOneLineComments2) {
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testOneLineComments3) {
+TEST(TestLexer, testOneLineComments3) {
     string input =
 "//abcdefg    \t\t!@@#$\n//";
     vector<Lexem> expected {
@@ -515,12 +514,12 @@ BOOST_AUTO_TEST_CASE(testOneLineComments3) {
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testMultilineComments) {
+TEST(TestLexer, testMultilineComments) {
     string input =
 "/*abcdefll\n\
 \n\
@@ -536,12 +535,12 @@ BOOST_AUTO_TEST_CASE(testMultilineComments) {
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testMultilineComments2) {
+TEST(TestLexer, testMultilineComments2) {
     string input =
 "/*abcdefll\n\
 \n\
@@ -555,12 +554,12 @@ BOOST_AUTO_TEST_CASE(testMultilineComments2) {
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testIdentifiers2) {
+TEST(TestLexer, testIdentifiers2) {
     string input =
 R"(abcd123
 abcd
@@ -579,12 +578,12 @@ abcd
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testIntegerLiteralsEasier) {
+TEST(TestLexer, testIntegerLiteralsEasier) {
     string input =
 R"(123
 111112 1230)";
@@ -598,11 +597,11 @@ R"(123
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
-BOOST_AUTO_TEST_CASE(testIntegerLiterals) {
+TEST(TestLexer, testIntegerLiterals) {
     string input =
 R"(123
 abcd12 1230
@@ -621,12 +620,12 @@ abcd12 1230
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testIntegerMany) {
+TEST(TestLexer, testIntegerMany) {
     string input =
 R"(1 2 3 4 5 6 7 8 9 10 11 12+13)";
     vector<Lexem> expected {
@@ -650,12 +649,12 @@ R"(1 2 3 4 5 6 7 8 9 10 11 12+13)";
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testIntegerLiteralsError) {
+TEST(TestLexer, testIntegerLiteralsError) {
     string input =
 R"(123_
 abcd12 1230
@@ -674,12 +673,12 @@ abcd12 1230
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testKeywords) {
+TEST(TestLexer, testKeywords) {
     string input =
 "123 if while";
     vector<Lexem> expected {
@@ -692,12 +691,12 @@ BOOST_AUTO_TEST_CASE(testKeywords) {
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testStringsWithoutSpecialCharacters) {
+TEST(TestLexer, testStringsWithoutSpecialCharacters) {
     string input =
 R"("kaczuszka"
 
@@ -711,11 +710,11 @@ R"("kaczuszka"
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
-BOOST_AUTO_TEST_CASE(testStringsWithoutSpecialCharactersWithNewLine) {
+TEST(TestLexer, testStringsWithoutSpecialCharactersWithNewLine) {
     string input =
 R"("kaczuszka
 
@@ -728,12 +727,12 @@ cos    ")";
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testStringsWithDoubleQuotesInside) {
+TEST(TestLexer, testStringsWithDoubleQuotesInside) {
     string input =
 R"("kaczuszka mowi \"Hau, Hau!\"")";
     vector<Lexem> expected {
@@ -744,12 +743,12 @@ R"("kaczuszka mowi \"Hau, Hau!\"")";
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testStringsWithNewLineCharacterInside) {
+TEST(TestLexer, testStringsWithNewLineCharacterInside) {
     string input =
 R"("kaczuszka mowi:
 - hello!
@@ -765,12 +764,12 @@ R"("kaczuszka mowi:
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testFloat) {
+TEST(TestLexer, testFloat) {
     string input =
 R"(1.12345)";
     vector<Lexem> expected {
@@ -781,12 +780,12 @@ R"(1.12345)";
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testFloat2) {
+TEST(TestLexer, testFloat2) {
     string input =
 R"(1.12345 0.0)";
     vector<Lexem> expected {
@@ -798,12 +797,12 @@ R"(1.12345 0.0)";
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testFloatWithoutNumbersAfterDot) {
+TEST(TestLexer, testFloatWithoutNumbersAfterDot) {
     string input =
 R"(1.12345 0.)";
     vector<Lexem> expected {
@@ -815,12 +814,12 @@ R"(1.12345 0.)";
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(testAll1) {
+TEST(TestLexer, testAll1) {
     string input =
 R"(let kaczka = if (a == 21) { 12 } else { "kaczka" };
 while(x < 12) { x = x + 0.; }
@@ -876,14 +875,14 @@ let mut b = 123->str;
     Lexer l(in);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
 }
 
 // file reading
 
-BOOST_AUTO_TEST_CASE(testReadingFromFile) {
+TEST(TestLexer, testReadingFromFile) {
     string input =
 R"(let kaczka = if (a == 21) { 12 } else { "kaczka" };
 while(x < 12) { x = x + 0.; }
@@ -894,7 +893,7 @@ let mut b = 123->str;
         file << input;
         file.close();
     } else {
-        BOOST_FAIL("Failed to open the file!");
+        FAIL() << "Failed to open the file!";
     }
     vector<Lexem> expected {
         {Token(LET), 1, 1},
@@ -947,7 +946,7 @@ let mut b = 123->str;
     Lexer l(file_input);
     vector<Lexem> result = l.lexerize();
 
-    BOOST_CHECK_EQUAL(expected.size(), result.size());
+    EXPECT_EQ(expected.size(), result.size());
 
     compareLexemVectors(expected, result);
     std::remove("test.txt");

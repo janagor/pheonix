@@ -1,6 +1,5 @@
-#define BOOST_TEST_MODULE TestParser
-#include <boost/test/unit_test.hpp>
 #include "../inc/parser.hpp"
+#include <gtest/gtest.h>
 #include <cassert>
 #include <map>
 using namespace std;
@@ -130,16 +129,16 @@ void testTrivial(const string& input, const string& expected) {
     TreeGenVisitor visitor;
     output->accept(visitor);
     string received = visitor.getResult();
-    BOOST_CHECK_EQUAL(expected, received);
+    EXPECT_EQ(expected, received);
 }
 
-BOOST_AUTO_TEST_CASE(testTrivialCases) {
+TEST(TestParser, testTrivialCases) {
     for (const auto& [i, e] : trivialCases) {
         testTrivial(i, e);
     }
 }
 
-BOOST_AUTO_TEST_CASE(testIntegerAddition) {
+TEST(TestParser, testIntegerAddition) {
     string input = R"(1 + 2 * 3)";
     string expected = 
 "(AdditiveExpression:\n\
@@ -158,6 +157,6 @@ BOOST_AUTO_TEST_CASE(testIntegerAddition) {
     TreeGenVisitor visitor;
     output->accept(visitor);
     string received = visitor.getResult();
-    BOOST_CHECK_EQUAL(received, expected);
+    EXPECT_EQ(received, expected);
 }
 
