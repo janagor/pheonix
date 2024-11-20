@@ -28,14 +28,6 @@ Lexem Lexer::nextLexem() {
     case EOF:
         return Lexem{token::Token(token::END_OF_FILE), sline, scolumn};
         break;
-    case '-':
-        readChar();
-        if (ch == '>') {
-            readChar();
-            return Lexem{token::Token(token::RARROW), sline, scolumn};
-        }
-        return Lexem{token::Token(token::MINUS), sline, scolumn};
-        break;
     case '<':
         readChar();
         if (ch == '=') {
@@ -84,6 +76,10 @@ Lexem Lexer::nextLexem() {
             return Lexem{token::Token(token::SLASH), sline, scolumn};
         break;
 
+    case '-':
+        readChar();
+        return Lexem{token::Token(token::MINUS), sline, scolumn};
+        break;
     case '(':
         readChar();
         return Lexem{token::Token(token::LPARENT), sline, scolumn};
@@ -133,10 +129,6 @@ Lexem Lexer::nextLexem() {
         token = handleString();
         return Lexem{token, sline, scolumn};
         break;
-    case '@':
-        readChar();
-        return Lexem{token::Token(token::AT), sline, scolumn};
-        break;
     case '$':
         readChar();
         return Lexem{token::Token(token::DOLAR), sline, scolumn};
@@ -151,7 +143,7 @@ Lexem Lexer::nextLexem() {
             readChar();
             return Lexem{token::Token(token::AND), sline, scolumn};
         }
-        return Lexem{token::Token(token::AMPERSAND), sline, scolumn};
+        return Lexem{token::Token(token::NOT_A_TOKEN, "&"), sline, scolumn};
         break;
     case '|':
         readChar();
@@ -159,7 +151,7 @@ Lexem Lexer::nextLexem() {
             readChar();
             return Lexem{token::Token(token::OR), sline, scolumn};
         }
-        return Lexem{token::Token(token::PIPE), sline, scolumn};
+        return Lexem{token::Token(token::NOT_A_TOKEN, "|"), sline, scolumn};
         break;
 
     case ';':
@@ -170,15 +162,11 @@ Lexem Lexer::nextLexem() {
         readChar();
         return Lexem{token::Token(token::COMMA), sline, scolumn};
         break;
-    case '.':
-        readChar();
-        return Lexem{token::Token(token::DOT), sline, scolumn};
-        break;
-
     default:
         if (!isalnum(ch)) {
+            char val = ch;
             readChar();
-            return Lexem {token::Token(token::NOT_A_KEYWORD), sline, scolumn};
+            return Lexem {token::Token(token::NOT_A_TOKEN, val), sline, scolumn};
         }
         if (isdigit(ch)) {
             token = handleNumber();
@@ -238,6 +226,7 @@ token::Token Lexer::handleOnelineCommentToken() {
             readChar();
         }
     }
+    // NOTE: continue after overload encountered but without updating buffer
     bool firstPossible = true;
     while (true) {
         switch (ch) {
@@ -249,7 +238,6 @@ token::Token Lexer::handleOnelineCommentToken() {
             readChar();
             if (firstPossible)
                 return token::Token(token::ONE_LINE_COMMENT, buffer);
-
             return token::Token(
                     token::ERROR_ONE_LINE_COMMENT_OUT_OF_BOUND,
                     buffer
@@ -324,6 +312,7 @@ token::Token Lexer::handleMultilineCommentToken() {
             readChar();
         }
     }
+    // NOTE: continue after overload encountered but without updating buffer
     bool firstPossible = true;
     while (true) {
         switch (ch) {

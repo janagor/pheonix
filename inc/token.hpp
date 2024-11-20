@@ -32,15 +32,10 @@ enum TokenType : int {
     STAR,
     SLASH,
     PERCENT,
-    DOUBLE_QUOTE,
     HASH,
-    AT,
-    AMPERSAND,
-    PIPE,
     DOLAR,
     SEMICOLON,
     COMMA,
-    DOT,
 
     LPARENT,
     RPARENT,
@@ -56,7 +51,6 @@ enum TokenType : int {
     GEQ,
     GREATER,
     LESS,
-    RARROW,
     LARROW,
 
     IDENTIFIER,
@@ -78,7 +72,7 @@ enum TokenType : int {
     TRUE,
     FALSE,
 
-    NOT_A_KEYWORD,
+    NOT_A_TOKEN,
     /* */
 };
 
@@ -113,17 +107,11 @@ const std::map<TokenType, std::string> TokenTypeToLiteral {
     { PLUS,"PLUS" },
     { MINUS,"MINUS" },
     { STAR,"STAR" },
-    { SLASH,"SLASH" },
     { PERCENT,"PERCENT" },
-    { DOUBLE_QUOTE,"DOUBLE_QUOTE" },
     { HASH,"HASH" },
-    { AT,"AT" },
-    { AMPERSAND,"AMPERSAND" },
-    { PIPE,"PIPE" },
     { DOLAR,"DOLAR" },
     { SEMICOLON,"SEMICOLON" },
     { COMMA,"COMMA" },
-    { DOT,"DOT" },
 
     { LPARENT,"LPARENT" },
     { RPARENT,"RPARENT" },
@@ -139,7 +127,6 @@ const std::map<TokenType, std::string> TokenTypeToLiteral {
     { GEQ,"GEQ" },
     { GREATER,"GREATER" },
     { LESS,"LESS" },
-    { RARROW,"RARROW" },
     { LARROW,"LARROW" },
 
     { IDENTIFIER,"IDENTIFIER" },
@@ -161,7 +148,7 @@ const std::map<TokenType, std::string> TokenTypeToLiteral {
     { TRUE, "TRUE" },
     { FALSE,"FALSE" },
 
-    { NOT_A_KEYWORD, "NOT_A_KEYWORD"},
+    { NOT_A_TOKEN, "NOT_A_TOKEN"},
 };
 
 static const std::map<std::string, TokenType> Keywords = {
@@ -186,9 +173,10 @@ static const std::map<std::string, TokenType> Keywords = {
 std::optional<TokenType> searchForKeyword(std::string& word);
 
 struct Token {
-    Token() : tokenType(NOT_A_KEYWORD), value(std::nullopt) {}
+    Token() : tokenType(NOT_A_TOKEN), value(std::nullopt) {}
     Token(TokenType t) : tokenType(t), value(std::nullopt) {}
     Token(TokenType t, std::string val) : tokenType(t), value(val) {}
+    Token(TokenType t, char val) : tokenType(t), value(std::string(1, val)) {}
     Token(TokenType t, int val) : tokenType(t), value(val) {}
     Token(TokenType t, double val) : tokenType(t), value(val) {}
     bool operator==(const Token& t) const;

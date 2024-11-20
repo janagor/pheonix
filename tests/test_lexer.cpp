@@ -27,13 +27,9 @@ const map<const string, const Token> SPECIAL_CHARS_AND_KEYWORDS {
     { "+", Token(PLUS) },
     { "-", Token(MINUS) },
     { "*", Token(STAR) },
-    { "/", Token(SLASH) },
     { "%", Token(PERCENT) },
     { "#", Token(HASH) },
     { "$", Token(DOLAR) },
-    { "@", Token(AT) },
-    { "&", Token(AMPERSAND) },
-    { ".", Token(DOT) },
     { ";", Token(SEMICOLON) },
     { ",", Token(COMMA) },
     { "(", Token(LPARENT) },
@@ -251,7 +247,10 @@ const map<const string, const Token> FLOATS {
 };
 
 const vector<string> NEW_LINE_CHARACTERS { "\n", "\r", "\r\n", };
+
 const vector<string> NEW_LINE_CHARACTERS_WITH_SOMETHING_AFTER { "\na", "\ra", "\r\na", };
+
+const vector<string> NOT_A_TOKENS { ".", "`", "~", "|", "@", "^", "&", "?", "\\" };
 
 // tests cases
 TEST(TestLexer, testEmptyInput) {
@@ -397,6 +396,20 @@ TEST(TestLexer, testNewLineCharactersWithSomethingAfter) {
     }
 }
 
+TEST(TestLexer, testNotATokens) {
+    for (const auto& input : NOT_A_TOKENS) {
+        vector<Lexem> expected {
+            {Token(NOT_A_TOKEN, input), 1, 1},
+            {Token(END_OF_FILE), 1, 2},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = l.lexerize();
+        EXPECT_EQ(expected.size(), result.size());
+        compareLexemVectors(expected, result);
+    }
+}
+
 // example nr 1 from the documentation
 TEST(TestLexer, Ex1) {
     string input =
@@ -468,6 +481,78 @@ let mut d = true; // bol - mutowalny)";
     compareLexemVectors(expected, result);
 }
 
+// file reading
+TEST(TestLexer, testReadingFromFile) {
+    string input =
+R"(let kaczka = if (a == 21) { 12 } else { "kaczka" };
+while(x < 12) { x = x + 0.; }
+let mut b = 123<-str;
+)";
+    std::ofstream file("test.txt");
+    if (file.is_open()) {
+        file << input;
+        file.close();
+    } else {
+        FAIL() << "Failed to open the file!";
+    }
+    vector<Lexem> expected {
+        {Token(LET), 1, 1},
+        {Token(IDENTIFIER, "kaczka"), 1, 5},
+        {Token(ASSIGN), 1, 12},
+        {Token(IF), 1, 14},
+        {Token(LPARENT), 1, 17},
+        {Token(IDENTIFIER, "a"), 1, 18},
+        {Token(EQUALS), 1, 20},
+        {Token(INTEGER, 21), 1, 23},
+        {Token(RPARENT), 1, 25},
+
+        {Token(LBRACE), 1, 27},
+        {Token(INTEGER, 12), 1, 29},
+        {Token(RBRACE), 1, 32},
+        {Token(ELSE), 1, 34},
+        {Token(LBRACE), 1, 39},
+        {Token(STRING, "kaczka"), 1, 41},
+        {Token(RBRACE), 1, 50},
+        {Token(SEMICOLON), 1, 51},
+
+        {Token(WHILE), 2, 1},
+        {Token(LPARENT), 2, 6},
+        {Token(IDENTIFIER, "x"), 2, 7},
+        {Token(LESS), 2, 9},
+        {Token(INTEGER, 12), 2, 11},
+        {Token(RPARENT), 2, 13},
+        {Token(LBRACE), 2, 15},
+        {Token(IDENTIFIER, "x"), 2, 17},
+        {Token(ASSIGN), 2, 19},
+        {Token(IDENTIFIER, "x"), 2, 21},
+        {Token(PLUS), 2, 23},
+        {Token(FLOAT, 0.), 2, 25},
+        {Token(SEMICOLON), 2, 27},
+        {Token(RBRACE), 2, 29},
+
+        {Token(LET), 3, 1},
+        {Token(MUT), 3, 5},
+        {Token(IDENTIFIER, "b"), 3, 9},
+        {Token(ASSIGN), 3, 11},
+        {Token(INTEGER, 123), 3, 13},
+        {Token(LARROW), 3, 16},
+        {Token(STR), 3,18},
+        {Token(SEMICOLON), 3, 21},
+
+        {Token(END_OF_FILE), 4, 1},
+    };
+
+    ifstream file_input("test.txt");
+    Lexer l(file_input);
+    vector<Lexem> result = l.lexerize();
+
+    EXPECT_EQ(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+    std::remove("test.txt");
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // some less ordered tests
 TEST(TestLexer, testOperators) {
     string input = R"(+=*/-)";
@@ -849,7 +934,7 @@ TEST(TestLexer, testAll1) {
     string input =
 R"(let kaczka = if (a == 21) { 12 } else { "kaczka" };
 while(x < 12) { x = x + 0.; }
-let mut b = 123->str;
+let mut b = 123<-str;
 )";
     vector<Lexem> expected {
         {Token(LET), 1, 1},
@@ -891,7 +976,7 @@ let mut b = 123->str;
         {Token(IDENTIFIER, "b"), 3, 9},
         {Token(ASSIGN), 3, 11},
         {Token(INTEGER, 123), 3, 13},
-        {Token(RARROW), 3, 16},
+        {Token(LARROW), 3, 16},
         {Token(STR), 3,18},
         {Token(SEMICOLON), 3, 21},
 
@@ -905,76 +990,3 @@ let mut b = 123->str;
 
     compareLexemVectors(expected, result);
 }
-
-// file reading
-
-TEST(TestLexer, testReadingFromFile) {
-    string input =
-R"(let kaczka = if (a == 21) { 12 } else { "kaczka" };
-while(x < 12) { x = x + 0.; }
-let mut b = 123->str;
-)";
-    std::ofstream file("test.txt");
-    if (file.is_open()) {
-        file << input;
-        file.close();
-    } else {
-        FAIL() << "Failed to open the file!";
-    }
-    vector<Lexem> expected {
-        {Token(LET), 1, 1},
-        {Token(IDENTIFIER, "kaczka"), 1, 5},
-        {Token(ASSIGN), 1, 12},
-        {Token(IF), 1, 14},
-        {Token(LPARENT), 1, 17},
-        {Token(IDENTIFIER, "a"), 1, 18},
-        {Token(EQUALS), 1, 20},
-        {Token(INTEGER, 21), 1, 23},
-        {Token(RPARENT), 1, 25},
-
-        {Token(LBRACE), 1, 27},
-        {Token(INTEGER, 12), 1, 29},
-        {Token(RBRACE), 1, 32},
-        {Token(ELSE), 1, 34},
-        {Token(LBRACE), 1, 39},
-        {Token(STRING, "kaczka"), 1, 41},
-        {Token(RBRACE), 1, 50},
-        {Token(SEMICOLON), 1, 51},
-
-        {Token(WHILE), 2, 1},
-        {Token(LPARENT), 2, 6},
-        {Token(IDENTIFIER, "x"), 2, 7},
-        {Token(LESS), 2, 9},
-        {Token(INTEGER, 12), 2, 11},
-        {Token(RPARENT), 2, 13},
-        {Token(LBRACE), 2, 15},
-        {Token(IDENTIFIER, "x"), 2, 17},
-        {Token(ASSIGN), 2, 19},
-        {Token(IDENTIFIER, "x"), 2, 21},
-        {Token(PLUS), 2, 23},
-        {Token(FLOAT, 0.), 2, 25},
-        {Token(SEMICOLON), 2, 27},
-        {Token(RBRACE), 2, 29},
-
-        {Token(LET), 3, 1},
-        {Token(MUT), 3, 5},
-        {Token(IDENTIFIER, "b"), 3, 9},
-        {Token(ASSIGN), 3, 11},
-        {Token(INTEGER, 123), 3, 13},
-        {Token(RARROW), 3, 16},
-        {Token(STR), 3,18},
-        {Token(SEMICOLON), 3, 21},
-
-        {Token(END_OF_FILE), 4, 1},
-    };
-
-    ifstream file_input("test.txt");
-    Lexer l(file_input);
-    vector<Lexem> result = l.lexerize();
-
-    EXPECT_EQ(expected.size(), result.size());
-
-    compareLexemVectors(expected, result);
-    std::remove("test.txt");
-}
-
