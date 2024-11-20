@@ -22,13 +22,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-
-# find_package(Boost 1.86 CONFIG REQUIRED COMPONENTS unit_test_framework)
 find_package(Boost 1.86 CONFIG REQUIRED COMPONENTS program_options)
-
-# set(Boost_USE_STATIC_LIBS OFF)
-# set(Boost_USE_MULTITHREADED ON)
-# set(Boost_USE_STATIC_RUNTIME OFF)
 
 include_directories(src)
 include_directories(inc)

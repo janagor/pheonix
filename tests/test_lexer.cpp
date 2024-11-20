@@ -30,6 +30,7 @@ const map<const string, const Token> SPECIAL_CHARS_AND_KEYWORDS {
     { "/", Token(SLASH) },
     { "%", Token(PERCENT) },
     { "#", Token(HASH) },
+    { "$", Token(DOLAR) },
     { "@", Token(AT) },
     { "&", Token(AMPERSAND) },
     { ".", Token(DOT) },
@@ -41,14 +42,12 @@ const map<const string, const Token> SPECIAL_CHARS_AND_KEYWORDS {
     { "}", Token(RBRACE) },
     { "[", Token(LBRACKET) },
     { "]", Token(RBRACKET) },
-
     { "==", Token(EQUALS) },
     { "&&", Token(AND) },
     { "||", Token(OR) },
     { "<=", Token(LEQ) },
     { ">=", Token(GEQ) },
     { "<-", Token(LARROW) },
-
     { "fn", Token(FN) },
     { "let", Token(LET) },
     { "mut", Token(MUT) },
@@ -56,7 +55,6 @@ const map<const string, const Token> SPECIAL_CHARS_AND_KEYWORDS {
     { "if", Token(IF) },
     { "else", Token(ELSE) },
     { "while", Token(WHILE) },
-
     { "int", Token(INT) },
     { "str", Token(STR) },
     { "flt", Token(FLT) },
@@ -69,8 +67,65 @@ const map<string, Token> ONE_LINE_COMMENTS {
     { R"(//)", Token(ONE_LINE_COMMENT, "//") },
     { R"(//aa)", Token(ONE_LINE_COMMENT, "//aa") },
     { R"(//  )", Token(ONE_LINE_COMMENT, "//  ") },
-    { R"(//for while let 1 2 &&)", Token(ONE_LINE_COMMENT, "//for while let 1 2 &&") },
     { R"(// c)", Token(ONE_LINE_COMMENT,  "// c") },
+    { R"(//////)", Token(ONE_LINE_COMMENT,  "//////") },
+    {
+        R"(//for while let 1 2 &&)",
+        Token(ONE_LINE_COMMENT, "//for while let 1 2 &&")
+    },
+    {
+        "//" + string(COMMENT_MAX_SIZE - 2, 'a'),
+        Token(ONE_LINE_COMMENT,  "//" + string(COMMENT_MAX_SIZE - 2, 'a'))
+    },
+    //errors
+    {
+        "//" + string(COMMENT_MAX_SIZE, 'a'),
+        Token(
+            ERROR_ONE_LINE_COMMENT_OUT_OF_BOUND,
+            "//" + string(COMMENT_MAX_SIZE - 2, 'a')
+        )
+    },
+    {
+        "//" + string(COMMENT_MAX_SIZE * 2, 'a'),
+        Token(
+            ERROR_ONE_LINE_COMMENT_OUT_OF_BOUND,
+            "//" + string(COMMENT_MAX_SIZE - 2, 'a')
+        )
+    },
+};
+
+const map<string, Token> MULTILINE_COMMENTS {
+    { R"(/**/)", Token(MULTILINE_COMMENT, "//") },
+    { R"(/*aa*/)", Token(MULTILINE_COMMENT, "/*aa*/") },
+    { R"(/*  */)", Token(MULTILINE_COMMENT, "/*  */") },
+    { R"(/* c*/)", Token(MULTILINE_COMMENT,  "/* c*/") },
+    { R"(/*////*/)", Token(MULTILINE_COMMENT,  "/*////*/") },
+    {
+        R"(/*for while let 1 2 &&*/)",
+        Token(ONE_LINE_COMMENT, "/*for while let 1 2 &&*/")
+    },
+    {
+        "/*" + string(COMMENT_MAX_SIZE - 4, 'a') + "*/",
+        Token(
+            ONE_LINE_COMMENT,
+            "/*" + string(COMMENT_MAX_SIZE - 4, 'a') + "*/"
+        )
+    },
+    //errors
+    {
+        "//" + string(COMMENT_MAX_SIZE, 'a'),
+        Token(
+            ERROR_ONE_LINE_COMMENT_OUT_OF_BOUND,
+            "//" + string(COMMENT_MAX_SIZE - 2, 'a')
+        )
+    },
+    {
+        "/*" + string(COMMENT_MAX_SIZE, 'a') + "*/",
+        Token(
+            ONE_LINE_COMMENT,
+            "/*" + string(COMMENT_MAX_SIZE - 2, 'a')
+        )
+    },
 };
 
 const map<const string, const Token> STRINGS {
@@ -79,16 +134,30 @@ const map<const string, const Token> STRINGS {
     { R"("&")", Token(STRING, "&") },
     { R"("a")", Token(STRING, "a") },
     { R"("\n")", Token(STRING, "\n") },
+    { R"("\r")", Token(STRING, "\r") },
     { R"("\\")", Token(STRING, "\\") },
     { R"("\t")", Token(STRING, "\t") },
     { R"(" ")", Token(STRING, " ") },
     { R"("\"")", Token(STRING, "\"")  },
+    {
+        "\"" + string(STRING_MAX_SIZE, 'a') + "\"",
+        Token(STRING, string(STRING_MAX_SIZE, 'a'))
+    },
     // errors
-    { R"("\")", Token(ERROR_UNFINISHED_STRING, R"("")")  },
-    { R"("\t)", Token(ERROR_UNFINISHED_STRING, "\"\t")  },
-    { R"("\n)", Token(ERROR_UNFINISHED_STRING, "\"\n")  },
-    { R"("\\)", Token(ERROR_UNFINISHED_STRING, "\"\\")  },
-    // { R"("\ )", Token(ERROR_BACK_SLASH_STRING, "\"\"")  }, // TODO:
+    { R"("\")", Token(ERROR_UNFINISHED_STRING, R"(")")  },
+    { R"("\t)", Token(ERROR_UNFINISHED_STRING, "\t")  },
+    { R"("\n)", Token(ERROR_UNFINISHED_STRING, "\n")  },
+    { R"("\\)", Token(ERROR_UNFINISHED_STRING, "\\")  },
+    { R"("\ ")", Token(ERROR_BACK_SLASH_STRING, R"(\ )")  },
+    { R"("\a")", Token(ERROR_BACK_SLASH_STRING, R"(\a)")  },
+    {
+        "\"" + string(STRING_MAX_SIZE + 1, 'a') + "\"",
+        Token(ERROR_STRING_OUT_OF_BOUND, string(STRING_MAX_SIZE, 'a'))
+    },
+    {
+        "\"" + string(STRING_MAX_SIZE * 2, 'a') + "\"",
+        Token(ERROR_STRING_OUT_OF_BOUND, string(STRING_MAX_SIZE, 'a'))
+    },
 };
 
 const map<const string, const Token> IDENTIFIERS {
@@ -96,19 +165,25 @@ const map<const string, const Token> IDENTIFIERS {
     { "normal123", Token(IDENTIFIER, "normal123") },
     { "normal__123", Token(IDENTIFIER, "normal__123") },
     { "NORMAL", Token(IDENTIFIER, "NORMAL") },
-    { string(100, 'a'), Token(IDENTIFIER, string(100, 'a')) },
-    { string(99, 'a'), Token(IDENTIFIER, string(99, 'a')) },
+    {
+        string(IDENTIFIER_MAX_SIZE, 'a'),
+        Token(IDENTIFIER, string(IDENTIFIER_MAX_SIZE, 'a')) 
+    },
+    {
+        string(IDENTIFIER_MAX_SIZE - 1, 'a'),
+        Token(IDENTIFIER, string(IDENTIFIER_MAX_SIZE - 1, 'a'))
+    },
     // errors
     {
-        string(101, 'a'),
+        string(IDENTIFIER_MAX_SIZE + 1, 'a'),
         Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
     },
     {
-        string(200, 'a'),
+        string(2 * IDENTIFIER_MAX_SIZE, 'a'),
         Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
     },
     {
-        string(1000, 'a'),
+        string(10 * IDENTIFIER_MAX_SIZE, 'a'),
         Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
     },
 };
@@ -176,6 +251,7 @@ const map<const string, const Token> FLOATS {
 };
 
 const vector<string> NEW_LINE_CHARACTERS { "\n", "\r", "\r\n", };
+const vector<string> NEW_LINE_CHARACTERS_WITH_SOMETHING_AFTER { "\na", "\ra", "\r\na", };
 
 // tests cases
 TEST(TestLexer, testEmptyInput) {
@@ -306,8 +382,22 @@ TEST(TestLexer, testNewLineCharacters) {
         compareLexemVectors(expected, result);
     }
 }
-///////////////////////////////////////////////////////////////////////////////
-// examples from the documentation
+
+TEST(TestLexer, testNewLineCharactersWithSomethingAfter) {
+    for (const auto& input : NEW_LINE_CHARACTERS_WITH_SOMETHING_AFTER) {
+        vector<Lexem> expected {
+            {Token(IDENTIFIER, "a"), 2, 1},
+            {Token(END_OF_FILE), 2, 2},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = l.lexerize();
+        EXPECT_EQ(expected.size(), result.size());
+        compareLexemVectors(expected, result);
+    }
+}
+
+// example nr 1 from the documentation
 TEST(TestLexer, Ex1) {
     string input =
 R"(// These are one line comments.
@@ -353,14 +443,12 @@ let mut d = true; // bol - mutowalny)";
         {Token(SEMICOLON), 2, 18},
         {Token(ONE_LINE_COMMENT, "// flt - mutowalny"), 2, 20},
 
-
         {Token(LET), 3, 1},
         {Token(IDENTIFIER, "c"), 3, 5},
         {Token(ASSIGN), 3, 7},
         {Token(STRING, "duck"), 3, 9},
         {Token(SEMICOLON), 3, 15},
         {Token(ONE_LINE_COMMENT, "// str - const"), 3, 17},
-
 
         {Token(LET), 4, 1},
         {Token(MUT), 4, 5},
@@ -380,69 +468,7 @@ let mut d = true; // bol - mutowalny)";
     compareLexemVectors(expected, result);
 }
 
-// TEST(TestLexer, Ex3) {
-//     string input =
-// R"(let mut a = 0;
-//
-// // zmiana na stringa
-// $a = 1 <- str; // "1"
-// $a = 1.12 <- str; // "1.12"
-// $a = true <- str; // "true"
-//
-// // zmiana na float
-// $a = 12 <- flt; // 12.0
-// $a = true <- flt; // 1.0
-//
-// // zmiana na inta
-// $a = 1.2 <- int; // 1
-// $a = true <- int; // 1
-//
-// // zmiana na boola
-// $a = 1 <- bol; // true)";
-//     vector<Lexem> expected {
-//         {Token(LET), 1, 1},
-//         {Token(MUT), 2, 5},
-//         {Token(IDENTIFIER, "a"), 1, 5},
-//         {Token(ASSIGN), 1, 7},
-//         {Token(INTEGER, 0), 1, 9},
-//
-//         {Token(ONE_LINE_COMMENT, "// int - const"), 3, 1},
-//
-//         {Token(LET), 2, 1},
-//         {Token(IDENTIFIER, "b"), 2, 9},
-//         {Token(ASSIGN), 2, 11},
-//         {Token(FLOAT, 12.12), 2, 13},
-//         {Token(SEMICOLON), 2, 18},
-//         {Token(ONE_LINE_COMMENT, "// flt - mutowalny"), 2, 20},
-//
-//
-//         {Token(LET), 3, 1},
-//         {Token(IDENTIFIER, "c"), 3, 5},
-//         {Token(ASSIGN), 3, 7},
-//         {Token(STRING, "duck"), 3, 9},
-//         {Token(SEMICOLON), 3, 15},
-//         {Token(ONE_LINE_COMMENT, "// str - const"), 3, 17},
-//
-//
-//         {Token(LET), 4, 1},
-//         {Token(MUT), 4, 5},
-//         {Token(IDENTIFIER, "d"), 4, 9},
-//         {Token(ASSIGN), 4, 11},
-//         {Token(TRUE), 4, 13},
-//         {Token(SEMICOLON), 4, 17},
-//         {Token(ONE_LINE_COMMENT, "// bol - mutowalny"), 4, 19},
-//
-//         {Token(END_OF_FILE), 4, 37},
-//     };
-//     istringstream in(input);
-//     Lexer l(in);
-//     vector<Lexem> result = l.lexerize();
-//
-//     EXPECT_EQ(expected.size(), result.size());
-//     compareLexemVectors(expected, result);
-// }
-
-///////////////////////////////////////////////////////////////////////////////
+// some less ordered tests
 TEST(TestLexer, testOperators) {
     string input = R"(+=*/-)";
     vector<Lexem> expected {
@@ -547,7 +573,7 @@ TEST(TestLexer, testMultilineComments2) {
 \n\
 ;'.,:1";
     vector<Lexem> expected {
-        {Token(UNFINISHED_COMMENT, "/*abcdefll\n\n\n;'.,:1"), 1, 1},
+        {Token(ERROR_UNFINISHED_COMMENT, "/*abcdefll\n\n\n;'.,:1"), 1, 1},
         {Token(END_OF_FILE), 4, 7},
     };
     istringstream in(input);

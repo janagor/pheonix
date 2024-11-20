@@ -178,7 +178,7 @@ Lexem Lexer::nextLexem() {
     default:
         if (!isalnum(ch)) {
             readChar();
-            return Lexem {token::Token(token::ERROR), sline, scolumn};
+            return Lexem {token::Token(token::NOT_A_KEYWORD), sline, scolumn};
         }
         if (isdigit(ch)) {
             token = handleNumber();
@@ -223,10 +223,12 @@ token::Token Lexer::handleOnelineCommentToken() {
     std::string buffer = "";
     buffer += ch;
     readChar();
-    while (true) {
+    while (buffer.size() < COMMENT_MAX_SIZE) {
         switch (ch) {
-        case '\n':
         case '\r':
+            if (peek == '\n') readChar();
+            // fall through
+        case '\n':
         case EOF:
             readChar();
             return token::Token(token::ONE_LINE_COMMENT, buffer);
@@ -236,7 +238,28 @@ token::Token Lexer::handleOnelineCommentToken() {
             readChar();
         }
     }
+    bool firstPossible = true;
+    while (true) {
+        switch (ch) {
+        case '\r':
+            if (peek == '\n') readChar();
+            // fall through
+        case '\n':
+        case EOF:
+            readChar();
+            if (firstPossible)
+                return token::Token(token::ONE_LINE_COMMENT, buffer);
 
+            return token::Token(
+                    token::ERROR_ONE_LINE_COMMENT_OUT_OF_BOUND,
+                    buffer
+                );
+            break;
+        default:
+            firstPossible = false;
+            readChar();
+        }
+    }
 }
 
 void Lexer::skipWhiteSpaces() {
@@ -253,7 +276,6 @@ void Lexer::skipWhiteSpaces() {
         }
     }
 }
-
 
 std::vector<Lexem> Lexer::lexerize() {
     std::vector<Lexem> result;
@@ -277,7 +299,7 @@ token::Token Lexer::handleMultilineCommentToken() {
     assert(buffer == "/*");
     // state 3: *
     readChar();
-    while (true) {
+    while (buffer.size() < COMMENT_MAX_SIZE) {
         switch (ch) {
         case '*':
             buffer += ch;
@@ -289,16 +311,44 @@ token::Token Lexer::handleMultilineCommentToken() {
                 return token::Token(token::MULTILINE_COMMENT, buffer);
             }
             if (ch == EOF) {
-                return token::Token(token::UNFINISHED_COMMENT, buffer);
+                return token::Token(token::ERROR_UNFINISHED_COMMENT, buffer);
             }
             buffer += ch;
             readChar();
             break;
         case EOF:
-            return token::Token(token::UNFINISHED_COMMENT, buffer);
+            return token::Token(token::ERROR_UNFINISHED_COMMENT, buffer);
             break;
         default:
             buffer += ch;
+            readChar();
+        }
+    }
+    bool firstPossible = true;
+    while (true) {
+        switch (ch) {
+        case '*':
+            readChar();
+            if (ch == '/') {
+                readChar();
+                if (firstPossible)
+                    return token::Token(token::MULTILINE_COMMENT, buffer);
+                return token::Token(
+                    token::ERROR_MULTILINE_COMMENT_OUT_OF_BOUND,
+                    buffer
+                );
+            }
+            if (ch == EOF) {
+                return token::Token(token::ERROR_UNFINISHED_COMMENT, buffer);
+            }
+            readChar();
+            firstPossible = false;
+            break;
+        case EOF:
+            return token::Token(token::ERROR_UNFINISHED_COMMENT, buffer);
+            break;
+        default:
+            firstPossible = false;
             readChar();
         }
     }
@@ -410,8 +460,9 @@ token::Token Lexer::handleNumericUndefinedRepresentation(std::string& buffer){
 
 token::Token Lexer::handleString(){
     std::string buffer = "";
+    bool hasIncorrectBackSlash = false;
     readChar();
-    while (ch != '"' && ch !=EOF) {
+    while (ch != '"' && ch !=EOF && buffer.size() < STRING_MAX_SIZE) {
         if (ch == '\\') {
             readChar();
             switch (ch) {
@@ -421,6 +472,9 @@ token::Token Lexer::handleString(){
             case '"':
                 buffer += R"(")";
                 break;
+            case 'r':
+                buffer += '\r';
+                break;
             case 'n':
                 buffer += '\n';
                 break;
@@ -428,10 +482,9 @@ token::Token Lexer::handleString(){
                 buffer += '\t';
                 break;
             default:
-                return token::Token(
-                    token::ERROR_BACK_SLASH_STRING, "\"" + buffer + "\\"
-                );
-                buffer += ch;
+                buffer += '\\';
+                hasIncorrectBackSlash = true;
+                continue;
             }
             readChar();
             continue;
@@ -440,11 +493,27 @@ token::Token Lexer::handleString(){
         buffer += ch;
         readChar();
     }
-    if (ch=='"'){
+
+    if (ch=='"' && buffer.size() <= STRING_MAX_SIZE){
         readChar();
+        if (hasIncorrectBackSlash)
+            return token::Token(token::ERROR_BACK_SLASH_STRING, buffer);
         return token::Token(token::STRING, buffer);
     }
-    return token::Token(token::ERROR_UNFINISHED_STRING, "\"" + buffer);
+    if (ch==EOF && buffer.size() < STRING_MAX_SIZE){
+        return token::Token(token::ERROR_UNFINISHED_STRING, "" + buffer);
+    }
+
+    if (buffer.size() == STRING_MAX_SIZE) {
+        while (ch != '"' && ch !=EOF)
+            readChar();
+    }
+
+    if (ch=='"'){
+        readChar();
+        return token::Token(token::ERROR_STRING_OUT_OF_BOUND, buffer);
+    }
+    return token::Token(token::ERROR_UNFINISHED_STRING, "" + buffer);
 }
 
 } // namespace lexer
