@@ -107,7 +107,7 @@ std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
 }
 
 std::unique_ptr<Node> Parser::parseCastExpression() {
-    std::unique_ptr<Node> expression = parseIntegerLiteral();
+    std::unique_ptr<Node> expression = parsePrefixExpression();
     while (
         current.token.tokenType == token::LARROW
     ) {
@@ -117,6 +117,23 @@ std::unique_ptr<Node> Parser::parseCastExpression() {
             std::move(expression), std::move(type)
         );
     }
+    return expression;
+}
+
+std::unique_ptr<Node> Parser::parsePrefixExpression() {
+    std::unique_ptr<Node> expression;
+    if (
+        current.token.tokenType == token::BANG ||
+        current.token.tokenType == token::MINUS
+    ) {
+        token::TokenType op = current.token.tokenType;
+        readLex();
+        expression = parseIntegerLiteral();
+        return std::make_unique<PrefixExpression>(
+            op, std::move(expression)
+        );
+    }
+    expression = parseIntegerLiteral();
     return expression;
 }
 

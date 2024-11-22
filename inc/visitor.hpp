@@ -8,6 +8,7 @@ class RelationalExpression;
 class AdditiveExpression;
 class MultiplicativeExpression;
 class CastExpression;
+class PrefixExpression;
 class TypeSpecifier;
 class IntegerLiteral;
 
@@ -20,6 +21,7 @@ public:
     virtual void visit(AdditiveExpression&) = 0;
     virtual void visit(MultiplicativeExpression&) = 0;
     virtual void visit(CastExpression&) = 0;
+    virtual void visit(PrefixExpression&) = 0;
     virtual void visit(IntegerLiteral&) = 0;
     virtual void visit(TypeSpecifier&) = 0;
     virtual ~Visitor() = default;
@@ -37,6 +39,7 @@ public:
     void visit(MultiplicativeExpression &me) override;
     void visit(AdditiveExpression &ae) override;
     void visit(CastExpression &ce) override;
+    void visit(PrefixExpression &pe) override;
     void visit(TypeSpecifier &ts) override;
     void visit(IntegerLiteral &il) override;
 

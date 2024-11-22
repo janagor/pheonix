@@ -19,6 +19,7 @@ private:
     std::unique_ptr<Node> parseAdditiveExpression();
     std::unique_ptr<Node> parseMultiplicativeExpression();
     std::unique_ptr<Node> parseCastExpression();
+    std::unique_ptr<Node> parsePrefixExpression();
     std::unique_ptr<Node> parseTypeSpecifier();
     std::unique_ptr<Node> parseIntegerLiteral();
     void readLex();

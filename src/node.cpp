@@ -15,6 +15,9 @@ std::string opToString(const token::TokenType& tok) {
     case token::MINUS:
         return "-";
         break;
+    case token::BANG:
+        return "!";
+        break;
     case token::STAR:
         return "*";
         break;
@@ -57,7 +60,7 @@ std::string ComparisonExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string oper = opToString(op);
     return "(ComparisonExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[" + (oper)+
+    "," + s + "operator=[" + oper+
     "]," + s + "right=" + right->toString(shift_size + 1) + ")";
 }
 
@@ -65,7 +68,7 @@ std::string RelationalExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string oper = opToString(op);
     return "(RelationalExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[" + (oper)+
+    "," + s + "operator=[" + oper +
     "]," + s + "right=" + right->toString(shift_size + 1) + ")";
 }
 
@@ -90,6 +93,13 @@ std::string CastExpression::toString(const int shift_size) const  {
     return "(CastExpression:" + s + "expression=" +
     expression->toString(shift_size+1) + "," + s +
     "type=" + type->toString(shift_size+1) + ")";
+}
+
+std::string PrefixExpression::toString(const int shift_size) const  {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::string oper = opToString(op);
+    return "(PrefixExpression:" + s + "operator=[" + oper + "]," + s +
+    "expression=" + expression->toString(shift_size+1) + ")";
 }
 
 std::string TypeSpecifier::toString(const int shift_size) const {
@@ -127,6 +137,10 @@ void MultiplicativeExpression::accept(Visitor& v) {
 }
 
 void CastExpression::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void PrefixExpression::accept(Visitor& v) {
     v.visit(*this);
 }
 

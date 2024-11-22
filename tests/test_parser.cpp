@@ -70,6 +70,21 @@ const map<string, string> TRIVIAL_CASES {
     type=(TypeSpecifier:\n\
         value=bol))"
     },
+    // PrefixExpression
+    {
+"-2",
+"(PrefixExpression:\n\
+    operator=[-],\n\
+    expression=(IntegerLiteral:\n\
+        value=2))"
+    },
+    {
+"!2",
+"(PrefixExpression:\n\
+    operator=[!],\n\
+    expression=(IntegerLiteral:\n\
+        value=2))"
+    },
     // AdditiveExpression
     {
 "1+2",

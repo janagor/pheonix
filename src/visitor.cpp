@@ -25,6 +25,9 @@ void TreeGenVisitor::visit(AdditiveExpression &ae) {
 void TreeGenVisitor::visit(CastExpression &ce) {
     result += ce.toString(1);
 }
+void TreeGenVisitor::visit(PrefixExpression &pe) {
+    result += pe.toString(1);
+}
 void TreeGenVisitor::visit(TypeSpecifier &ts) {
     result += ts.toString(1);
 }
