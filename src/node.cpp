@@ -44,6 +44,18 @@ std::string opToString(const token::TokenType& tok) {
     }
 }
 
+std::string Program::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::string result = "(Program:" + s;
+    for (size_t i = 0; i < statements.size(); ++i) {
+        result += statements[i]->toString(shift_size + 1);
+        if (i!=statements.size()-1)
+            result += "," + s;
+    }
+    result += ")";
+    return result;
+}
+
 std::string VariableDeclaration::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(VariableDeclaration:" + s +
@@ -154,6 +166,10 @@ std::string IntegerLiteral::toString(const int shift_size) const {
     return "(IntegerLiteral:" + s +
     "value=" + std::to_string(value) +
     ")";
+}
+
+void Program::accept(Visitor& v) {
+    v.visit(*this);
 }
 
 void VariableDeclaration::accept(Visitor& v) {

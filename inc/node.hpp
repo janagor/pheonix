@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <vector>
 
 #include "token.hpp"
 #include "visitor.hpp"
@@ -12,6 +13,15 @@ struct Node {
     virtual ~Node() = default;
     virtual std::string toString(const int shift_size) const = 0;
     virtual void accept(Visitor& v) = 0;
+};
+
+struct Program: public Node {
+    std::vector<std::unique_ptr<Node>> statements;
+
+    Program(): Node() {};
+
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
 };
 
 struct VariableDeclaration: public Node {

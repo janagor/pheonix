@@ -6,10 +6,17 @@
 namespace parser {
 
 std::unique_ptr<Node> Parser::parseProgram() {
-    if ( current.token.tokenType == token::LET) {
-        return parseVariableDeclaration();
+    auto program = std::make_unique<Program>();
+    while ( current.token.tokenType != token::END_OF_FILE) {
+        if ( current.token.tokenType == token::LET) {
+            auto varDec = parseVariableDeclaration();
+            program->statements.push_back(std::move(varDec));
+            continue;
+        }
+        auto statement = parseStatement();
+        program->statements.push_back(std::move(statement));
     }
-    return parseStatement();
+        return program;
 }
 
 std::unique_ptr<Node> Parser::parseVariableDeclaration() {
