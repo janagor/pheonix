@@ -207,6 +207,15 @@ const map<string, string> TRIVIAL_CASES {
     expression=(IntegerLiteral:\n\
         value=123))"
     },
+    // ExpressionStatement
+    {
+"$a=123;",
+"(ExpressionStatement:\n\
+    expression=(AssignementExpression:\n\
+        identifier=a,\n\
+        expression=(IntegerLiteral:\n\
+            value=123)))"
+    },
 };
 void testTrivial(const string& input, const string& expected) {
     istringstream in(input);

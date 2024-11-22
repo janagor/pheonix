@@ -103,6 +103,14 @@ struct PrefixExpression: public Node {
     void accept(Visitor& v) override;
 };
 
+struct ExpressionStatement: public Node {
+    std::unique_ptr<Node> expression;
+    ExpressionStatement(std::unique_ptr<Node> e):
+        Node(), expression(std::move(e)){};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
 enum TypeName : int {
     ERROR = 0,
     STR,

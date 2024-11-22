@@ -44,6 +44,11 @@ std::string opToString(const token::TokenType& tok) {
     }
 }
 
+std::string ExpressionStatement::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(ExpressionStatement:" + s +
+    "expression=" + expression->toString(shift_size + 1) + ")";
+}
 std::string AssignementExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(AssignementExpression:" + s +
@@ -117,6 +122,10 @@ std::string TypeSpecifier::toString(const int shift_size) const {
 std::string IntegerLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(IntegerLiteral:" + s + "value=" + std::to_string(value) + ")";
+}
+
+void ExpressionStatement::accept(Visitor& v) {
+    v.visit(*this);
 }
 
 void AssignementExpression::accept(Visitor& v) {

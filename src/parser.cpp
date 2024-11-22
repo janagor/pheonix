@@ -5,6 +5,16 @@
 
 namespace parser {
 
+std::unique_ptr<Node> Parser::parseExpressionStatement() {
+    auto expression = parseExpression();
+    if ( current.token.tokenType == token::SEMICOLON) {
+        readLex();
+        return std::make_unique<ExpressionStatement>(std::move(expression));
+    }
+        return expression;
+
+}
+
 std::unique_ptr<Node> Parser::parseExpression() {
     if ( current.token.tokenType == token::DOLAR) {
         return parseAssignementExpression();
@@ -182,7 +192,7 @@ std::optional<std::unique_ptr<Node>> Parser::parse() {
     // std::unique_ptr<Node> root;
     // switch (current.token.tokenType) {
     //     case token::INTEGER:
-    return std::move(parseExpression());
+    return std::move(parseExpressionStatement());
     //         break;
     //     default:
     //         return std::nullopt;
