@@ -5,6 +5,13 @@
 
 namespace parser {
 
+std::unique_ptr<Node> Parser::parseProgram() {
+    return parseStatement();
+}
+
+std::unique_ptr<Node> Parser::parseStatement() {
+    return parseExpressionStatement();
+}
 std::unique_ptr<Node> Parser::parseExpressionStatement() {
     auto expression = parseExpression();
     if ( current.token.tokenType == token::SEMICOLON) {
@@ -189,15 +196,7 @@ std::unique_ptr<Node> Parser::generateParsingTree() {
 }
 
 std::optional<std::unique_ptr<Node>> Parser::parse() {
-    // std::unique_ptr<Node> root;
-    // switch (current.token.tokenType) {
-    //     case token::INTEGER:
-    return std::move(parseExpressionStatement());
-    //         break;
-    //     default:
-    //         return std::nullopt;
-    // }
-    // return std::nullopt;
+    return std::move(parseProgram());
 }
 
 void Parser::readLex() {
