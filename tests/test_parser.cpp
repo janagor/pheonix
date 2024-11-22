@@ -204,12 +204,13 @@ const map<string, string> TRIVIAL_CASES {
         expression=(IntegerLiteral:\n\
             value=123)))"
     },
-    // ExpressionStatement
+    // VariableDeclaration
     {
-"$a=123;",
-"(ExpressionStatement:\n\
-    expression=(AssignementExpression:\n\
-        identifier=a,\n\
+"let a = 123;",
+"(VariableDeclaration:\n\
+    isMutable=false,\n\
+    identifier=a,\n\
+    expression=(ExpressionStatement:\n\
         expression=(IntegerLiteral:\n\
             value=123)))"
     },

@@ -4,6 +4,9 @@
 std::string TreeGenVisitor::getResult() {
     return result;
 }
+void TreeGenVisitor::visit(VariableDeclaration &vd) {
+    result += vd.toString(1);
+}
 void TreeGenVisitor::visit(ExpressionStatement &es) {
     result += es.toString(1);
 }

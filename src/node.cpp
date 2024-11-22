@@ -44,84 +44,120 @@ std::string opToString(const token::TokenType& tok) {
     }
 }
 
+std::string VariableDeclaration::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(VariableDeclaration:" + s +
+    "isMutable=" + (isMutable ? "true" : "false") + "," +  s +
+    "identifier=" + identifier + "," + s +
+    "expression=" + expression->toString(shift_size + 1) +
+    ")";
+}
 std::string ExpressionStatement::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    return "(ExpressionStatement:" + s +
-    "expression=" + expression->toString(shift_size + 1) + ")";
+    return
+    "(ExpressionStatement:" + s +
+    "expression=" + expression->toString(shift_size + 1) +
+    ")";
 }
 std::string AssignementExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(AssignementExpression:" + s +
     "identifier=" + identifier + "," + s +
-    "expression=" + expression->toString(shift_size + 1) + ")";
+    "expression=" + expression->toString(shift_size + 1) +
+    ")";
 }
 
 std::string OrExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    return "(OrExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[||]," + s + "right=" + right->toString(shift_size + 1) + ")";
+    return "(OrExpression:" + s +
+    "left=" + left->toString(shift_size+1) + "," + s +
+    "operator=[||]," + s +
+    "right=" + right->toString(shift_size + 1) +
+    ")";
 }
 
 std::string AndExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    return "(AndExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[&&]," + s + "right=" + right->toString(shift_size + 1) + ")";
+    return "(AndExpression:" + s +
+    "left=" + left->toString(shift_size+1) + "," + s +
+    "operator=[&&]," + s +
+    "right=" + right->toString(shift_size + 1) +
+    ")";
 }
 
 std::string ComparisonExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string oper = opToString(op);
-    return "(ComparisonExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[" + oper+
-    "]," + s + "right=" + right->toString(shift_size + 1) + ")";
+    return "(ComparisonExpression:" + s +
+    "left=" + left->toString(shift_size+1) + "," + s +
+    "operator=[" + oper + "]," + s +
+    "right=" + right->toString(shift_size + 1) +
+    ")";
 }
 
 std::string RelationalExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string oper = opToString(op);
-    return "(RelationalExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[" + oper +
-    "]," + s + "right=" + right->toString(shift_size + 1) + ")";
+    return "(RelationalExpression:" + s +
+    "left=" + left->toString(shift_size+1) + "," + s +
+    "operator=[" + oper + "]," + s +
+    "right=" + right->toString(shift_size + 1) +
+    ")";
 }
 
 std::string MultiplicativeExpression::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string oper = opToString(op);
-    return "(MultiplicativeExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[" + oper +
-    "]," + s + "right=" + right->toString(shift_size + 1) + ")";
+    return "(MultiplicativeExpression:" + s +
+    "left=" + left->toString(shift_size+1) + "," + s +
+    "operator=[" + oper + "]," + s +
+    "right=" + right->toString(shift_size + 1) +
+    ")";
 }
 
 std::string AdditiveExpression::toString(const int shift_size) const  {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string oper = opToString(op);
-    return "(AdditiveExpression:" + s + "left=" + left->toString(shift_size+1) + 
-    "," + s + "operator=[" + oper +
-    "]," + s + "right=" + right->toString(shift_size + 1) + ")";
+    return "(AdditiveExpression:" + s +
+    "left=" + left->toString(shift_size+1) + "," + s +
+    "operator=[" + oper + "]," + s +
+    "right=" + right->toString(shift_size + 1) +
+    ")";
 }
 
 std::string CastExpression::toString(const int shift_size) const  {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    return "(CastExpression:" + s + "expression=" +
-    expression->toString(shift_size+1) + "," + s +
-    "type=" + type->toString(shift_size+1) + ")";
+    return "(CastExpression:" + s +
+    "expression=" + expression->toString(shift_size+1) + "," + s +
+    "type=" + type->toString(shift_size+1) +
+    ")";
 }
 
 std::string PrefixExpression::toString(const int shift_size) const  {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string oper = opToString(op);
-    return "(PrefixExpression:" + s + "operator=[" + oper + "]," + s +
-    "expression=" + expression->toString(shift_size+1) + ")";
+    return "(PrefixExpression:" + s +
+    "operator=[" + oper + "]," + s +
+    "expression=" + expression->toString(shift_size+1) +
+    ")";
 }
 
 std::string TypeSpecifier::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    return "(TypeSpecifier:" + s + "value=" + TypeToString.at(typeName) + ")";
+    return "(TypeSpecifier:" + s +
+    "value=" + TypeToString.at(typeName) +
+    ")";
 }
 
 std::string IntegerLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    return "(IntegerLiteral:" + s + "value=" + std::to_string(value) + ")";
+    return "(IntegerLiteral:" + s +
+    "value=" + std::to_string(value) +
+    ")";
+}
+
+void VariableDeclaration::accept(Visitor& v) {
+    v.visit(*this);
 }
 
 void ExpressionStatement::accept(Visitor& v) {

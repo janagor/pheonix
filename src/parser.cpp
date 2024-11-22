@@ -6,12 +6,34 @@
 namespace parser {
 
 std::unique_ptr<Node> Parser::parseProgram() {
+    if ( current.token.tokenType == token::LET) {
+        return parseVariableDeclaration();
+    }
     return parseStatement();
 }
+
+std::unique_ptr<Node> Parser::parseVariableDeclaration() {
+    assert(current.token.tokenType==token::TokenType::LET);
+    readLex();
+    bool isMutable = false;
+    if ( current.token.tokenType == token::MUT) {
+        isMutable = true;
+        readLex();
+    }
+    assert(current.token.tokenType==token::TokenType::IDENTIFIER);
+    std::string identifier = std::get<std::string>(*current.token.value);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::ASSIGN);
+    readLex();
+    auto expression = parseExpressionStatement();
+    return std::make_unique<VariableDeclaration>(isMutable, identifier, std::move(expression));
+}
+
 
 std::unique_ptr<Node> Parser::parseStatement() {
     return parseExpressionStatement();
 }
+
 std::unique_ptr<Node> Parser::parseExpressionStatement() {
     auto expression = parseExpression();
     if ( current.token.tokenType == token::SEMICOLON) {
