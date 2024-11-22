@@ -246,6 +246,22 @@ const map<string, string> TRIVIAL_CASES {
             expression=(IntegerLiteral:\n\
                 value=123))))"
     },
+    // WhileLoopStatement
+    {
+"while(1==1) { 1; }",
+"(Program:\n\
+    (WhileLoopStatement:\n\
+        expression=(ComparisonExpression:\n\
+            left=(IntegerLiteral:\n\
+                value=1),\n\
+            operator=[==],\n\
+            right=(IntegerLiteral:\n\
+                value=1)),\n\
+        statements=(\n\
+            (ExpressionStatement:\n\
+                expression=(IntegerLiteral:\n\
+                    value=1)))))"
+    },
 };
 
 TEST(TestParser, testTrivialCases) {

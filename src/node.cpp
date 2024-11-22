@@ -56,6 +56,20 @@ std::string Program::toString(const int shift_size=1) const {
     return result;
 }
 
+std::string WhileLoopStatement::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::string result = "(WhileLoopStatement:" + s + 
+    "expression=" + expression->toString(shift_size + 1) + "," + s +
+    "statements=(" + s + "    ";
+    for (size_t i = 0; i < statements.size(); ++i) {
+        result += statements[i]->toString(shift_size + 2);
+        if (i!=statements.size()-1)
+            result += "," + s;
+    }
+    result += "))";
+    return result;
+}
+
 std::string VariableDeclaration::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(VariableDeclaration:" + s +
@@ -173,6 +187,10 @@ void Program::accept(Visitor& v) {
 }
 
 void VariableDeclaration::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void WhileLoopStatement::accept(Visitor& v) {
     v.visit(*this);
 }
 

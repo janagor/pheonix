@@ -28,9 +28,20 @@ struct VariableDeclaration: public Node {
     bool isMutable;
     std::string identifier;
     std::unique_ptr<Node> expression;
-    
+
     VariableDeclaration(bool isMut, std::string i, std::unique_ptr<Node> e):
         Node(), isMutable(isMut), identifier(i), expression(std::move(e)) {};
+
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
+struct WhileLoopStatement: public Node {
+    std::unique_ptr<Node> expression;
+    std::vector<std::unique_ptr<Node>> statements;
+
+    WhileLoopStatement(std::unique_ptr<Node> e):
+        Node(), expression(std::move(e)) {};
 
     std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;

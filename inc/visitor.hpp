@@ -3,6 +3,7 @@
 #include <iostream>
 class Program;
 class VariableDeclaration;
+class WhileLoopStatement;
 class ExpressionStatement;
 class AssignementExpression;
 class OrExpression;
@@ -20,6 +21,7 @@ class Visitor {
 public:
     virtual void visit(Program&) = 0;
     virtual void visit(VariableDeclaration&) = 0;
+    virtual void visit(WhileLoopStatement&) = 0;
     virtual void visit(ExpressionStatement&) = 0;
     virtual void visit(AssignementExpression&) = 0;
     virtual void visit(OrExpression&) = 0;
@@ -42,6 +44,7 @@ public:
 
     void visit(Program &p) override;
     void visit(VariableDeclaration &vd) override;
+    void visit(WhileLoopStatement &wls) override;
     void visit(ExpressionStatement &es) override;
     void visit(AssignementExpression &ae) override;
     void visit(OrExpression &oe) override;

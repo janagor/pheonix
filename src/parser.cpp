@@ -8,15 +8,22 @@ namespace parser {
 std::unique_ptr<Node> Parser::parseProgram() {
     auto program = std::make_unique<Program>();
     while ( current.token.tokenType != token::END_OF_FILE) {
-        if ( current.token.tokenType == token::LET) {
-            auto varDec = parseVariableDeclaration();
-            program->statements.push_back(std::move(varDec));
-            continue;
+        std::unique_ptr<Node> node;
+        switch (current.token.tokenType) {
+        case token::LET:
+            node = parseVariableDeclaration();
+            program->statements.push_back(std::move(node));
+            break;
+        case token::WHILE:
+            node = parseWhileLoopStatement();
+            program->statements.push_back(std::move(node));
+            break;
+        default:
+            node = parseStatement();
+            program->statements.push_back(std::move(node));
         }
-        auto statement = parseStatement();
-        program->statements.push_back(std::move(statement));
     }
-        return program;
+    return program;
 }
 
 std::unique_ptr<Node> Parser::parseVariableDeclaration() {
@@ -36,6 +43,25 @@ std::unique_ptr<Node> Parser::parseVariableDeclaration() {
     return std::make_unique<VariableDeclaration>(isMutable, identifier, std::move(expression));
 }
 
+std::unique_ptr<Node> Parser::parseWhileLoopStatement() {
+    assert(current.token.tokenType==token::TokenType::WHILE);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::LPARENT);
+    readLex();
+    auto expression = parseExpression();
+    auto whileLoopStmt = std::make_unique<WhileLoopStatement>(std::move(expression));
+    assert(current.token.tokenType==token::TokenType::RPARENT);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::LBRACE);
+    readLex();
+    while ( current.token.tokenType != token::RBRACE) {
+        auto statement = parseStatement();
+        whileLoopStmt->statements.push_back(std::move(statement));
+    }
+    assert(current.token.tokenType==token::TokenType::RBRACE);
+    readLex();
+    return whileLoopStmt;
+}
 
 std::unique_ptr<Node> Parser::parseStatement() {
     return parseExpressionStatement();
