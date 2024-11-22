@@ -12,6 +12,7 @@ namespace parser {
 struct Parser {
 private:
     std::unique_ptr<Node> parseExpression();
+    std::unique_ptr<Node> parseAssignementExpression();
     std::unique_ptr<Node> parseOrExpression();
     std::unique_ptr<Node> parseAndExpression();
     std::unique_ptr<Node> parseComparisonExpression();

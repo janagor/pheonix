@@ -14,6 +14,17 @@ struct Node {
     virtual void accept(Visitor& v) = 0;
 };
 
+struct AssignementExpression: public Node {
+    std::string identifier;
+    std::unique_ptr<Node> expression;
+    
+    AssignementExpression(std::string i, std::unique_ptr<Node> e):
+        Node(), identifier(i), expression(std::move(e)) {};
+
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
 struct OrExpression: public Node {
     std::unique_ptr<Node> left;
     std::unique_ptr<Node> right;

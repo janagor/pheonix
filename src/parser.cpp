@@ -6,7 +6,23 @@
 namespace parser {
 
 std::unique_ptr<Node> Parser::parseExpression() {
+    if ( current.token.tokenType == token::DOLAR) {
+        return parseAssignementExpression();
+    }
     return parseOrExpression();
+}
+
+std::unique_ptr<Node> Parser::parseAssignementExpression() {
+    readLex();
+    assert(current.token.tokenType==token::TokenType::IDENTIFIER);
+    std::string identifier = std::get<std::string>(*current.token.value);
+    readLex();
+    readLex();
+    assert(current.token.tokenType==token::TokenType::INTEGER);
+    auto expression = parseOrExpression();
+    return std::make_unique<AssignementExpression>(
+        identifier, std::move(expression)
+    );
 }
 
 std::unique_ptr<Node> Parser::parseOrExpression() {
@@ -23,6 +39,7 @@ std::unique_ptr<Node> Parser::parseOrExpression() {
     }
     return left;
 }
+
 std::unique_ptr<Node> Parser::parseAndExpression() {
     auto left = parseComparisonExpression();
     while (
@@ -149,7 +166,7 @@ std::unique_ptr<Node> Parser::parseTypeSpecifier() {
 }
 
 std::unique_ptr<Node> Parser::parseIntegerLiteral() {
-    int val = static_cast<int>(std::get<int>(*current.token.value));
+    int val =std::get<int>(*current.token.value);
     readLex();
     return std::make_unique<IntegerLiteral>(val);
 }
