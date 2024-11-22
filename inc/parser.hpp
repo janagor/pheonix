@@ -18,6 +18,8 @@ private:
     std::unique_ptr<Node> parseRelationalExpression();
     std::unique_ptr<Node> parseAdditiveExpression();
     std::unique_ptr<Node> parseMultiplicativeExpression();
+    std::unique_ptr<Node> parseCastExpression();
+    std::unique_ptr<Node> parseTypeSpecifier();
     std::unique_ptr<Node> parseIntegerLiteral();
     void readLex();
 
@@ -31,7 +33,6 @@ public:
 private:
     lexer::Lexer lexer;
     lexer::Lexem current;
-    // lexer::Lexem peek;
 };
 
 } // namespace parser

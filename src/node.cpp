@@ -85,6 +85,18 @@ std::string AdditiveExpression::toString(const int shift_size) const  {
     "]," + s + "right=" + right->toString(shift_size + 1) + ")";
 }
 
+std::string CastExpression::toString(const int shift_size) const  {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(CastExpression:" + s + "expression=" +
+    expression->toString(shift_size+1) + "," + s +
+    "type=" + type->toString(shift_size+1) + ")";
+}
+
+std::string TypeSpecifier::toString(const int shift_size) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(TypeSpecifier:" + s + "value=" + TypeToString.at(typeName) + ")";
+}
+
 std::string IntegerLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(IntegerLiteral:" + s + "value=" + std::to_string(value) + ")";
@@ -111,6 +123,14 @@ void AdditiveExpression::accept(Visitor& v) {
 }
 
 void MultiplicativeExpression::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void CastExpression::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void TypeSpecifier::accept(Visitor& v) {
     v.visit(*this);
 }
 

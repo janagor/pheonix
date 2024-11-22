@@ -90,7 +90,7 @@ std::unique_ptr<Node> Parser::parseAdditiveExpression() {
 } 
 
 std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
-    std::unique_ptr<Node> left = parseIntegerLiteral();
+    std::unique_ptr<Node> left = parseCastExpression();
     while (
         current.token.tokenType == token::STAR
         || current.token.tokenType == token::SLASH
@@ -98,12 +98,37 @@ std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
     ) {
         token::TokenType op = current.token.tokenType;
         readLex();
-        std::unique_ptr<Node> right = parseIntegerLiteral();
+        std::unique_ptr<Node> right = parseCastExpression();
         return std::make_unique<MultiplicativeExpression>(
             std::move(left), std::move(right), op
         );
     }
     return left;
+}
+
+std::unique_ptr<Node> Parser::parseCastExpression() {
+    std::unique_ptr<Node> expression = parseIntegerLiteral();
+    while (
+        current.token.tokenType == token::LARROW
+    ) {
+        readLex();
+        std::unique_ptr<Node> type = parseTypeSpecifier();
+        return std::make_unique<CastExpression>(
+            std::move(expression), std::move(type)
+        );
+    }
+    return expression;
+}
+
+std::unique_ptr<Node> Parser::parseTypeSpecifier() {
+    // TypeName::iterator type = TokenToType.at(current.token.tokenType);
+    auto type = TokenToType.find(current.token.tokenType);
+    if(type != TokenToType.end()) {
+        readLex();
+        return std::make_unique<TypeSpecifier>(type->second);
+    }
+    // TODO: ERROR HANDLING
+    return std::make_unique<TypeSpecifier>(token::TokenType::STR);
 }
 
 std::unique_ptr<Node> Parser::parseIntegerLiteral() {

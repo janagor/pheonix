@@ -7,12 +7,70 @@ using namespace token;
 using namespace lexer;
 using namespace parser;
 
-const map<string, string> trivialCases {
+const map<string, string> TRIVIAL_CASES {
+    //IntegerLiteral
     {
 "1",
 "(IntegerLiteral:\n\
     value=1)"
     },
+    //TypeSpecifier
+    /*
+    {
+"str",
+"(TypeSpecifier:\n\
+    value=str)"
+    },
+    {
+"int",
+"(TypeSpecifier:\n\
+    value=int)"
+    },
+    {
+"flt",
+"(TypeSpecifier:\n\
+    value=flt)"
+    },
+    {
+"bol",
+"(TypeSpecifier:\n\
+    value=bol)"
+    },
+    */
+    // CastExpression
+    {
+"1<-int",
+"(CastExpression:\n\
+    expression=(IntegerLiteral:\n\
+        value=1),\n\
+    type=(TypeSpecifier:\n\
+        value=int))"
+    },
+    {
+"1<-str",
+"(CastExpression:\n\
+    expression=(IntegerLiteral:\n\
+        value=1),\n\
+    type=(TypeSpecifier:\n\
+        value=str))"
+    },
+    {
+"1<-flt",
+"(CastExpression:\n\
+    expression=(IntegerLiteral:\n\
+        value=1),\n\
+    type=(TypeSpecifier:\n\
+        value=flt))"
+    },
+    {
+"1<-bol",
+"(CastExpression:\n\
+    expression=(IntegerLiteral:\n\
+        value=1),\n\
+    type=(TypeSpecifier:\n\
+        value=bol))"
+    },
+    // AdditiveExpression
     {
 "1+2",
 "(AdditiveExpression:\n\
@@ -31,6 +89,7 @@ const map<string, string> trivialCases {
     right=(IntegerLiteral:\n\
         value=100))"
     },
+    // MultipliveExpression
     {
 "9*123",
 "(MultiplicativeExpression:\n\
@@ -49,6 +108,7 @@ const map<string, string> trivialCases {
     right=(IntegerLiteral:\n\
         value=123))"
     },
+    // RelationalExpression
     {
 "9<123",
 "(RelationalExpression:\n\
@@ -85,6 +145,7 @@ const map<string, string> trivialCases {
     right=(IntegerLiteral:\n\
         value=123))"
     },
+    // ComparisonExpression
     {
 "9==123",
 "(ComparisonExpression:\n\
@@ -103,6 +164,7 @@ const map<string, string> trivialCases {
     right=(IntegerLiteral:\n\
         value=123))"
     },
+    // AndExpression
     {
 "9&&123",
 "(AndExpression:\n\
@@ -112,6 +174,7 @@ const map<string, string> trivialCases {
     right=(IntegerLiteral:\n\
         value=123))"
     },
+    // OrExpression
     {
 "9||123",
 "(OrExpression:\n\
@@ -133,7 +196,7 @@ void testTrivial(const string& input, const string& expected) {
 }
 
 TEST(TestParser, testTrivialCases) {
-    for (const auto& [i, e] : trivialCases) {
+    for (const auto& [i, e] : TRIVIAL_CASES) {
         testTrivial(i, e);
     }
 }

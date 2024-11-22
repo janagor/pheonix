@@ -107,6 +107,7 @@ const std::map<TokenType, std::string> TokenTypeToLiteral {
     { PLUS,"PLUS" },
     { MINUS,"MINUS" },
     { STAR,"STAR" },
+    { SLASH,"SLASH" },
     { PERCENT,"PERCENT" },
     { HASH,"HASH" },
     { DOLAR,"DOLAR" },
