@@ -262,6 +262,15 @@ const map<string, string> TRIVIAL_CASES {
                 expression=(IntegerLiteral:\n\
                     value=1)))))"
     },
+    // ReturnStatement
+    {
+"return 123;",
+"(Program:\n\
+    (ReturnStatement:\n\
+        expression=(ExpressionStatement:\n\
+            expression=(IntegerLiteral:\n\
+                value=123))))"
+    },
 };
 
 TEST(TestParser, testTrivialCases) {

@@ -55,7 +55,7 @@ std::string Program::toString(const int shift_size=1) const {
     result += ")";
     return result;
 }
-
+// statements
 std::string WhileLoopStatement::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string result = "(WhileLoopStatement:" + s + 
@@ -78,6 +78,15 @@ std::string VariableDeclaration::toString(const int shift_size=1) const {
     "expression=" + expression->toString(shift_size + 1) +
     ")";
 }
+
+std::string ReturnStatement::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return
+    "(ReturnStatement:" + s +
+    "expression=" + expression->toString(shift_size + 1) +
+    ")";
+}
+
 std::string ExpressionStatement::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return
@@ -85,6 +94,7 @@ std::string ExpressionStatement::toString(const int shift_size=1) const {
     "expression=" + expression->toString(shift_size + 1) +
     ")";
 }
+// expression
 std::string AssignementExpression::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(AssignementExpression:" + s +
@@ -191,6 +201,10 @@ void VariableDeclaration::accept(Visitor& v) {
 }
 
 void WhileLoopStatement::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void ReturnStatement::accept(Visitor& v) {
     v.visit(*this);
 }
 

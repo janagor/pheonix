@@ -13,6 +13,9 @@ void TreeGenVisitor::visit(VariableDeclaration &vd) {
 void TreeGenVisitor::visit(WhileLoopStatement &wls) {
     result += wls.toString(1);
 }
+void TreeGenVisitor::visit(ReturnStatement &rs) {
+    result += rs.toString(1);
+}
 void TreeGenVisitor::visit(ExpressionStatement &es) {
     result += es.toString(1);
 }

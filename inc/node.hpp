@@ -24,6 +24,7 @@ struct Program: public Node {
     void accept(Visitor& v) override;
 };
 
+// Statements
 struct VariableDeclaration: public Node {
     bool isMutable;
     std::string identifier;
@@ -47,6 +48,22 @@ struct WhileLoopStatement: public Node {
     void accept(Visitor& v) override;
 };
 
+struct ReturnStatement: public Node {
+    std::unique_ptr<Node> expression;
+    ReturnStatement(std::unique_ptr<Node> e):
+        Node(), expression(std::move(e)){};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
+struct ExpressionStatement: public Node {
+    std::unique_ptr<Node> expression;
+    ExpressionStatement(std::unique_ptr<Node> e):
+        Node(), expression(std::move(e)){};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+// Expressions
 struct AssignementExpression: public Node {
     std::string identifier;
     std::unique_ptr<Node> expression;
@@ -132,14 +149,6 @@ struct PrefixExpression: public Node {
     std::unique_ptr<Node> expression;
     PrefixExpression(token::TokenType o, std::unique_ptr<Node> e):
         Node(), op(o), expression(std::move(e)){};
-    std::string toString(const int shift_size) const override;
-    void accept(Visitor& v) override;
-};
-
-struct ExpressionStatement: public Node {
-    std::unique_ptr<Node> expression;
-    ExpressionStatement(std::unique_ptr<Node> e):
-        Node(), expression(std::move(e)){};
     std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;
 };

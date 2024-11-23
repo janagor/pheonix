@@ -18,12 +18,20 @@ std::unique_ptr<Node> Parser::parseProgram() {
             node = parseWhileLoopStatement();
             program->statements.push_back(std::move(node));
             break;
+        case token::RETURN:
+            node = parseReturnStatement();
+            program->statements.push_back(std::move(node));
+            break;
         default:
-            node = parseStatement();
+            node = parseExpressionStatement();
             program->statements.push_back(std::move(node));
         }
     }
     return program;
+}
+
+std::unique_ptr<Node> Parser::parseStatement() {
+    return parseExpressionStatement();
 }
 
 std::unique_ptr<Node> Parser::parseVariableDeclaration() {
@@ -63,8 +71,11 @@ std::unique_ptr<Node> Parser::parseWhileLoopStatement() {
     return whileLoopStmt;
 }
 
-std::unique_ptr<Node> Parser::parseStatement() {
-    return parseExpressionStatement();
+std::unique_ptr<Node> Parser::parseReturnStatement() {
+    assert(current.token.tokenType==token::TokenType::RETURN);
+    readLex();
+    auto expression = parseExpressionStatement();
+    return std::make_unique<ReturnStatement>(std::move(expression));
 }
 
 std::unique_ptr<Node> Parser::parseExpressionStatement() {
