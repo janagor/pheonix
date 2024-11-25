@@ -1,7 +1,9 @@
 #include "lexer.hpp"
 #include <string>
+#include <stdexcept>
 #include <cassert>
 #include <cstdlib>
+#include <cmath>
 
 namespace lexer {
 
@@ -215,7 +217,7 @@ Lexem Lexer::tryLiteralOrNotAToken() {
         return Lexem {token::Token(token::NOT_A_TOKEN, val), sline, scolumn};
     }
     if (isdigit(ch)) {
-        token = handleNumber();
+        token = handleNumber(sline, scolumn);
         return Lexem{token, sline, scolumn};
     }
     token = handleIdentifier();
@@ -402,83 +404,45 @@ token::Token Lexer::handleIdentifier(){
     return token::Token(token::IDENTIFIER, buffer);
 }
 
-token::Token Lexer::handleNumber(){
+token::Token Lexer::handleNumber(size_t row, size_t column){
     std::string buffer = "";
     buffer += ch;
+    long integerPart = static_cast<long>(ch - '0');
     readChar();
-
-    while (isdigit(ch) && buffer.size() < NUMERIC_MAX_SIZE) {
+    while (isdigit(ch) && integerPart <= std::numeric_limits<int>::max()) {
+        integerPart = 10*integerPart + static_cast<long>(ch - '0');
         buffer += ch;
         readChar();
     }
-    if (ch == '.')
-        return handleFloat(buffer);
-
-    if (isalpha(ch) || ch == '_')
-        return handleNumericUndefinedRepresentation(buffer);
-
-    if (buffer.size() == NUMERIC_MAX_SIZE) {
-        while (isdigit(ch)) {
-            readChar();
-        }
-        if (ch == '.')
-            return handleFloat(buffer);
-
-        if (isalnum(ch) || ch == '_')
-            return handleNumericUndefinedRepresentation(buffer);
-        return token::Token(token::ERROR_INTEGER_OUT_OF_BOUND, buffer);
+    if (ch == '.') {
+        readChar();
+        return handleFloat(row, column, integerPart);
     }
+    if (integerPart > std::numeric_limits<int>::max())
+        throw LexerException("Integer literal out of range.", row, column);
+    if (isalpha(ch))
+        throw LexerException("Undefined value", row, column);
 
-    try {
-        // NOTE: it is expected that std::numeric_limit::<int>lowest() is not
-        // achievable
-        return token::Token(token::INTEGER, stoi(buffer));
-    } catch (const std::out_of_range& e) {
-        return token::Token(token::ERROR_INTEGER_OUT_OF_BOUND, buffer);
-    }
+    return token::Token(token::INTEGER, static_cast<int>(integerPart));
 }
 
-token::Token Lexer::handleFloat(std::string& buffer){
-    if (buffer.size() < NUMERIC_MAX_SIZE) {
-        buffer += ch;
-        readChar();
-    } else {
-        readChar();
-    }
+token::Token Lexer::handleFloat(size_t row, size_t column, long intPart){
+    std::string buffer = "";
+    int fractionalPart = 0;
+    int length = 0;
 
-    while (isdigit(ch) && buffer.size() < NUMERIC_MAX_SIZE) {
-        buffer += ch;
-        readChar();
-    }
-    if (isalpha(ch) || ch == '_')
-        return handleNumericUndefinedRepresentation(buffer);
-
-    if (buffer.size() == NUMERIC_MAX_SIZE) {
-        while (isdigit(ch)) {
-            readChar();
-        }
-        if (isalpha(ch) || ch == '_')
-            return handleNumericUndefinedRepresentation(buffer);
-        return token::Token(token::ERROR_FLOAT_OUT_OF_BOUND, buffer);
-    }
-
-    try {
-        return token::Token(token::FLOAT, stod(buffer));
-    } catch (const std::out_of_range& e) {
-        return token::Token(token::ERROR_FLOAT_OUT_OF_BOUND, buffer);
-    }
-}
-
-token::Token Lexer::handleNumericUndefinedRepresentation(std::string& buffer){
-    while ((isalnum(ch) || ch == '_') && buffer.size() < NUMERIC_MAX_SIZE) {
+    while (isdigit(ch) && fractionalPart <= std::numeric_limits<int>::max()) {
+        fractionalPart = 10*fractionalPart + static_cast<long>(ch - '0');
+        ++length;
         buffer += ch;
         readChar();
     }
-    if (buffer.size() == NUMERIC_MAX_SIZE) {
-        while (isalnum(ch) || ch == '_')
-            readChar();
-    }
-    return token::Token(token::ERROR_NUMBER_UNDEFINED_REPRESENTATION, buffer);
+    if (isalpha(ch))
+        throw LexerException("Undefined value", row, column);
+
+    double result = static_cast<double>(intPart) +
+    static_cast<double>(fractionalPart) * std::pow(10., static_cast<double>(-length));
+    return token::Token(token::FLOAT, result);
 }
 
 token::Token Lexer::handleString(){

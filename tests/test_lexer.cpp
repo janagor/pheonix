@@ -11,7 +11,7 @@ using namespace std;
 using namespace token;
 using namespace lexer;
 
-// helper
+// helpers
 void compareLexemVectors(const vector<Lexem>& expected, const vector<Lexem>& received) {
     EXPECT_EQ(expected.size(), received.size());
 
@@ -30,7 +30,21 @@ std::vector<Lexem> lexerize(Lexer& lexer) {
     }
 }
 
-// input
+// tests
+TEST(TestLexer, testEmptyInput) {
+    string input = R"()";
+    vector<Lexem> expected {
+        {Token(END_OF_FILE), 1, 1},
+    };
+    istringstream in(input);
+    Lexer l(in);
+    vector<Lexem> result = lexerize(l);
+
+    EXPECT_EQ(expected.size(), result.size());
+
+    compareLexemVectors(expected, result);
+}
+
 const map<const string, const Token> SPECIAL_CHARS_AND_KEYWORDS {
     { "=", Token(ASSIGN) },
     { "!", Token(BANG) },
@@ -69,6 +83,25 @@ const map<const string, const Token> SPECIAL_CHARS_AND_KEYWORDS {
     { "false", Token(FALSE) },
 };
 
+TEST(TestLexer, specialCharsAndKeywords) {
+    for (const auto& [key, value] : SPECIAL_CHARS_AND_KEYWORDS) {
+        string input = key;
+        // NOTE: first character is at the indexes (1, 1)
+        size_t shift = input.length() + 1;
+        vector<Lexem> expected {
+            {value, 1, 1},
+            {Token(END_OF_FILE), 1, shift},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = lexerize(l);
+
+        EXPECT_EQ(expected.size(), result.size());
+
+        compareLexemVectors(expected, result);
+    }
+}
+
 const map<string, Token> ONE_LINE_COMMENTS {
     { R"(//)", Token(ONE_LINE_COMMENT, "//") },
     { R"(//aa)", Token(ONE_LINE_COMMENT, "//aa") },
@@ -83,7 +116,9 @@ const map<string, Token> ONE_LINE_COMMENTS {
         "//" + string(COMMENT_MAX_SIZE - 2, 'a'),
         Token(ONE_LINE_COMMENT,  "//" + string(COMMENT_MAX_SIZE - 2, 'a'))
     },
-    //errors
+};
+
+const map<string, Token> ONE_LINE_COMMENTS_ERRORS {
     {
         "//" + string(COMMENT_MAX_SIZE, 'a'),
         Token(
@@ -99,6 +134,24 @@ const map<string, Token> ONE_LINE_COMMENTS {
         )
     },
 };
+
+TEST(TestLexer, testOneLineComments) {
+    for (const auto& [key, value] : ONE_LINE_COMMENTS) {
+        string input = key;
+        size_t shift = input.length() + 1;
+        vector<Lexem> expected {
+            {value, 1, 1},
+            {Token(END_OF_FILE), 1, shift},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = lexerize(l);
+
+        EXPECT_EQ(expected.size(), result.size());
+
+        compareLexemVectors(expected, result);
+    }
+}
 
 const map<string, Token> MULTILINE_COMMENTS {
     { R"(/**/)", Token(MULTILINE_COMMENT, "//") },
@@ -117,7 +170,9 @@ const map<string, Token> MULTILINE_COMMENTS {
             "/*" + string(COMMENT_MAX_SIZE - 4, 'a') + "*/"
         )
     },
-    //errors
+};
+
+const map<string, Token> MULTILINE_COMMENTS_ERRORS {
     {
         "//" + string(COMMENT_MAX_SIZE, 'a'),
         Token(
@@ -149,6 +204,9 @@ const map<const string, const Token> STRINGS {
         "\"" + string(STRING_MAX_SIZE, 'a') + "\"",
         Token(STRING, string(STRING_MAX_SIZE, 'a'))
     },
+};
+
+const map<const string, const Token> STRINGS_ERRORS {
     // errors
     { R"("\")", Token(ERROR_UNFINISHED_STRING, R"(")")  },
     { R"("\t)", Token(ERROR_UNFINISHED_STRING, "\t")  },
@@ -179,7 +237,9 @@ const map<const string, const Token> IDENTIFIERS {
         string(IDENTIFIER_MAX_SIZE - 1, 'a'),
         Token(IDENTIFIER, string(IDENTIFIER_MAX_SIZE - 1, 'a'))
     },
-    // errors
+};
+
+const map<const string, const Token> IDENTIFIERS_ERRORS {
     {
         string(IDENTIFIER_MAX_SIZE + 1, 'a'),
         Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
@@ -193,143 +253,6 @@ const map<const string, const Token> IDENTIFIERS {
         Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
     },
 };
-
-const map<const string, const Token> INTEGERS {
-    { "0", Token(INTEGER, 0) },
-    { "1", Token(INTEGER, 1) },
-    { "213", Token(INTEGER, 213) },
-    {
-        to_string(numeric_limits<int>::max()),
-        Token(INTEGER, numeric_limits<int>::max())
-    },
-    // errors
-    {
-        string(NUMERIC_MAX_SIZE, '1'),
-        Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1'))
-    },
-    {
-        to_string(static_cast<long>(numeric_limits<int>::max()) + 1),
-       Token(
-            ERROR_INTEGER_OUT_OF_BOUND,
-            to_string(static_cast<long>(numeric_limits<int>::max()) + 1)
-        )
-    },
-    {
-        string(NUMERIC_MAX_SIZE+1, '1'),
-        Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1'))
-    },
-    {
-        string("33333" + NUMERIC_MAX_SIZE*2, '1'),
-        Token(
-            ERROR_INTEGER_OUT_OF_BOUND,
-            "33333" + string((NUMERIC_MAX_SIZE-5), '1')
-        )
-    },
-    {
-        string(NUMERIC_MAX_SIZE+10000, '1') + "cniewfiqwndqeu2398rq______",
-        Token(ERROR_NUMBER_UNDEFINED_REPRESENTATION, string(NUMERIC_MAX_SIZE, '1'))
-    },
-};
-
-const map<const string, const Token> FLOATS {
-    { "0.", Token(FLOAT, stod("0.")) },
-    { "1.", Token(FLOAT, stod("1.")) },
-    { "213.", Token(FLOAT, stod("213.")) },
-    {
-        to_string(numeric_limits<double>::max()),
-        Token(FLOAT, stod(to_string(numeric_limits<double>::max())))
-    },
-    // errors
-    {
-        "1." + string(NUMERIC_MAX_SIZE, '1'),
-        Token(ERROR_FLOAT_OUT_OF_BOUND, "1." + string(NUMERIC_MAX_SIZE-2, '1'))
-    },
-    {
-        "0." + string(NUMERIC_MAX_SIZE +200, '1'),
-        Token(ERROR_FLOAT_OUT_OF_BOUND, "0." + string(NUMERIC_MAX_SIZE-2, '1'))
-    },
-    {
-        string(NUMERIC_MAX_SIZE*100, '1') + "." + string(NUMERIC_MAX_SIZE*100, '1'),
-        Token(
-            ERROR_FLOAT_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1')
-        )
-    },
-};
-
-const vector<string> NEW_LINE_CHARACTERS { "\n", "\r", "\r\n", };
-
-const vector<string> NEW_LINE_CHARACTERS_WITH_SOMETHING_AFTER { "\na", "\ra", "\r\na", };
-
-const vector<string> NOT_A_TOKENS { ".", "`", "~", "|", "@", "^", "&", "?", "\\" };
-
-// tests cases
-TEST(TestLexer, testEmptyInput) {
-    string input = R"()";
-    vector<Lexem> expected {
-        {Token(END_OF_FILE), 1, 1},
-    };
-    istringstream in(input);
-    Lexer l(in);
-    vector<Lexem> result = lexerize(l);
-
-    EXPECT_EQ(expected.size(), result.size());
-
-    compareLexemVectors(expected, result);
-}
-
-TEST(TestLexer, specialCharsAndKeywords) {
-    for (const auto& [key, value] : SPECIAL_CHARS_AND_KEYWORDS) {
-        string input = key;
-        // NOTE: first character is at the indexes (1, 1)
-        size_t shift = input.length() + 1;
-        vector<Lexem> expected {
-            {value, 1, 1},
-            {Token(END_OF_FILE), 1, shift},
-        };
-        istringstream in(input);
-        Lexer l(in);
-        vector<Lexem> result = lexerize(l);
-
-        EXPECT_EQ(expected.size(), result.size());
-
-        compareLexemVectors(expected, result);
-    }
-}
-
-TEST(TestLexer, testOneLineComments) {
-    for (const auto& [key, value] : ONE_LINE_COMMENTS) {
-        string input = key;
-        size_t shift = input.length() + 1;
-        vector<Lexem> expected {
-            {value, 1, 1},
-            {Token(END_OF_FILE), 1, shift},
-        };
-        istringstream in(input);
-        Lexer l(in);
-        vector<Lexem> result = lexerize(l);
-
-        EXPECT_EQ(expected.size(), result.size());
-
-        compareLexemVectors(expected, result);
-    }
-}
-
-
-TEST(TestLexer, testStrings) {
-    for (const auto& [key, value] : STRINGS) {
-        string input = key;
-        size_t shift = input.length() + 1;
-        vector<Lexem> expected {
-            {value, 1, 1},
-            {Token(END_OF_FILE), 1, shift},
-        };
-        istringstream in(input);
-        Lexer l(in);
-        vector<Lexem> result = lexerize(l);
-        EXPECT_EQ(expected.size(), result.size());
-        compareLexemVectors(expected, result);
-    }
-}
 
 TEST(TestLexer, testIdentifiers) {
     for (const auto& [key, value] : IDENTIFIERS) {
@@ -346,6 +269,60 @@ TEST(TestLexer, testIdentifiers) {
         compareLexemVectors(expected, result);
     }
 }
+
+const map<const string, const Token> INTEGERS {
+    { "0", Token(INTEGER, 0) },
+    { "1", Token(INTEGER, 1) },
+    { "213", Token(INTEGER, 213) },
+    { "21323234", Token(INTEGER, 21323234) },
+    {
+        to_string(numeric_limits<int>::max()),
+        Token(INTEGER, numeric_limits<int>::max())
+    },
+};
+TEST(TestLexer, testIntegers) {
+    for (const auto& [key, value] : INTEGERS) {
+        string input = key;
+        size_t shift = input.length() + 1;
+        vector<Lexem> expected {
+            {value, 1, 1},
+            {Token(END_OF_FILE), 1, shift},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = lexerize(l);
+        EXPECT_EQ(expected.size(), result.size());
+        compareLexemVectors(expected, result);
+    }
+}
+
+const map<const string, const Token> FLOATS {
+    { "0.", Token(FLOAT, stod("0.")) },
+    { "1.", Token(FLOAT, stod("1.")) },
+    { "133.12", Token(FLOAT, stod("133.12")) },
+    { "13333.12", Token(FLOAT, stod("13333.12")) },
+    { "133.12", Token(FLOAT, stod("133.12")) },
+    { "13.12", Token(FLOAT, stod("13.12")) },
+    { "213.", Token(FLOAT, stod("213.")) },
+    { "213.11111", Token(FLOAT, stod("213.11111")) },
+};
+
+TEST(TestLexer, testFloats) {
+    for (const auto& [key, value] : FLOATS) {
+        string input = key;
+        size_t shift = input.length() + 1;
+        vector<Lexem> expected {
+            {value, 1, 1},
+            {Token(END_OF_FILE), 1, shift},
+        };
+        istringstream in(input);
+        Lexer l(in);
+        vector<Lexem> result = lexerize(l);
+        EXPECT_EQ(expected.size(), result.size());
+        compareLexemVectors(expected, result);
+    }
+}
+
 TEST(TestLexer, testIntegersFrom0to1000) {
     for (int i = 0; i < 1000; ++i) {
         string input = to_string(i);
@@ -364,21 +341,9 @@ TEST(TestLexer, testIntegersFrom0to1000) {
         compareLexemVectors(expected, result);
     }
 }
-TEST(TestLexer, testFloats) {
-    for (const auto& [key, value] : FLOATS) {
-        string input = key;
-        size_t shift = input.length() + 1;
-        vector<Lexem> expected {
-            {value, 1, 1},
-            {Token(END_OF_FILE), 1, shift},
-        };
-        istringstream in(input);
-        Lexer l(in);
-        vector<Lexem> result = lexerize(l);
-        EXPECT_EQ(expected.size(), result.size());
-        compareLexemVectors(expected, result);
-    }
-}
+
+const vector<string> NEW_LINE_CHARACTERS { "\n", "\r", "\r\n", };
+
 TEST(TestLexer, testNewLineCharacters) {
     for (const auto& input : NEW_LINE_CHARACTERS) {
         vector<Lexem> expected {
@@ -391,6 +356,8 @@ TEST(TestLexer, testNewLineCharacters) {
         compareLexemVectors(expected, result);
     }
 }
+
+const vector<string> NEW_LINE_CHARACTERS_WITH_SOMETHING_AFTER { "\na", "\ra", "\r\na", };
 
 TEST(TestLexer, testNewLineCharactersWithSomethingAfter) {
     for (const auto& input : NEW_LINE_CHARACTERS_WITH_SOMETHING_AFTER) {
@@ -405,6 +372,8 @@ TEST(TestLexer, testNewLineCharactersWithSomethingAfter) {
         compareLexemVectors(expected, result);
     }
 }
+
+const vector<string> NOT_A_TOKENS { ".", "`", "~", "|", "@", "^", "&", "?", "\\" };
 
 TEST(TestLexer, testNotATokens) {
     for (const auto& input : NOT_A_TOKENS) {
@@ -780,23 +749,18 @@ TEST(TestLexer, testIntegerLiteralsError) {
 R"(123_
 abcd12 1230
 **789a a__12311)";
-    vector<Lexem> expected {
-        {Token(ERROR_NUMBER_UNDEFINED_REPRESENTATION, "123_"), 1, 1},
-        {Token(IDENTIFIER, "abcd12"), 2, 1},
-        {Token(INTEGER, 1230), 2, 8},
-        {Token(STAR), 3, 1},
-        {Token(STAR), 3, 2},
-        {Token(ERROR_NUMBER_UNDEFINED_REPRESENTATION, "789a"), 3, 3},
-        {Token(IDENTIFIER, "a__12311"), 3, 8},
-        {Token(END_OF_FILE), 3, 16},
-    };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = lexerize(l);
-
-    EXPECT_EQ(expected.size(), result.size());
-
-    compareLexemVectors(expected, result);
+    try {
+        lexerize(l);
+        FAIL() << "Expected LexerException to be thrown";
+    } catch (const LexerException& e) {
+        EXPECT_STREQ(e.what(), "Undefined value");
+        EXPECT_EQ(e.getLine(), 1);
+        EXPECT_EQ(e.getColumn(), 1);
+    } catch (...) {
+        FAIL() << "Expected LexerException, but a different exception was thrown";
+    }
 }
 
 TEST(TestLexer, testKeywords) {

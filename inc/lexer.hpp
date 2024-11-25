@@ -2,10 +2,27 @@
 
 #include <sstream>
 #include <vector>
+#include <exception>
 
 #include "token.hpp"
 
 namespace lexer {
+
+class LexerException: public std::exception {
+    std::string message;
+    size_t line;
+    size_t column;
+public:
+    LexerException(const std::string& msg, size_t ln, size_t col)
+    : message(msg), line(ln), column(col) {}
+
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+    size_t getLine() const { return line; }
+    size_t getColumn() const { return column; }
+};
+
 
 static const int IDENTIFIER_MAX_SIZE = 1200;
 static const int NUMERIC_MAX_SIZE = 1200;
@@ -27,9 +44,8 @@ private:
     void readChar();
     token::Token handleOnelineCommentToken();
     token::Token handleMultilineCommentToken();
-    token::Token handleNumber();
-    token::Token handleFloat(std::string& buffer);
-    token::Token handleNumericUndefinedRepresentation(std::string& buffer);
+    token::Token handleNumber(size_t row, size_t column);
+    token::Token handleFloat(size_t row, size_t column, long intPart);
     token::Token handleIdentifier();
     token::Token handleString();
 
