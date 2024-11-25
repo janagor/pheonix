@@ -7,6 +7,9 @@
 
 namespace lexer {
 
+size_t LexerException::getLine() const { return line; }
+size_t LexerException::getColumn() const { return column; }
+
 bool Lexem::operator==(const Lexem& l) const {
     return this->token==l.token &&
         this->line==l.line &&

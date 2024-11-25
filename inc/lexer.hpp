@@ -19,8 +19,8 @@ public:
     const char* what() const noexcept override {
         return message.c_str();
     }
-    size_t getLine() const { return line; }
-    size_t getColumn() const { return column; }
+    size_t getLine() const;
+    size_t getColumn() const;
 };
 
 
