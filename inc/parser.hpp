@@ -12,6 +12,7 @@ namespace parser {
 struct Parser {
 private:
     std::unique_ptr<Node> parseProgram();
+    std::unique_ptr<Node> parseFunctionDeclaration();
     std::unique_ptr<Node> parseVariableDeclaration();
     std::unique_ptr<Node> parseWhileLoopStatement();
     std::unique_ptr<Node> parseReturnStatement();

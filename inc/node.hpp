@@ -25,6 +25,39 @@ struct Program: public Node {
 };
 
 // Statements
+struct FunctionDeclaration: public Node {
+    struct Parameter;
+
+    std::string identifier;
+    std::vector<Parameter> parameters;
+    std::vector<std::unique_ptr<Node>> statements;
+
+    FunctionDeclaration( std::string i):
+        Node(), identifier(i) {};
+
+    void push_parameter(bool isMut, std::string ident) {
+        parameters.push_back(Parameter(isMut, ident));
+    }
+
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+
+    struct Parameter {
+        Parameter(bool isMut, std::string ident):
+            isMutable(isMut),
+            identifier(ident)
+        {}
+        bool isMutable;
+        std::string identifier;
+        std::string toString(const int shift_size) const {
+            std::string s = "\n" + std::string(shift_size*4, ' ');
+            return "parameter=(" + s + 
+            "isMutable=" + (isMutable ? "true" : "false") + "," + s +
+            "identifier=" + identifier + ")";
+        }
+    };
+};
+
 struct VariableDeclaration: public Node {
     bool isMutable;
     std::string identifier;

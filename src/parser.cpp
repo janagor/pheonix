@@ -18,6 +18,10 @@ std::unique_ptr<Node> Parser::parseProgram() {
             node = parseWhileLoopStatement();
             program->statements.push_back(std::move(node));
             break;
+        case token::FN:
+            node = parseFunctionDeclaration();
+            program->statements.push_back(std::move(node));
+            break;
         case token::RETURN:
             node = parseReturnStatement();
             program->statements.push_back(std::move(node));
@@ -32,6 +36,44 @@ std::unique_ptr<Node> Parser::parseProgram() {
 
 std::unique_ptr<Node> Parser::parseStatement() {
     return parseExpressionStatement();
+}
+
+std::unique_ptr<Node> Parser::parseFunctionDeclaration() {
+    assert(current.token.tokenType==token::TokenType::FN);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::IDENTIFIER);
+    std::string identifier = std::get<std::string>(*current.token.value);
+    auto functionDeclaration = std::make_unique<FunctionDeclaration>(identifier);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::LPARENT);
+    readLex();
+    while (
+        current.token.tokenType==token::TokenType::MUT
+        || current.token.tokenType==token::TokenType::IDENTIFIER
+    ) {
+        bool isMutable = false;
+        if (current.token.tokenType==token::TokenType::MUT) {
+            isMutable = true;
+            readLex();
+        }
+        std::string param_identifier =
+            std::get<std::string>(*current.token.value);
+        functionDeclaration->push_parameter(isMutable, param_identifier);
+        if (current.token.tokenType==token::TokenType::COMMA)
+            readLex();
+        readLex();
+    }
+    assert(current.token.tokenType==token::TokenType::RPARENT);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::LBRACE);
+    readLex();
+    while ( current.token.tokenType != token::RBRACE) {
+        auto statement = parseReturnStatement();
+        functionDeclaration->statements.push_back(std::move(statement));
+    }
+    assert(current.token.tokenType==token::TokenType::RBRACE);
+    readLex();
+    return functionDeclaration;
 }
 
 std::unique_ptr<Node> Parser::parseVariableDeclaration() {

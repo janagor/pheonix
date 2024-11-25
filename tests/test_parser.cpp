@@ -271,6 +271,23 @@ const map<string, string> TRIVIAL_CASES {
             expression=(IntegerLiteral:\n\
                 value=123))))"
     },
+    {
+"fn returnOne(mut num) {\n\
+    return 123;\n\
+}",
+"(Program:\n\
+    (FunctionDeclaration:\n\
+        identifier=returnOne,\n\
+        parameterList=(\n\
+            (parameter=(\n\
+                isMutable=true,\n\
+                identifier=num))),\n\
+        statements=(\n\
+            (ReturnStatement:\n\
+                expression=(ExpressionStatement:\n\
+                    expression=(IntegerLiteral:\n\
+                        value=123))))))"
+    },
 };
 
 TEST(TestParser, testTrivialCases) {
