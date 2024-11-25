@@ -240,6 +240,18 @@ false
 )",
 };
 
+// helper
+std::vector<Lexem> lexerize(Lexer& lexer) {
+    std::vector<Lexem> result;
+    while (true) {
+        Lexem l = lexer.nextLexem();
+        result.emplace_back(l);
+        if (l.token.getTokenType() == token::END_OF_FILE){
+            return result;
+        }
+    }
+}
+
 int main(int argc, char** argv) {
     if (argc == 2) {
         size_t test_case = 1;
@@ -250,7 +262,7 @@ int main(int argc, char** argv) {
         }
         istringstream in(EXAMPLES[test_case]);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
         cout << "Example nr. " << ++test_case << endl;
         for (const auto& lexem : result) {
             cout <<  lexem << std::endl;
@@ -263,7 +275,7 @@ int main(int argc, char** argv) {
     for (const auto& ex : EXAMPLES) {
         istringstream in(ex);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
         cout << "Example nr. " << ++i << endl;
         for (const auto& lexem : result) {
             cout <<  lexem << std::endl;

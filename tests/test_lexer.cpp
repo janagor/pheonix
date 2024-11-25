@@ -19,6 +19,16 @@ void compareLexemVectors(const vector<Lexem>& expected, const vector<Lexem>& rec
         EXPECT_EQ(expected[i], received[i]);
     }
 }
+std::vector<Lexem> lexerize(Lexer& lexer) {
+    std::vector<Lexem> result;
+    while (true) {
+        Lexem l = lexer.nextLexem();
+        result.emplace_back(l);
+        if (l.token.getTokenType() == token::END_OF_FILE){
+            return result;
+        }
+    }
+}
 
 // input
 const map<const string, const Token> SPECIAL_CHARS_AND_KEYWORDS {
@@ -260,7 +270,7 @@ TEST(TestLexer, testEmptyInput) {
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -278,7 +288,7 @@ TEST(TestLexer, specialCharsAndKeywords) {
         };
         istringstream in(input);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
 
         EXPECT_EQ(expected.size(), result.size());
 
@@ -296,7 +306,7 @@ TEST(TestLexer, testOneLineComments) {
         };
         istringstream in(input);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
 
         EXPECT_EQ(expected.size(), result.size());
 
@@ -315,7 +325,7 @@ TEST(TestLexer, testStrings) {
         };
         istringstream in(input);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
         EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
     }
@@ -331,7 +341,7 @@ TEST(TestLexer, testIdentifiers) {
         };
         istringstream in(input);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
         EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
     }
@@ -347,7 +357,7 @@ TEST(TestLexer, testIntegersFrom0to1000) {
         assert(std::get<int>(expected[0].token.getValue().value()) == i);
         istringstream in(input);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
 
         EXPECT_EQ(expected.size(), result.size());
 
@@ -364,7 +374,7 @@ TEST(TestLexer, testFloats) {
         };
         istringstream in(input);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
         EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
     }
@@ -376,7 +386,7 @@ TEST(TestLexer, testNewLineCharacters) {
         };
         istringstream in(input);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
         EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
     }
@@ -390,7 +400,7 @@ TEST(TestLexer, testNewLineCharactersWithSomethingAfter) {
         };
         istringstream in(input);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
         EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
     }
@@ -404,7 +414,7 @@ TEST(TestLexer, testNotATokens) {
         };
         istringstream in(input);
         Lexer l(in);
-        vector<Lexem> result = l.lexerize();
+        vector<Lexem> result = lexerize(l);
         EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
     }
@@ -428,7 +438,7 @@ comments */)"), 2, 1},
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
     compareLexemVectors(expected, result);
@@ -475,7 +485,7 @@ let mut d = true; // bol - mutowalny)";
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
     compareLexemVectors(expected, result);
@@ -544,7 +554,7 @@ let mut b = 123<-str;
 
     ifstream file_input("test.txt");
     Lexer l(file_input);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -566,7 +576,7 @@ TEST(TestLexer, testOperators) {
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -586,7 +596,7 @@ TEST(TestLexer, testBrackets) {
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -606,7 +616,7 @@ TEST(TestLexer, testOneLineComments2) {
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -623,7 +633,7 @@ TEST(TestLexer, testOneLineComments3) {
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -644,7 +654,7 @@ TEST(TestLexer, testMultilineComments) {
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -663,7 +673,7 @@ TEST(TestLexer, testMultilineComments2) {
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -687,7 +697,7 @@ abcd
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -706,7 +716,7 @@ R"(123
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -729,7 +739,7 @@ abcd12 1230
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -758,7 +768,7 @@ R"(1 2 3 4 5 6 7 8 9 10 11 12+13)";
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -782,7 +792,7 @@ abcd12 1230
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -800,7 +810,7 @@ TEST(TestLexer, testKeywords) {
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -819,7 +829,7 @@ R"("kaczuszka"
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -836,7 +846,7 @@ cos    ")";
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -852,7 +862,7 @@ R"("kaczuszka mowi \"Hau, Hau!\"")";
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -873,7 +883,7 @@ R"("kaczuszka mowi:
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -889,7 +899,7 @@ R"(1.12345)";
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -906,7 +916,7 @@ R"(1.12345 0.0)";
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -923,7 +933,7 @@ R"(1.12345 0.)";
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 
@@ -984,7 +994,7 @@ let mut b = 123<-str;
     };
     istringstream in(input);
     Lexer l(in);
-    vector<Lexem> result = l.lexerize();
+    vector<Lexem> result = lexerize(l);
 
     EXPECT_EQ(expected.size(), result.size());
 

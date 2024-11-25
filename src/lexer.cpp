@@ -265,16 +265,6 @@ void Lexer::skipWhiteSpaces() {
     }
 }
 
-std::vector<Lexem> Lexer::lexerize() {
-    std::vector<Lexem> result;
-    while (true) {
-        Lexem l = nextLexem();
-        result.emplace_back(l);
-        if (l.token.getTokenType() == token::END_OF_FILE){
-            return result;
-        }
-    }
-}
 token::Token Lexer::handleMultilineCommentToken() {
     // state 1: /
     std::string buffer = "";

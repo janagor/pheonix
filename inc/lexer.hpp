@@ -39,7 +39,6 @@ public:
     }
 
     Lexem nextLexem();
-    std::vector<Lexem> lexerize();
 private:
     std::istream& istream_;
     char ch;
