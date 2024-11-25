@@ -259,7 +259,7 @@ token::Token Lexer::handleOnelineCommentToken() {
         switch (ch) {
         case '\r':
             if (peek == '\n') readChar();
-            // fall through
+            [[fallthrough]];
         case '\n':
         case EOF:
             readChar();
@@ -276,7 +276,7 @@ token::Token Lexer::handleOnelineCommentToken() {
         switch (ch) {
         case '\r':
             if (peek == '\n') readChar();
-            // fall through
+            [[fallthrough]];
         case '\n':
         case EOF:
             readChar();
