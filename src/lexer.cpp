@@ -19,45 +19,36 @@ std::ostream& operator<<(std::ostream& os, const Lexem& l) {
 }
 
 Lexem Lexer::nextLexem() {
+    std::optional<Lexem> result;
     skipWhiteSpaces();
-    if(ch == EOF) {
-        return tryEndOfFile();
-    } else if (ch == '/') {
-        return trySlashOrToken();
-    } else if (
-        ch == '(' || ch == ')' || ch == '{' ||
-        ch == '}' || ch == '[' || ch == ']'
-    ) {
-        return tryParenthesis();
-    } else if(
-        ch == '<' || ch == '>' || ch == '=' ||
-        ch == '!' || ch == '&' || ch == '|'
-    ) {
-        return tryTwoCharOperator();
-    } else if(
-        ch == '-' || ch == '+' || ch == '*' ||
-        ch == '%' || ch == '$' || ch == '#'
-    ) {
-        return tryOneCharOperator();
-    } else if (ch == ';' || ch ==',') {
-        return trySeparator();
-    } else if (ch == '"') {
-        return tryString();
-    } else {
-        return tryLiteralOrNotAToken();
-    }
+
+    result = tryEndOfFile();
+    if (result.has_value()) return result.value();
+    result = trySlashOrToken();
+    if (result.has_value()) return result.value();
+    result = tryParenthesis();
+    if (result.has_value()) return result.value();
+    result = tryTwoCharOperator();
+    if (result.has_value()) return result.value();
+    result = tryOneCharOperator();
+    if (result.has_value()) return result.value();
+    result = trySeparator();
+    if (result.has_value()) return result.value();
+    result = tryString();
+    if (result.has_value()) return result.value();
+    return tryLiteralOrNotAToken();
 }
 
-Lexem Lexer::tryEndOfFile() {
+std::optional<Lexem> Lexer::tryEndOfFile() {
     switch (ch) {
     case EOF:
         return Lexem{token::Token(token::END_OF_FILE), line, column};
     default:
-        return Lexem{token::Token(token::END_OF_FILE), line, column};
+        return std::nullopt;
     }
 }
 
-Lexem Lexer::trySlashOrToken() {
+std::optional<Lexem> Lexer::trySlashOrToken() {
     size_t sline = line;
     size_t scolumn = column;
     token::Token token;
@@ -76,11 +67,11 @@ Lexem Lexer::trySlashOrToken() {
         readChar();
         return Lexem{token::Token(token::SLASH), sline, scolumn};
     default:
-        return Lexem{token::Token(token::SLASH), sline, scolumn};
+        return std::nullopt;
     }
 }
 
-Lexem Lexer::tryParenthesis() {
+std::optional<Lexem> Lexer::tryParenthesis() {
     size_t sline = line;
     size_t scolumn = column;
     switch (ch) {
@@ -103,11 +94,11 @@ Lexem Lexer::tryParenthesis() {
         readChar();
         return Lexem{token::Token(token::RBRACKET), sline, scolumn};
     default:
-        return Lexem{token::Token(token::RBRACKET), sline, scolumn};
+        return std::nullopt;
     }
 }
 
-Lexem Lexer::tryTwoCharOperator() {
+std::optional<Lexem> Lexer::tryTwoCharOperator() {
     size_t sline = line;
     size_t scolumn = column;
     switch (ch) {
@@ -158,11 +149,11 @@ Lexem Lexer::tryTwoCharOperator() {
         }
         return Lexem{token::Token(token::NOT_A_TOKEN, "|"), sline, scolumn};
     default:
-        return Lexem{token::Token(token::NOT_A_TOKEN, "|"), sline, scolumn};
+        return std::nullopt;
     }
 }
 
-Lexem Lexer::tryOneCharOperator() {
+std::optional<Lexem> Lexer::tryOneCharOperator() {
     size_t sline = line;
     size_t scolumn = column;
     switch (ch) {
@@ -185,11 +176,11 @@ Lexem Lexer::tryOneCharOperator() {
         readChar();
         return Lexem{token::Token(token::HASH), sline, scolumn};
     default:
-        return Lexem{token::Token(token::NOT_A_TOKEN, "|"), sline, scolumn};
+        return std::nullopt;
     }
 }
 
-Lexem Lexer::trySeparator() {
+std::optional<Lexem> Lexer::trySeparator() {
     size_t sline = line;
     size_t scolumn = column;
     switch (ch) {
@@ -200,10 +191,10 @@ Lexem Lexer::trySeparator() {
         readChar();
         return Lexem{token::Token(token::COMMA), sline, scolumn};
     default:
-        return Lexem{token::Token(token::COMMA), sline, scolumn};
+        return std::nullopt;
     }
 }
-Lexem Lexer::tryString() {
+std::optional<Lexem> Lexer::tryString() {
     size_t sline = line;
     size_t scolumn = column;
     token::Token token;
@@ -211,7 +202,7 @@ Lexem Lexer::tryString() {
         token = handleString();
         return Lexem{token, sline, scolumn};
     }
-    return Lexem{token, sline, scolumn};
+    return std::nullopt;
 }
 
 Lexem Lexer::tryLiteralOrNotAToken() {
@@ -493,6 +484,7 @@ token::Token Lexer::handleNumericUndefinedRepresentation(std::string& buffer){
 token::Token Lexer::handleString(){
     std::string buffer = "";
     bool hasIncorrectBackSlash = false;
+    assert(ch == '"');
     readChar();
     while (ch != '"' && ch !=EOF && buffer.size() < STRING_MAX_SIZE) {
         if (ch == '\\') {

@@ -33,14 +33,16 @@ private:
     token::Token handleIdentifier();
     token::Token handleString();
 
-    Lexem tryEndOfFile();
-    Lexem trySlashOrToken();
-    Lexem tryParenthesis();
-    Lexem tryTwoCharOperator();
-    Lexem tryOneCharOperator();
-    Lexem trySeparator();
-    Lexem tryString();
+    std::optional<Lexem> tryEndOfFile();
+    std::optional<Lexem> trySlashOrToken();
+    std::optional<Lexem> tryParenthesis();
+    std::optional<Lexem> tryTwoCharOperator();
+    std::optional<Lexem> tryOneCharOperator();
+    std::optional<Lexem> trySeparator();
+    std::optional<Lexem> tryString();
     Lexem tryLiteralOrNotAToken();
+
+
 public:
     Lexer(std::istream& istream) : istream_(istream), offset(1), line(1), column(1){
         ch = istream_.get();

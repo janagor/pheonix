@@ -12,12 +12,10 @@ are
 multiline
 comments */)",
     // Ex2
-    R"(
-let a = 12; // int - const
+    R"( let a = 12; // int - const
 let mut b = 12.12; // flt - mutowalny
 let c = "duck"; // str - const
-let mut d = true; // bol - mutowalny
-)",
+let mut d = true; // bol - mutowalny)",
     // Ex3
     R"(
 let mut a = 0;
