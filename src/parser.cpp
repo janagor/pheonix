@@ -2,40 +2,30 @@
 #include <string>
 #include <cassert>
 #include <cstdlib>
-
-namespace parser {
+using namespace parser;
 
 std::unique_ptr<Node> Parser::parseProgram() {
     auto program = std::make_unique<Program>();
-    while ( current.token.tokenType != token::END_OF_FILE) {
-        std::unique_ptr<Node> node;
-        switch (current.token.tokenType) {
-        case token::LET:
-            node = parseVariableDeclaration();
-            program->statements.push_back(std::move(node));
-            break;
-        case token::WHILE:
-            node = parseWhileLoopStatement();
-            program->statements.push_back(std::move(node));
-            break;
-        case token::FN:
-            node = parseFunctionDeclaration();
-            program->statements.push_back(std::move(node));
-            break;
-        case token::RETURN:
-            node = parseReturnStatement();
-            program->statements.push_back(std::move(node));
-            break;
-        default:
-            node = parseExpressionStatement();
-            program->statements.push_back(std::move(node));
-        }
+    while (current.token.tokenType != token::END_OF_FILE) {
+        program->statements.push_back(std::move(parseStatement()));
     }
     return program;
 }
 
 std::unique_ptr<Node> Parser::parseStatement() {
-    return parseExpressionStatement();
+    std::unique_ptr<Node> node;
+    switch (current.token.tokenType) {
+    case token::LET:
+        return parseVariableDeclaration();
+    case token::WHILE:
+        return parseWhileLoopStatement();
+    case token::FN:
+        return parseFunctionDeclaration();
+    case token::RETURN:
+        return parseReturnStatement();
+    default:
+        return parseExpressionStatement();
+    }
 }
 
 std::unique_ptr<Node> Parser::parseFunctionDeclaration() {
@@ -68,7 +58,7 @@ std::unique_ptr<Node> Parser::parseFunctionDeclaration() {
     assert(current.token.tokenType==token::TokenType::LBRACE);
     readLex();
     while ( current.token.tokenType != token::RBRACE) {
-        auto statement = parseReturnStatement();
+        auto statement = parseStatement();
         functionDeclaration->statements.push_back(std::move(statement));
     }
     assert(current.token.tokenType==token::TokenType::RBRACE);
@@ -313,5 +303,3 @@ void Parser::readLex() {
     }
     current = lexer.nextLexem();
 }
-
-} // parser
