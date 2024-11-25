@@ -32,6 +32,15 @@ private:
     token::Token handleNumericUndefinedRepresentation(std::string& buffer);
     token::Token handleIdentifier();
     token::Token handleString();
+
+    Lexem tryEndOfFile();
+    Lexem trySlashOrToken();
+    Lexem tryParenthesis();
+    Lexem tryTwoCharOperator();
+    Lexem tryOneCharOperator();
+    Lexem trySeparator();
+    Lexem tryString();
+    Lexem tryLiteralOrNotAToken();
 public:
     Lexer(std::istream& istream) : istream_(istream), offset(1), line(1), column(1){
         ch = istream_.get();

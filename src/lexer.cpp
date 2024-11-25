@@ -17,17 +17,100 @@ std::ostream& operator<<(std::ostream& os, const Lexem& l) {
         << "`,\n\tcolumn: `" << l.column << "`,\n),";
     return os;
 }
+
 Lexem Lexer::nextLexem() {
     skipWhiteSpaces();
-    size_t sline = line;
-    size_t scolumn = column;
-    std::string comment;
-    token::Token token;
+    if(ch == EOF) {
+        return tryEndOfFile();
+    } else if (ch == '/') {
+        return trySlashOrToken();
+    } else if (
+        ch == '(' || ch == ')' || ch == '{' ||
+        ch == '}' || ch == '[' || ch == ']'
+    ) {
+        return tryParenthesis();
+    } else if(
+        ch == '<' || ch == '>' || ch == '=' ||
+        ch == '!' || ch == '&' || ch == '|'
+    ) {
+        return tryTwoCharOperator();
+    } else if(
+        ch == '-' || ch == '+' || ch == '*' ||
+        ch == '%' || ch == '$' || ch == '#'
+    ) {
+        return tryOneCharOperator();
+    } else if (ch == ';' || ch ==',') {
+        return trySeparator();
+    } else if (ch == '"') {
+        return tryString();
+    } else {
+        return tryLiteralOrNotAToken();
+    }
+}
 
+Lexem Lexer::tryEndOfFile() {
     switch (ch) {
     case EOF:
-        return Lexem{token::Token(token::END_OF_FILE), sline, scolumn};
-        break;
+        return Lexem{token::Token(token::END_OF_FILE), line, column};
+    default:
+        return Lexem{token::Token(token::END_OF_FILE), line, column};
+    }
+}
+
+Lexem Lexer::trySlashOrToken() {
+    size_t sline = line;
+    size_t scolumn = column;
+    token::Token token;
+    switch (ch) {
+    case '/':
+        switch (peek){
+            case '/':
+                token = handleOnelineCommentToken();
+                return Lexem{token, sline, scolumn};
+            case '*':
+                token = handleMultilineCommentToken();
+                return Lexem{token, sline, scolumn};
+            default:
+                break;
+        }
+        readChar();
+        return Lexem{token::Token(token::SLASH), sline, scolumn};
+    default:
+        return Lexem{token::Token(token::SLASH), sline, scolumn};
+    }
+}
+
+Lexem Lexer::tryParenthesis() {
+    size_t sline = line;
+    size_t scolumn = column;
+    switch (ch) {
+    case '(':
+        readChar();
+        return Lexem{token::Token(token::LPARENT), sline, scolumn};
+    case ')':
+        readChar();
+        return Lexem{token::Token(token::RPARENT), sline, scolumn};
+    case '{':
+        readChar();
+        return Lexem{token::Token(token::LBRACE), sline, scolumn};
+    case '}':
+        readChar();
+        return Lexem{token::Token(token::RBRACE), sline, scolumn};
+    case '[':
+        readChar();
+        return Lexem{token::Token(token::LBRACKET), sline, scolumn};
+    case']':
+        readChar();
+        return Lexem{token::Token(token::RBRACKET), sline, scolumn};
+    default:
+        return Lexem{token::Token(token::RBRACKET), sline, scolumn};
+    }
+}
+
+Lexem Lexer::tryTwoCharOperator() {
+    size_t sline = line;
+    size_t scolumn = column;
+    switch (ch) {
     case '<':
         readChar();
         if (ch == '=') {
@@ -39,8 +122,6 @@ Lexem Lexer::nextLexem() {
             return Lexem{token::Token(token::LARROW), sline, scolumn};
         }
         return Lexem{token::Token(token::LESS), sline, scolumn};
-        break;
-
     case '>':
         readChar();
         if (ch == '=') {
@@ -48,8 +129,6 @@ Lexem Lexer::nextLexem() {
             return Lexem{token::Token(token::GEQ), sline, scolumn};
         }
         return Lexem{token::Token(token::GREATER), sline, scolumn};
-        break;
-
     case '=':
         readChar();
         if (ch == '=') {
@@ -57,57 +136,6 @@ Lexem Lexer::nextLexem() {
             return Lexem{token::Token(token::EQUALS), sline, scolumn};
         }
         return Lexem{token::Token(token::ASSIGN), sline, scolumn};
-        break;
-
-    case '/':
-        switch (peek){
-        case '/':
-            token = handleOnelineCommentToken();
-            return Lexem{token, sline, scolumn};
-            break;
-        case '*':
-            token = handleMultilineCommentToken();
-            return Lexem{token, sline, scolumn};
-            break;
-        default:
-            break;
-        }
-            readChar();
-            return Lexem{token::Token(token::SLASH), sline, scolumn};
-        break;
-
-    case '-':
-        readChar();
-        return Lexem{token::Token(token::MINUS), sline, scolumn};
-        break;
-    case '(':
-        readChar();
-        return Lexem{token::Token(token::LPARENT), sline, scolumn};
-        break;
-    case ')':
-        readChar();
-        return Lexem{token::Token(token::RPARENT), sline, scolumn};
-        break;
-    case '{':
-        readChar();
-        return Lexem{token::Token(token::LBRACE), sline, scolumn};
-        break;
-    case '}':
-        readChar();
-        return Lexem{token::Token(token::RBRACE), sline, scolumn};
-        break;
-    case '[':
-        readChar();
-        return Lexem{token::Token(token::LBRACKET), sline, scolumn};
-        break;
-    case ']':
-        readChar();
-        return Lexem{token::Token(token::RBRACKET), sline, scolumn};
-        break;
-    case '+':
-        readChar();
-        return Lexem{token::Token(token::PLUS), sline, scolumn};
-        break;
     case '!':
         readChar();
         if (ch == '=') {
@@ -115,28 +143,6 @@ Lexem Lexer::nextLexem() {
             return Lexem{token::Token(token::NEQ), sline, scolumn};
         }
         return Lexem{token::Token(token::BANG), sline, scolumn};
-        break;
-
-    case '*':
-        readChar();
-        return Lexem{token::Token(token::STAR), sline, scolumn};
-        break;
-    case '%':
-        readChar();
-        return Lexem{token::Token(token::PERCENT), sline, scolumn};
-        break;
-    case '"':
-        token = handleString();
-        return Lexem{token, sline, scolumn};
-        break;
-    case '$':
-        readChar();
-        return Lexem{token::Token(token::DOLAR), sline, scolumn};
-        break;
-    case '#':
-        readChar();
-        return Lexem{token::Token(token::HASH), sline, scolumn};
-        break;
     case '&':
         readChar();
         if (ch == '&') {
@@ -144,7 +150,6 @@ Lexem Lexer::nextLexem() {
             return Lexem{token::Token(token::AND), sline, scolumn};
         }
         return Lexem{token::Token(token::NOT_A_TOKEN, "&"), sline, scolumn};
-        break;
     case '|':
         readChar();
         if (ch == '|') {
@@ -152,30 +157,78 @@ Lexem Lexer::nextLexem() {
             return Lexem{token::Token(token::OR), sline, scolumn};
         }
         return Lexem{token::Token(token::NOT_A_TOKEN, "|"), sline, scolumn};
-        break;
+    default:
+        return Lexem{token::Token(token::NOT_A_TOKEN, "|"), sline, scolumn};
+    }
+}
 
+Lexem Lexer::tryOneCharOperator() {
+    size_t sline = line;
+    size_t scolumn = column;
+    switch (ch) {
+    case '-':
+        readChar();
+        return Lexem{token::Token(token::MINUS), sline, scolumn};
+    case '+':
+        readChar();
+        return Lexem{token::Token(token::PLUS), sline, scolumn};
+    case '*':
+        readChar();
+        return Lexem{token::Token(token::STAR), sline, scolumn};
+    case '%':
+        readChar();
+        return Lexem{token::Token(token::PERCENT), sline, scolumn};
+    case '$':
+        readChar();
+        return Lexem{token::Token(token::DOLAR), sline, scolumn};
+    case '#':
+        readChar();
+        return Lexem{token::Token(token::HASH), sline, scolumn};
+    default:
+        return Lexem{token::Token(token::NOT_A_TOKEN, "|"), sline, scolumn};
+    }
+}
+
+Lexem Lexer::trySeparator() {
+    size_t sline = line;
+    size_t scolumn = column;
+    switch (ch) {
     case ';':
         readChar();
         return Lexem{token::Token(token::SEMICOLON), sline, scolumn};
-        break;
     case ',':
         readChar();
         return Lexem{token::Token(token::COMMA), sline, scolumn};
-        break;
     default:
-        if (!isalnum(ch)) {
-            char val = ch;
-            readChar();
-            return Lexem {token::Token(token::NOT_A_TOKEN, val), sline, scolumn};
-        }
-        if (isdigit(ch)) {
-            token = handleNumber();
-            return Lexem{token, sline, scolumn};
-        }
-        token = handleIdentifier();
-        return Lexem{token, sline, scolumn};
-        break;
+        return Lexem{token::Token(token::COMMA), sline, scolumn};
     }
+}
+Lexem Lexer::tryString() {
+    size_t sline = line;
+    size_t scolumn = column;
+    token::Token token;
+    if (ch == '"') {
+        token = handleString();
+        return Lexem{token, sline, scolumn};
+    }
+    return Lexem{token, sline, scolumn};
+}
+
+Lexem Lexer::tryLiteralOrNotAToken() {
+    size_t sline = line;
+    size_t scolumn = column;
+    token::Token token;
+    if (!isalnum(ch)) {
+        char val = ch;
+        readChar();
+        return Lexem {token::Token(token::NOT_A_TOKEN, val), sline, scolumn};
+    }
+    if (isdigit(ch)) {
+        token = handleNumber();
+        return Lexem{token, sline, scolumn};
+    }
+    token = handleIdentifier();
+    return Lexem{token, sline, scolumn};
 }
 
 void Lexer::readChar() {
