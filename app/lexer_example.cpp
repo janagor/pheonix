@@ -1,4 +1,4 @@
-#include "../inc/lexer.hpp"
+#include "lexer.hpp"
 #include <iostream>
 #include <vector>
 using namespace std;

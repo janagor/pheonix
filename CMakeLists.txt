@@ -12,7 +12,6 @@ elseif (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
 endif()
 
-enable_testing()
 
 include(FetchContent)
 FetchContent_Declare( 
@@ -50,5 +49,7 @@ test_lexer
     ${SOURCE_FILES} ${HEADER_FILES}
 )
 target_link_libraries(test_lexer PRIVATE gtest gtest_main)
+
+enable_testing()
 
 add_test(NAME test_lexer COMMAND test_lexer)

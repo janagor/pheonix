@@ -1,4 +1,4 @@
-#include "../inc/token.hpp"
+#include "token.hpp"
 // #include <cstdlib>
 
 namespace token {
