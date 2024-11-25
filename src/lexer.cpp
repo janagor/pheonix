@@ -58,10 +58,10 @@ std::optional<Lexem> Lexer::trySlashOrToken() {
     case '/':
         switch (peek){
             case '/':
-                token = handleOnelineCommentToken();
+                token = handleOnelineCommentToken(sline, scolumn);
                 return Lexem{token, sline, scolumn};
             case '*':
-                token = handleMultilineCommentToken();
+                token = handleMultilineCommentToken(sline, scolumn);
                 return Lexem{token, sline, scolumn};
             default:
                 break;
@@ -201,7 +201,7 @@ std::optional<Lexem> Lexer::tryString() {
     size_t scolumn = column;
     token::Token token;
     if (ch == '"') {
-        token = handleString();
+        token = handleString(sline, scolumn);
         return Lexem{token, sline, scolumn};
     }
     return std::nullopt;
@@ -212,15 +212,13 @@ Lexem Lexer::tryLiteralOrNotAToken() {
     size_t scolumn = column;
     token::Token token;
     if (!isalnum(ch)) {
-        char val = ch;
-        readChar();
-        return Lexem {token::Token(token::NOT_A_TOKEN, val), sline, scolumn};
+        throw LexerException("Not a token.", sline, scolumn);
     }
     if (isdigit(ch)) {
         token = handleNumber(sline, scolumn);
         return Lexem{token, sline, scolumn};
     }
-    token = handleIdentifier();
+    token = handleIdentifier(sline, scolumn);
     return Lexem{token, sline, scolumn};
 }
 
@@ -253,49 +251,6 @@ void Lexer::readChar() {
 
 }
 
-token::Token Lexer::handleOnelineCommentToken() {
-    std::string buffer = "";
-    buffer += ch;
-    readChar();
-    while (buffer.size() < COMMENT_MAX_SIZE) {
-        switch (ch) {
-        case '\r':
-            if (peek == '\n') readChar();
-            [[fallthrough]];
-        case '\n':
-        case EOF:
-            readChar();
-            return token::Token(token::ONE_LINE_COMMENT, buffer);
-            break;
-        default:
-            buffer += ch;
-            readChar();
-        }
-    }
-    // NOTE: continue after overload encountered but without updating buffer
-    bool firstPossible = true;
-    while (true) {
-        switch (ch) {
-        case '\r':
-            if (peek == '\n') readChar();
-            [[fallthrough]];
-        case '\n':
-        case EOF:
-            readChar();
-            if (firstPossible)
-                return token::Token(token::ONE_LINE_COMMENT, buffer);
-            return token::Token(
-                    token::ERROR_ONE_LINE_COMMENT_OUT_OF_BOUND,
-                    buffer
-                );
-            break;
-        default:
-            firstPossible = false;
-            readChar();
-        }
-    }
-}
-
 void Lexer::skipWhiteSpaces() {
     while (true) {
         switch (ch) {
@@ -311,91 +266,77 @@ void Lexer::skipWhiteSpaces() {
     }
 }
 
-token::Token Lexer::handleMultilineCommentToken() {
-    // state 1: /
+token::Token Lexer::handleOnelineCommentToken(size_t row, size_t column) {
+    std::string buffer = "";
+    buffer += ch;
+    readChar();
+    while (buffer.size() <= COMMENT_MAX_SIZE) {
+        switch (ch) {
+        case '\r':
+            if (peek == '\n') readChar();
+            [[fallthrough]];
+        case '\n':
+        case EOF:
+            readChar();
+            return token::Token(token::ONE_LINE_COMMENT, buffer);
+            break;
+        default:
+            buffer += ch;
+            readChar();
+        }
+    }
+    throw LexerException("Oneline comment too long.", row, column);
+}
+
+token::Token Lexer::handleMultilineCommentToken(size_t row, size_t column) {
     std::string buffer = "";
     assert(ch == '/');
     buffer += ch;
-    // state 2: *
     readChar();
     assert(ch == '*');
     buffer += ch;
     assert(buffer == "/*");
-    // state 3: *
     readChar();
-    while (buffer.size() < COMMENT_MAX_SIZE) {
+    while (buffer.size() <= COMMENT_MAX_SIZE) {
         switch (ch) {
         case '*':
             buffer += ch;
             readChar();
             if (ch == '/') {
-                // state 4: /
                 buffer += ch;
                 readChar();
                 return token::Token(token::MULTILINE_COMMENT, buffer);
             }
             if (ch == EOF) {
-                return token::Token(token::ERROR_UNFINISHED_COMMENT, buffer);
-            }
-            buffer += ch;
-            readChar();
-            break;
-        case EOF:
-            return token::Token(token::ERROR_UNFINISHED_COMMENT, buffer);
-            break;
-        default:
-            buffer += ch;
-            readChar();
-        }
-    }
-    // NOTE: continue after overload encountered but without updating buffer
-    bool firstPossible = true;
-    while (true) {
-        switch (ch) {
-        case '*':
-            readChar();
-            if (ch == '/') {
-                readChar();
-                if (firstPossible)
-                    return token::Token(token::MULTILINE_COMMENT, buffer);
-                return token::Token(
-                    token::ERROR_MULTILINE_COMMENT_OUT_OF_BOUND,
-                    buffer
+                throw LexerException(
+                    "Unfinished multiline comment.", row, column
                 );
             }
-            if (ch == EOF) {
-                return token::Token(token::ERROR_UNFINISHED_COMMENT, buffer);
-            }
+            buffer += ch;
             readChar();
-            firstPossible = false;
             break;
         case EOF:
-            return token::Token(token::ERROR_UNFINISHED_COMMENT, buffer);
-            break;
+            throw LexerException(
+                "Unfinished multiline comment.", row, column
+            );
         default:
-            firstPossible = false;
+            buffer += ch;
             readChar();
         }
     }
+    throw LexerException("Multiline comment too long.", row, column);
 }
 
-token::Token Lexer::handleIdentifier(){
+token::Token Lexer::handleIdentifier(size_t row, size_t column){
     std::string buffer = "";
     buffer += ch;
     readChar();
-    while ((isalnum(ch) || ch=='_') && buffer.size() < IDENTIFIER_MAX_SIZE) {
+    while ((isalnum(ch) || ch=='_') && buffer.size() <= IDENTIFIER_MAX_SIZE) {
         buffer += ch;
         readChar();
     }
-    // NOTE: if identifier size may be greater then IDENTIFIER_MAX_SIZE
-    // skipping all the next chars
-    bool overflow_encoutered = false;
-    while (isalnum(ch) || ch=='_') {
-        overflow_encoutered = true;
-        readChar();
-    }
-    if(overflow_encoutered)
-        return token::Token(token::ERROR_IDENTIFIER_TOO_LONG, buffer);
+    if(buffer.size() > IDENTIFIER_MAX_SIZE)
+        throw LexerException("Identifier too long.", row, column);
 
     std::optional<token::TokenType> result = token::searchForKeyword(buffer);
     if(result)
@@ -421,7 +362,7 @@ token::Token Lexer::handleNumber(size_t row, size_t column){
     if (integerPart > std::numeric_limits<int>::max())
         throw LexerException("Integer literal out of range.", row, column);
     if (isalpha(ch))
-        throw LexerException("Undefined value", row, column);
+        throw LexerException("Undefined value.", row, column);
 
     return token::Token(token::INTEGER, static_cast<int>(integerPart));
 }
@@ -438,19 +379,18 @@ token::Token Lexer::handleFloat(size_t row, size_t column, long intPart){
         readChar();
     }
     if (isalpha(ch))
-        throw LexerException("Undefined value", row, column);
+        throw LexerException("Undefined value.", row, column);
 
     double result = static_cast<double>(intPart) +
     static_cast<double>(fractionalPart) * std::pow(10., static_cast<double>(-length));
     return token::Token(token::FLOAT, result);
 }
 
-token::Token Lexer::handleString(){
+token::Token Lexer::handleString(size_t line, size_t column){
     std::string buffer = "";
-    bool hasIncorrectBackSlash = false;
     assert(ch == '"');
     readChar();
-    while (ch != '"' && ch !=EOF && buffer.size() < STRING_MAX_SIZE) {
+    while (ch != '"' && ch !=EOF && buffer.size() <= STRING_MAX_SIZE) {
         if (ch == '\\') {
             readChar();
             switch (ch) {
@@ -470,9 +410,10 @@ token::Token Lexer::handleString(){
                 buffer += '\t';
                 break;
             default:
-                buffer += '\\';
-                hasIncorrectBackSlash = true;
-                continue;
+                throw LexerException(
+                    "Wrong usage of \\ character in string literal",
+                    line, column
+                );
             }
             readChar();
             continue;
@@ -484,24 +425,19 @@ token::Token Lexer::handleString(){
 
     if (ch=='"' && buffer.size() <= STRING_MAX_SIZE){
         readChar();
-        if (hasIncorrectBackSlash)
-            return token::Token(token::ERROR_BACK_SLASH_STRING, buffer);
         return token::Token(token::STRING, buffer);
     }
-    if (ch==EOF && buffer.size() < STRING_MAX_SIZE){
-        return token::Token(token::ERROR_UNFINISHED_STRING, "" + buffer);
+
+    if (ch==EOF && buffer.size() <= STRING_MAX_SIZE){
+        throw LexerException(
+            "Unfinished string literal.",
+            line, column
+        );
     }
 
-    if (buffer.size() == STRING_MAX_SIZE) {
-        while (ch != '"' && ch !=EOF)
-            readChar();
-    }
-
-    if (ch=='"'){
-        readChar();
-        return token::Token(token::ERROR_STRING_OUT_OF_BOUND, buffer);
-    }
-    return token::Token(token::ERROR_UNFINISHED_STRING, "" + buffer);
+    throw LexerException(
+        "String literal to long.", line, column
+    );
 }
 
 } // namespace lexer

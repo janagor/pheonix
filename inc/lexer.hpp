@@ -42,12 +42,12 @@ struct Lexer {
 private:
     void skipWhiteSpaces();
     void readChar();
-    token::Token handleOnelineCommentToken();
-    token::Token handleMultilineCommentToken();
+    token::Token handleOnelineCommentToken(size_t row, size_t column);
+    token::Token handleMultilineCommentToken(size_t row, size_t column);
     token::Token handleNumber(size_t row, size_t column);
     token::Token handleFloat(size_t row, size_t column, long intPart);
-    token::Token handleIdentifier();
-    token::Token handleString();
+    token::Token handleIdentifier(size_t row, size_t column);
+    token::Token handleString(size_t row, size_t column);
 
     std::optional<Lexem> tryEndOfFile();
     std::optional<Lexem> trySlashOrToken();

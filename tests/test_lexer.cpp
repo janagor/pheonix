@@ -118,22 +118,18 @@ const map<string, Token> ONE_LINE_COMMENTS {
     },
 };
 
-const map<string, Token> ONE_LINE_COMMENTS_ERRORS {
-    {
-        "//" + string(COMMENT_MAX_SIZE, 'a'),
-        Token(
-            ERROR_ONE_LINE_COMMENT_OUT_OF_BOUND,
-            "//" + string(COMMENT_MAX_SIZE - 2, 'a')
-        )
-    },
-    {
-        "//" + string(COMMENT_MAX_SIZE * 2, 'a'),
-        Token(
-            ERROR_ONE_LINE_COMMENT_OUT_OF_BOUND,
-            "//" + string(COMMENT_MAX_SIZE - 2, 'a')
-        )
-    },
-};
+TEST(TestLexer, testOneLineCommentError) {
+    string input ="//" + string(COMMENT_MAX_SIZE, 'a');
+    istringstream in(input);
+    Lexer l(in);
+    try {
+        lexerize(l);
+    } catch (const LexerException& e) {
+        EXPECT_STREQ(e.what(), "Oneline comment too long.");
+        EXPECT_EQ(e.getLine(), 1);
+        EXPECT_EQ(e.getColumn(), 1);
+    }
+}
 
 TEST(TestLexer, testOneLineComments) {
     for (const auto& [key, value] : ONE_LINE_COMMENTS) {
@@ -174,13 +170,6 @@ const map<string, Token> MULTILINE_COMMENTS {
 
 const map<string, Token> MULTILINE_COMMENTS_ERRORS {
     {
-        "//" + string(COMMENT_MAX_SIZE, 'a'),
-        Token(
-            ERROR_ONE_LINE_COMMENT_OUT_OF_BOUND,
-            "//" + string(COMMENT_MAX_SIZE - 2, 'a')
-        )
-    },
-    {
         "/*" + string(COMMENT_MAX_SIZE, 'a') + "*/",
         Token(
             ONE_LINE_COMMENT,
@@ -188,6 +177,18 @@ const map<string, Token> MULTILINE_COMMENTS_ERRORS {
         )
     },
 };
+TEST(TestLexer, testMultilineCommentError) {
+    string input = "/*" + string(COMMENT_MAX_SIZE, 'a') + "*/";
+    istringstream in(input);
+    Lexer l(in);
+    try {
+        lexerize(l);
+    } catch (const LexerException& e) {
+        EXPECT_STREQ(e.what(), "Multiline comment too long.");
+        EXPECT_EQ(e.getLine(), 1);
+        EXPECT_EQ(e.getColumn(), 1);
+    }
+}
 
 const map<const string, const Token> STRINGS {
     { R"("")", Token(STRING, "") },
@@ -206,23 +207,38 @@ const map<const string, const Token> STRINGS {
     },
 };
 
-const map<const string, const Token> STRINGS_ERRORS {
+const map<const string, string> STRINGS_ERRORS {
     // errors
-    { R"("\")", Token(ERROR_UNFINISHED_STRING, R"(")")  },
-    { R"("\t)", Token(ERROR_UNFINISHED_STRING, "\t")  },
-    { R"("\n)", Token(ERROR_UNFINISHED_STRING, "\n")  },
-    { R"("\\)", Token(ERROR_UNFINISHED_STRING, "\\")  },
-    { R"("\ ")", Token(ERROR_BACK_SLASH_STRING, R"(\ )")  },
-    { R"("\a")", Token(ERROR_BACK_SLASH_STRING, R"(\a)")  },
+    { R"("\")", "Unfinished string literal." },
+    { R"("\t)", "Unfinished string literal." },
+    { R"("\n)", "Unfinished string literal." },
+    { R"("\\)", "Unfinished string literal." },
+    { R"("\ ")", "Wrong usage of \\ character in string literal" },
+    { R"("\a")", "Wrong usage of \\ character in string literal" },
     {
         "\"" + string(STRING_MAX_SIZE + 1, 'a') + "\"",
-        Token(ERROR_STRING_OUT_OF_BOUND, string(STRING_MAX_SIZE, 'a'))
+        "String literal to long."
     },
     {
         "\"" + string(STRING_MAX_SIZE * 2, 'a') + "\"",
-        Token(ERROR_STRING_OUT_OF_BOUND, string(STRING_MAX_SIZE, 'a'))
+        "String literal to long."
     },
 };
+
+TEST(TestLexer, testStringErrors) {
+    for (const auto& [key, value] : STRINGS_ERRORS) {
+        string input = key;
+        istringstream in(input);
+        Lexer l(in);
+        try {
+            lexerize(l);
+        } catch (const LexerException& e) {
+            EXPECT_STREQ(e.what(), value.c_str());
+            EXPECT_EQ(e.getLine(), 1);
+            EXPECT_EQ(e.getColumn(), 1);
+        }
+    }
+}
 
 const map<const string, const Token> IDENTIFIERS {
     { "normal", Token(IDENTIFIER, "normal") },
@@ -239,21 +255,6 @@ const map<const string, const Token> IDENTIFIERS {
     },
 };
 
-const map<const string, const Token> IDENTIFIERS_ERRORS {
-    {
-        string(IDENTIFIER_MAX_SIZE + 1, 'a'),
-        Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
-    },
-    {
-        string(2 * IDENTIFIER_MAX_SIZE, 'a'),
-        Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
-    },
-    {
-        string(10 * IDENTIFIER_MAX_SIZE, 'a'),
-        Token(ERROR_IDENTIFIER_TOO_LONG, string(IDENTIFIER_MAX_SIZE, 'a'))
-    },
-};
-
 TEST(TestLexer, testIdentifiers) {
     for (const auto& [key, value] : IDENTIFIERS) {
         string input = key;
@@ -267,6 +268,36 @@ TEST(TestLexer, testIdentifiers) {
         vector<Lexem> result = lexerize(l);
         EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
+    }
+}
+
+const map<const string, const string> IDENTIFIERS_ERRORS {
+    {
+        string(IDENTIFIER_MAX_SIZE + 1, 'a'),
+        "Identifier too long."
+    },
+    {
+        string(2 * IDENTIFIER_MAX_SIZE, 'a'),
+        "Identifier too long."
+    },
+    {
+        string(10 * IDENTIFIER_MAX_SIZE, 'a'),
+        "Identifier too long."
+    },
+};
+
+TEST(TestLexer, testIdentifiersErrors) {
+    for (const auto& [key, value] : IDENTIFIERS_ERRORS) {
+        string input = key;
+        istringstream in(input);
+        Lexer l(in);
+        try {
+            lexerize(l);
+        } catch (const LexerException& e) {
+            EXPECT_STREQ(e.what(), value.c_str());
+            EXPECT_EQ(e.getLine(), 1);
+            EXPECT_EQ(e.getColumn(), 1);
+        }
     }
 }
 
@@ -293,6 +324,36 @@ TEST(TestLexer, testIntegers) {
         vector<Lexem> result = lexerize(l);
         EXPECT_EQ(expected.size(), result.size());
         compareLexemVectors(expected, result);
+    }
+}
+
+const map<const string, const string> INTEGERS_ERRORS {
+    {
+        to_string(static_cast<long>(numeric_limits<int>::max())+1),
+        "Integer literal out of range."
+    },
+    {
+        to_string(2*static_cast<long>(numeric_limits<int>::max())),
+        "Integer literal out of range."
+    },
+    {
+        to_string(21321) + "a",
+        "Undefined value."
+    },
+};
+
+TEST(TestLexer, testIntegersErrors) {
+    for (const auto& [key, value] : INTEGERS_ERRORS) {
+        string input = key;
+        istringstream in(input);
+        Lexer l(in);
+        try {
+            lexerize(l);
+        } catch (const LexerException& e) {
+            EXPECT_STREQ(e.what(), value.c_str());
+            EXPECT_EQ(e.getLine(), 1);
+            EXPECT_EQ(e.getColumn(), 1);
+        }
     }
 }
 
@@ -377,15 +438,15 @@ const vector<string> NOT_A_TOKENS { ".", "`", "~", "|", "@", "^", "&", "?", "\\"
 
 TEST(TestLexer, testNotATokens) {
     for (const auto& input : NOT_A_TOKENS) {
-        vector<Lexem> expected {
-            {Token(NOT_A_TOKEN, input), 1, 1},
-            {Token(END_OF_FILE), 1, 2},
-        };
         istringstream in(input);
         Lexer l(in);
-        vector<Lexem> result = lexerize(l);
-        EXPECT_EQ(expected.size(), result.size());
-        compareLexemVectors(expected, result);
+        try {
+            lexerize(l);
+        } catch (const LexerException& e) {
+            EXPECT_STREQ(e.what(), "Not a token.");
+            EXPECT_EQ(e.getLine(), 1);
+            EXPECT_EQ(e.getColumn(), 1);
+        }
     }
 }
 
@@ -630,25 +691,6 @@ TEST(TestLexer, testMultilineComments) {
     compareLexemVectors(expected, result);
 }
 
-TEST(TestLexer, testMultilineComments2) {
-    string input =
-"/*abcdefll\n\
-\n\
-\n\
-;'.,:1";
-    vector<Lexem> expected {
-        {Token(ERROR_UNFINISHED_COMMENT, "/*abcdefll\n\n\n;'.,:1"), 1, 1},
-        {Token(END_OF_FILE), 4, 7},
-    };
-    istringstream in(input);
-    Lexer l(in);
-    vector<Lexem> result = lexerize(l);
-
-    EXPECT_EQ(expected.size(), result.size());
-
-    compareLexemVectors(expected, result);
-}
-
 TEST(TestLexer, testIdentifiers2) {
     string input =
 R"(abcd123
@@ -753,13 +795,10 @@ abcd12 1230
     Lexer l(in);
     try {
         lexerize(l);
-        FAIL() << "Expected LexerException to be thrown";
     } catch (const LexerException& e) {
-        EXPECT_STREQ(e.what(), "Undefined value");
+        EXPECT_STREQ(e.what(), "Not a token.");
         EXPECT_EQ(e.getLine(), 1);
-        EXPECT_EQ(e.getColumn(), 1);
-    } catch (...) {
-        FAIL() << "Expected LexerException, but a different exception was thrown";
+        EXPECT_EQ(e.getColumn(), 4);
     }
 }
 
