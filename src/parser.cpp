@@ -80,7 +80,9 @@ std::unique_ptr<Node> Parser::parseVariableDeclaration() {
     assert(current.token.tokenType==token::TokenType::ASSIGN);
     readLex();
     auto expression = parseExpressionStatement();
-    return std::make_unique<VariableDeclaration>(isMutable, identifier, std::move(expression));
+    return std::make_unique<VariableDeclaration>(
+        isMutable, identifier, std::move(expression)
+    );
 }
 
 std::unique_ptr<Node> Parser::parseWhileLoopStatement() {
@@ -112,12 +114,9 @@ std::unique_ptr<Node> Parser::parseReturnStatement() {
 
 std::unique_ptr<Node> Parser::parseExpressionStatement() {
     auto expression = parseExpression();
-    if ( current.token.tokenType == token::SEMICOLON) {
-        readLex();
-        return std::make_unique<ExpressionStatement>(std::move(expression));
-    }
-        return expression;
-
+    assert(current.token.tokenType==token::TokenType::SEMICOLON);
+    readLex();
+    return std::make_unique<ExpressionStatement>(std::move(expression));
 }
 
 std::unique_ptr<Node> Parser::parseExpression() {
@@ -201,9 +200,7 @@ std::unique_ptr<Node> Parser::parseRelationalExpression() {
         );
     }
     return left;
-
 }
-
 
 std::unique_ptr<Node> Parser::parseAdditiveExpression() {
     auto left = parseMultiplicativeExpression();
