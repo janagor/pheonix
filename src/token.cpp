@@ -100,6 +100,14 @@ static const std::map<std::string, TokenType> Keywords = {
 };
 }
 
+TokenType Token::getTokenType() const {
+    return tokenType;
+}
+
+std::optional<std::variant<int, double, std::string>> Token::getValue() const {
+    return value;
+}
+
 bool Token::operator==(const Token& t) const {
     return this->tokenType == t.tokenType && this->value == t.value;
 }
@@ -119,7 +127,7 @@ std::ostream& operator<<(
 }
 
 std::ostream& operator<<(std::ostream& os, const Token& t) {
-    os << "Token(\n\t\ttokenType:``" << TokenTypeToLiteral.at(t.tokenType) << "``, \n\t\tvalue:``" << t.value << "``,\n\t)";
+    os << "Token(\n\t\ttokenType:``" << TokenTypeToLiteral.at(t.getTokenType()) << "``, \n\t\tvalue:``" << t.getValue() << "``,\n\t)";
     return os;
 }
 

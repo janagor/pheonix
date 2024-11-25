@@ -270,7 +270,7 @@ std::vector<Lexem> Lexer::lexerize() {
     while (true) {
         Lexem l = nextLexem();
         result.emplace_back(l);
-        if (l.token.tokenType == token::END_OF_FILE){
+        if (l.token.getTokenType() == token::END_OF_FILE){
             return result;
         }
     }

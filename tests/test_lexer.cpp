@@ -344,7 +344,7 @@ TEST(TestLexer, testIntegersFrom0to1000) {
             {Token(INTEGER, i), 1, 1},
             {Token(END_OF_FILE), 1, shift},
         };
-        assert(std::get<int>(expected[0].token.value.value()) == i);
+        assert(std::get<int>(expected[0].token.getValue().value()) == i);
         istringstream in(input);
         Lexer l(in);
         vector<Lexem> result = l.lexerize();

@@ -78,7 +78,9 @@ struct Token {
     Token(TokenType t, int val) : tokenType(t), value(val) {}
     Token(TokenType t, double val) : tokenType(t), value(val) {}
     bool operator==(const Token& t) const;
-
+    TokenType getTokenType() const;
+    std::optional<std::variant<int, double, std::string>> getValue() const;
+private:
     TokenType tokenType;
     std::optional< std::variant<int, double, std::string > > value;
 };
