@@ -124,11 +124,15 @@ TEST(TestLexer, testOneLineCommentError) {
     Lexer l(in);
     try {
         lexerize(l);
+            FAIL() << "Expected LexerException";
     } catch (const LexerException& e) {
         EXPECT_STREQ(e.what(), "Oneline comment too long.");
         EXPECT_EQ(e.getLine(), 1);
         EXPECT_EQ(e.getColumn(), 1);
-    }
+    } catch (...) {
+            FAIL() << "Unexpected exception type thrown";
+        }
+
 }
 
 TEST(TestLexer, testOneLineComments) {
@@ -183,11 +187,15 @@ TEST(TestLexer, testMultilineCommentError) {
     Lexer l(in);
     try {
         lexerize(l);
+        FAIL() << "Expected LexerException";
     } catch (const LexerException& e) {
         EXPECT_STREQ(e.what(), "Multiline comment too long.");
         EXPECT_EQ(e.getLine(), 1);
         EXPECT_EQ(e.getColumn(), 1);
-    }
+    } catch (...) {
+            FAIL() << "Unexpected exception type thrown";
+        }
+
 }
 
 const map<const string, const Token> STRINGS {
@@ -232,11 +240,15 @@ TEST(TestLexer, testStringErrors) {
         Lexer l(in);
         try {
             lexerize(l);
+        FAIL() << "Expected LexerException";
         } catch (const LexerException& e) {
             EXPECT_STREQ(e.what(), value.c_str());
             EXPECT_EQ(e.getLine(), 1);
             EXPECT_EQ(e.getColumn(), 1);
+        } catch (...) {
+            FAIL() << "Unexpected exception type thrown";
         }
+
     }
 }
 
@@ -293,11 +305,15 @@ TEST(TestLexer, testIdentifiersErrors) {
         Lexer l(in);
         try {
             lexerize(l);
+            FAIL() << "Expected LexerException";
         } catch (const LexerException& e) {
             EXPECT_STREQ(e.what(), value.c_str());
             EXPECT_EQ(e.getLine(), 1);
             EXPECT_EQ(e.getColumn(), 1);
+        } catch (...) {
+            FAIL() << "Unexpected exception type thrown";
         }
+
     }
 }
 
@@ -349,10 +365,15 @@ TEST(TestLexer, testIntegersErrors) {
         Lexer l(in);
         try {
             lexerize(l);
+            FAIL() << "Expected LexerException";
         } catch (const LexerException& e) {
             EXPECT_STREQ(e.what(), value.c_str());
+            std::cout <<  e.what() << std::endl;
+            std::cout <<  value.c_str() << std::endl;
             EXPECT_EQ(e.getLine(), 1);
             EXPECT_EQ(e.getColumn(), 1);
+        } catch (...) {
+            FAIL() << "Unexpected exception type thrown";
         }
     }
 }
@@ -442,11 +463,16 @@ TEST(TestLexer, testNotATokens) {
         Lexer l(in);
         try {
             lexerize(l);
+            std::cout << input << std::endl;
+            FAIL() << "Expected LexerException";
         } catch (const LexerException& e) {
             EXPECT_STREQ(e.what(), "Not a token.");
             EXPECT_EQ(e.getLine(), 1);
             EXPECT_EQ(e.getColumn(), 1);
+        } catch (...) {
+            FAIL() << "Unexpected exception type thrown";
         }
+
     }
 }
 
@@ -795,11 +821,15 @@ abcd12 1230
     Lexer l(in);
     try {
         lexerize(l);
+            FAIL() << "Expected LexerException";
     } catch (const LexerException& e) {
         EXPECT_STREQ(e.what(), "Not a token.");
         EXPECT_EQ(e.getLine(), 1);
         EXPECT_EQ(e.getColumn(), 4);
-    }
+    } catch (...) {
+            FAIL() << "Unexpected exception type thrown";
+        }
+
 }
 
 TEST(TestLexer, testKeywords) {
