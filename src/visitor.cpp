@@ -58,6 +58,9 @@ void TreeGenVisitor::visit(PrefixExpression &pe) {
 void TreeGenVisitor::visit(IntegerLiteral &il) {
     result += il.toString(1);
 }
+void TreeGenVisitor::visit(BoolLiteral &bl) {
+    result += bl.toString(1);
+}
 void TreeGenVisitor::visit(StringLiteral &sl) {
     result += sl.toString(1);
 }

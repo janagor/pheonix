@@ -310,6 +310,13 @@ std::unique_ptr<Node> Parser::parseLiteral() {
     else if (current.token.tokenType == token::STRING) {
         return parseStringLiteral();
     }
+    else if (
+        current.token.tokenType == token::TRUE ||
+        current.token.tokenType == token::FALSE
+
+    ) {
+        return parseBoolLiteral();
+    }
     throw std::runtime_error("Literal type does not exist.");
 }
 
@@ -317,6 +324,12 @@ std::unique_ptr<Node> Parser::parseIntegerLiteral() {
     int val =std::get<int>(*current.token.value);
     readLex();
     return std::make_unique<IntegerLiteral>(val);
+}
+
+std::unique_ptr<Node> Parser::parseBoolLiteral() {
+    bool val = current.token.tokenType == token::TRUE;
+    readLex();
+    return std::make_unique<BoolLiteral>(val);
 }
 
 std::unique_ptr<Node> Parser::parseStringLiteral() {

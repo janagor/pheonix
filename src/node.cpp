@@ -218,6 +218,13 @@ std::string IntegerLiteral::toString(const int shift_size) const {
     ")";
 }
 
+std::string BoolLiteral::toString(const int shift_size) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(BoolLiteral:" + s +
+    "value=" + (value ? "true" : "false") +
+    ")";
+}
+
 std::string StringLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(StringLiteral:" + s +
@@ -301,6 +308,10 @@ void PrefixExpression::accept(Visitor& v) {
 }
 
 void IntegerLiteral::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void BoolLiteral::accept(Visitor& v) {
     v.visit(*this);
 }
 

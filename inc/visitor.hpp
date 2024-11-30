@@ -19,6 +19,7 @@ class MultiplicativeExpression;
 class CastExpression;
 class PrefixExpression;
 class IntegerLiteral;
+class BoolLiteral;
 class StringLiteral;
 class TypeSpecifier;
 
@@ -42,6 +43,7 @@ public:
     virtual void visit(CastExpression&) = 0;
     virtual void visit(PrefixExpression&) = 0;
     virtual void visit(IntegerLiteral&) = 0;
+    virtual void visit(BoolLiteral&) = 0;
     virtual void visit(StringLiteral&) = 0;
     virtual void visit(TypeSpecifier&) = 0;
     virtual ~Visitor() = default;
@@ -70,6 +72,7 @@ public:
     void visit(CastExpression &ce) override;
     void visit(PrefixExpression &pe) override;
     void visit(IntegerLiteral &il) override;
+    void visit(BoolLiteral &il) override;
     void visit(StringLiteral &sl) override;
     void visit(TypeSpecifier &ts) override;
 

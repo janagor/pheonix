@@ -32,6 +32,7 @@ private:
     std::unique_ptr<Node> parsePrefixExpression();
     std::unique_ptr<Node> parseLiteral();
     std::unique_ptr<Node> parseIntegerLiteral();
+    std::unique_ptr<Node> parseBoolLiteral();
     std::unique_ptr<Node> parseStringLiteral();
     std::unique_ptr<Node> parseTypeSpecifier();
     void readLex();

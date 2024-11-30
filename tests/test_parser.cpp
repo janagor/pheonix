@@ -35,6 +35,21 @@ const map<string, string> TRIVIAL_CASES {
         expression=(StringLiteral:\n\
             value=duck)))"
     },
+    // BoolLiteral
+    {
+"true;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(BoolLiteral:\n\
+            value=true)))"
+    },
+    {
+"false;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(BoolLiteral:\n\
+            value=false)))"
+    },
     // CastExpression
     {
 "1<-int;",
