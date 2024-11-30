@@ -307,6 +307,9 @@ std::unique_ptr<Node> Parser::parseLiteral() {
     if (current.token.tokenType == token::INTEGER) {
         return parseIntegerLiteral();
     }
+    else if (current.token.tokenType == token::FLOAT) {
+    return parseFloatLiteral();
+    }
     else if (current.token.tokenType == token::STRING) {
         return parseStringLiteral();
     }
@@ -324,6 +327,12 @@ std::unique_ptr<Node> Parser::parseIntegerLiteral() {
     int val =std::get<int>(*current.token.value);
     readLex();
     return std::make_unique<IntegerLiteral>(val);
+}
+
+std::unique_ptr<Node> Parser::parseFloatLiteral() {
+    double val =std::get<double>(*current.token.value);
+    readLex();
+    return std::make_unique<FloatLiteral>(val);
 }
 
 std::unique_ptr<Node> Parser::parseBoolLiteral() {

@@ -1,5 +1,7 @@
 #include "../inc/node.hpp"
 #include "../inc/visitor.hpp"
+#include <sstream>
+#include <iomanip>
 
 std::string opToString(const token::TokenType& tok) {
     switch (tok) {
@@ -218,6 +220,15 @@ std::string IntegerLiteral::toString(const int shift_size) const {
     ")";
 }
 
+std::string FloatLiteral::toString(const int shift_size) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::ostringstream dblAsStr;
+    dblAsStr << std::fixed << std::setprecision(3) << value;
+    return "(FloatLiteral:" + s +
+    "value=" + dblAsStr.str() +
+    ")";
+}
+
 std::string BoolLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(BoolLiteral:" + s +
@@ -308,6 +319,10 @@ void PrefixExpression::accept(Visitor& v) {
 }
 
 void IntegerLiteral::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void FloatLiteral::accept(Visitor& v) {
     v.visit(*this);
 }
 

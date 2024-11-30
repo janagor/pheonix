@@ -50,6 +50,14 @@ const map<string, string> TRIVIAL_CASES {
         expression=(BoolLiteral:\n\
             value=false)))"
     },
+    // FloatLiteral
+    {
+"1.1;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(FloatLiteral:\n\
+            value=1.100)))"
+    },
     // CastExpression
     {
 "1<-int;",

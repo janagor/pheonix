@@ -215,6 +215,13 @@ struct PrefixExpression: public Node {
     void accept(Visitor& v) override;
 };
 
+ struct FloatLiteral: public Node {
+    double value;
+    FloatLiteral(double val): Node(), value(val) {};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
  struct BoolLiteral: public Node {
     bool value;
     BoolLiteral(bool val): Node(), value(val) {};
