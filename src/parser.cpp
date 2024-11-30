@@ -1,5 +1,6 @@
 #include "../inc/parser.hpp"
 #include <string>
+#include <stdexcept>
 #include <cassert>
 #include <cstdlib>
 using namespace parser;
@@ -293,13 +294,35 @@ std::unique_ptr<Node> Parser::parsePrefixExpression() {
     ) {
         token::TokenType op = current.token.tokenType;
         readLex();
-        expression = parseIntegerLiteral();
+        expression = parseLiteral();
         return std::make_unique<PrefixExpression>(
             op, std::move(expression)
         );
     }
-    expression = parseIntegerLiteral();
+    expression = parseLiteral();
     return expression;
+}
+
+std::unique_ptr<Node> Parser::parseLiteral() {
+    if (current.token.tokenType == token::INTEGER) {
+        return parseIntegerLiteral();
+    }
+    else if (current.token.tokenType == token::STRING) {
+        return parseStringLiteral();
+    }
+    throw std::runtime_error("Literal type does not exist.");
+}
+
+std::unique_ptr<Node> Parser::parseIntegerLiteral() {
+    int val =std::get<int>(*current.token.value);
+    readLex();
+    return std::make_unique<IntegerLiteral>(val);
+}
+
+std::unique_ptr<Node> Parser::parseStringLiteral() {
+    std::string val = std::get<std::string>(*current.token.value);
+    readLex();
+    return std::make_unique<StringLiteral>(val);
 }
 
 std::unique_ptr<Node> Parser::parseTypeSpecifier() {
@@ -311,12 +334,6 @@ std::unique_ptr<Node> Parser::parseTypeSpecifier() {
     }
     // TODO: ERROR HANDLING
     return std::make_unique<TypeSpecifier>(token::TokenType::STR);
-}
-
-std::unique_ptr<Node> Parser::parseIntegerLiteral() {
-    int val =std::get<int>(*current.token.value);
-    readLex();
-    return std::make_unique<IntegerLiteral>(val);
 }
 
 std::unique_ptr<Node> Parser::generateParsingTree() {

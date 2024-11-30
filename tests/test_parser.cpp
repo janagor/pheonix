@@ -27,6 +27,14 @@ const map<string, string> TRIVIAL_CASES {
         expression=(IntegerLiteral:\n\
             value=1)))"
     },
+    // StringLiteral
+    {
+"\"duck\";",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(StringLiteral:\n\
+            value=duck)))"
+    },
     // CastExpression
     {
 "1<-int;",

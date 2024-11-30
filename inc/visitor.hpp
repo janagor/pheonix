@@ -18,8 +18,9 @@ class AdditiveExpression;
 class MultiplicativeExpression;
 class CastExpression;
 class PrefixExpression;
-class TypeSpecifier;
 class IntegerLiteral;
+class StringLiteral;
+class TypeSpecifier;
 
 class Visitor {
 public:
@@ -41,6 +42,7 @@ public:
     virtual void visit(CastExpression&) = 0;
     virtual void visit(PrefixExpression&) = 0;
     virtual void visit(IntegerLiteral&) = 0;
+    virtual void visit(StringLiteral&) = 0;
     virtual void visit(TypeSpecifier&) = 0;
     virtual ~Visitor() = default;
 };
@@ -67,8 +69,9 @@ public:
     void visit(AdditiveExpression &ae) override;
     void visit(CastExpression &ce) override;
     void visit(PrefixExpression &pe) override;
-    void visit(TypeSpecifier &ts) override;
     void visit(IntegerLiteral &il) override;
+    void visit(StringLiteral &sl) override;
+    void visit(TypeSpecifier &ts) override;
 
 private:
         std::string result;

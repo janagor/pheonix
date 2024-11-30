@@ -208,6 +208,20 @@ struct PrefixExpression: public Node {
     void accept(Visitor& v) override;
 };
 
+ struct IntegerLiteral: public Node {
+    int value;
+    IntegerLiteral(int val): Node(), value(val) {};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
+ struct StringLiteral: public Node {
+    std::string value;
+    StringLiteral(const std::string& val): Node(), value(val) {};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
 enum TypeName : int {
     ERROR = 0,
     STR,
@@ -216,14 +230,14 @@ enum TypeName : int {
     BOL,
 };
 
-const std::map<token::TokenType, TypeName> TokenToType {
+static const std::map<token::TokenType, TypeName> TokenToType {
     { token::TokenType::INT, TypeName::INT },
     { token::TokenType::STR, TypeName::STR },
     { token::TokenType::FLT, TypeName::FLT },
     { token::TokenType::BOL, TypeName::BOL }
 };
 
-const std::map<TypeName, std::string> TypeToString {
+static const std::map<TypeName, std::string> TypeToString {
     { TypeName::INT, "int" },
     { TypeName::STR, "str" },
     { TypeName::FLT, "flt" },
@@ -234,13 +248,6 @@ const std::map<TypeName, std::string> TypeToString {
     TypeName typeName;
     TypeSpecifier(const TypeName& type): Node(), typeName(type) {};
     TypeSpecifier(const token::TokenType& token): Node(), typeName(TokenToType.at(token)) {};
-    std::string toString(const int shift_size) const override;
-    void accept(Visitor& v) override;
-};
-
- struct IntegerLiteral: public Node {
-    int value;
-    IntegerLiteral(int val): Node(), value(val) {};
     std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;
 };

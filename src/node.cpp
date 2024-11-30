@@ -88,19 +88,19 @@ std::string FunctionDeclaration::toString(const int shift_size=1) const {
 
 std::string WhileLoopStatement::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    std::string result = "(WhileLoopStatement:" + s + 
-        "expression=" + expression->toString(shift_size + 1) + "," + s +
-        "statements=" + statements->toString(shift_size + 1) + ")";
-    return result;
+    return "(WhileLoopStatement:" + s + 
+    "expression=" + expression->toString(shift_size + 1) + "," + s +
+    "statements=" + statements->toString(shift_size + 1) +
+    ")";
 }
 
 std::string IfStatement::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    std::string result = "(IfStatement:" + s + 
-        "predicate=" + predicate->toString(shift_size + 1) + "," + s +
-        "ifBody=" + ifBody->toString(shift_size + 1) + "," + s +
-        "elseBody=" + (elseBody.get() ? elseBody->toString(shift_size + 1) : "") + ")";
-    return result;
+    return "(IfStatement:" + s + 
+    "predicate=" + predicate->toString(shift_size + 1) + "," + s +
+    "ifBody=" + ifBody->toString(shift_size + 1) + "," + s +
+    "elseBody=" + (elseBody.get() ? elseBody->toString(shift_size + 1) : "") +
+    ")";
 }
 
 std::string VariableDeclaration::toString(const int shift_size=1) const {
@@ -211,17 +211,24 @@ std::string PrefixExpression::toString(const int shift_size) const  {
     ")";
 }
 
-std::string TypeSpecifier::toString(const int shift_size) const {
-    std::string s = "\n" + std::string(shift_size*4, ' ');
-    return "(TypeSpecifier:" + s +
-    "value=" + TypeToString.at(typeName) +
-    ")";
-}
-
 std::string IntegerLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(IntegerLiteral:" + s +
     "value=" + std::to_string(value) +
+    ")";
+}
+
+std::string StringLiteral::toString(const int shift_size) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(StringLiteral:" + s +
+    "value=" + value +
+    ")";
+}
+
+std::string TypeSpecifier::toString(const int shift_size) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(TypeSpecifier:" + s +
+    "value=" + TypeToString.at(typeName) +
     ")";
 }
 
@@ -293,10 +300,14 @@ void PrefixExpression::accept(Visitor& v) {
     v.visit(*this);
 }
 
-void TypeSpecifier::accept(Visitor& v) {
+void IntegerLiteral::accept(Visitor& v) {
     v.visit(*this);
 }
 
-void IntegerLiteral::accept(Visitor& v) {
+void StringLiteral::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void TypeSpecifier::accept(Visitor& v) {
     v.visit(*this);
 }
