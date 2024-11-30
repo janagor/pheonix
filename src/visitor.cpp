@@ -7,6 +7,9 @@ std::string TreeGenVisitor::getResult() {
 void TreeGenVisitor::visit(Program &p) {
     result += p.toString(1);
 }
+void TreeGenVisitor::visit(Block &b) {
+    result += b.toString(1);
+}
 void TreeGenVisitor::visit(FunctionDeclaration &fd) {
     result += fd.toString(1);
 }

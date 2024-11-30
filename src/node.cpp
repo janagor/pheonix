@@ -55,6 +55,19 @@ std::string Program::toString(const int shift_size=1) const {
     result += ")";
     return result;
 }
+
+std::string Block::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::string result = "(Block:" + s;
+    for (size_t i = 0; i < statements.size(); ++i) {
+        result += statements[i]->toString(shift_size + 1);
+        if (i!=statements.size()-1)
+            result += "," + s;
+    }
+    result += ")";
+    return result;
+}
+
 // statements
 std::string FunctionDeclaration::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
@@ -83,13 +96,7 @@ std::string WhileLoopStatement::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string result = "(WhileLoopStatement:" + s + 
         "expression=" + expression->toString(shift_size + 1) + "," + s +
-        "statements=(" + s + "    ";
-    for (size_t i = 0; i < statements.size(); ++i) {
-        result += statements[i]->toString(shift_size + 2);
-        if (i!=statements.size()-1)
-            result += "," + s;
-    }
-    result += "))";
+        "statements=" + statements->toString(shift_size + 1) + ")";
     return result;
 }
 
@@ -237,6 +244,10 @@ std::string IntegerLiteral::toString(const int shift_size) const {
 }
 
 void Program::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void Block::accept(Visitor& v) {
     v.visit(*this);
 }
 

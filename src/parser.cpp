@@ -12,6 +12,20 @@ std::unique_ptr<Node> Parser::parseProgram() {
     return program;
 }
 
+std::unique_ptr<Node> Parser::parseBlock() {
+    auto block = std::make_unique<Block>();
+    assert(current.token.tokenType==token::TokenType::LBRACE);
+    readLex();
+    while (current.token.tokenType != token::RBRACE) {
+        auto statement = parseStatement();
+        block->statements.push_back(std::move(statement));
+    }
+    assert(current.token.tokenType==token::TokenType::RBRACE);
+    readLex();
+    
+    return block;
+}
+
 std::unique_ptr<Node> Parser::parseStatement() {
     std::unique_ptr<Node> node;
     switch (current.token.tokenType) {
@@ -93,17 +107,15 @@ std::unique_ptr<Node> Parser::parseWhileLoopStatement() {
     assert(current.token.tokenType==token::TokenType::LPARENT);
     readLex();
     auto expression = parseExpression();
-    auto whileLoopStmt = std::make_unique<WhileLoopStatement>(std::move(expression));
+
     assert(current.token.tokenType==token::TokenType::RPARENT);
     readLex();
-    assert(current.token.tokenType==token::TokenType::LBRACE);
-    readLex();
-    while ( current.token.tokenType != token::RBRACE) {
-        auto statement = parseStatement();
-        whileLoopStmt->statements.push_back(std::move(statement));
-    }
-    assert(current.token.tokenType==token::TokenType::RBRACE);
-    readLex();
+    auto block = parseBlock();
+
+    auto whileLoopStmt = std::make_unique<WhileLoopStatement>(
+        std::move(expression),
+        std::move(block)
+    );
     return whileLoopStmt;
 }
 
@@ -124,6 +136,22 @@ std::unique_ptr<Node> Parser::parseIfStatement() {
     }
     assert(current.token.tokenType==token::TokenType::RBRACE);
     readLex();
+
+    if ( current.token.tokenType == token::ELSE) {
+        std::cout << "ELSE FOUND" << std::endl;
+        readLex();
+        if (current.token.tokenType == token::IF) {
+            auto elseIfStmt = parseIfStatement();
+            ifStmt->elseBody.push_back(std::move(elseIfStmt));
+        } else {
+            assert(current.token.tokenType==token::TokenType::LBRACE);
+            readLex();
+            while ( current.token.tokenType != token::RBRACE) {
+                auto statement = parseStatement();
+                ifStmt->elseBody.push_back(std::move(statement));
+            }
+        }
+    }
     return ifStmt;
 }
 

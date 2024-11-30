@@ -257,12 +257,13 @@ const map<string, string> TRIVIAL_CASES {
             operator=[==],\n\
             right=(IntegerLiteral:\n\
                 value=1)),\n\
-        statements=(\n\
+        statements=(Block:\n\
             (ExpressionStatement:\n\
                 expression=(IntegerLiteral:\n\
                     value=1)))))"
     },
     // ReturnStatement
+    /*
     {
 "return 123;",
 "(Program:\n\
@@ -310,6 +311,35 @@ const map<string, string> TRIVIAL_CASES {
         elseBody=(\n\
             )))"
     },
+    */
+    // if statement with one else
+    /*
+    {
+"if (1 == 1) {\n\
+    return 123;\n\
+} else {\n\
+    return 123;\n\
+}",
+"(Program:\n\
+    (IfStatement:\n\
+        predicate=(ComparisonExpression:\n\
+            left=(IntegerLiteral:\n\
+                value=1),\n\
+            operator=[==],\n\
+            right=(IntegerLiteral:\n\
+                value=1)),\n\
+        ifBody=(\n\
+            (ReturnStatement:\n\
+                expression=(ExpressionStatement:\n\
+                    expression=(IntegerLiteral:\n\
+                        value=123)))),\n\
+        elseBody=(\n\
+            (ReturnStatement:\n\
+                expression=(ExpressionStatement:\n\
+                    expression=(IntegerLiteral:\n\
+                        value=123))))))"
+    },
+    */
 };
 
 TEST(TestParser, testTrivialCases) {

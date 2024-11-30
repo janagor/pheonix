@@ -2,6 +2,7 @@
 
 #include <iostream>
 class Program;
+class Block;
 class FunctionDeclaration;
 class VariableDeclaration;
 class WhileLoopStatement;
@@ -23,6 +24,7 @@ class IntegerLiteral;
 class Visitor {
 public:
     virtual void visit(Program&) = 0;
+    virtual void visit(Block&) = 0;
     virtual void visit(FunctionDeclaration&) = 0;
     virtual void visit(VariableDeclaration&) = 0;
     virtual void visit(WhileLoopStatement&) = 0;
@@ -49,6 +51,7 @@ public:
     std::string getResult();
 
     void visit(Program &p) override;
+    void visit(Block &p) override;
     void visit(FunctionDeclaration &fd) override;
     void visit(VariableDeclaration &vd) override;
     void visit(WhileLoopStatement &wls) override;

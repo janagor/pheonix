@@ -15,6 +15,16 @@ struct Node {
     virtual void accept(Visitor& v) = 0;
 };
 
+struct Block: public Node {
+    std::vector<std::unique_ptr<Node>> statements;
+
+    Block(): Node() {};
+
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
+
 struct Program: public Node {
     std::vector<std::unique_ptr<Node>> statements;
 
@@ -72,10 +82,10 @@ struct VariableDeclaration: public Node {
 
 struct WhileLoopStatement: public Node {
     std::unique_ptr<Node> expression;
-    std::vector<std::unique_ptr<Node>> statements;
+    std::unique_ptr<Node> statements;
 
-    WhileLoopStatement(std::unique_ptr<Node> e):
-        Node(), expression(std::move(e)) {};
+    WhileLoopStatement(std::unique_ptr<Node> e, std::unique_ptr<Node> s):
+        Node(), expression(std::move(e)), statements(std::move(s)) {};
 
     std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;
