@@ -40,7 +40,7 @@ struct FunctionDeclaration: public Node {
 
     std::string identifier;
     std::vector<Parameter> parameters;
-    std::vector<std::unique_ptr<Node>> statements;
+    std::unique_ptr<Node> statements;
 
     FunctionDeclaration( std::string i):
         Node(), identifier(i) {};
@@ -93,11 +93,11 @@ struct WhileLoopStatement: public Node {
 
 struct IfStatement: public Node {
     std::unique_ptr<Node> predicate;
-    std::vector<std::unique_ptr<Node>> ifBody;
-    std::vector<std::unique_ptr<Node>> elseBody;
+    std::unique_ptr<Node> ifBody;
+    std::unique_ptr<Node> elseBody;
 
     IfStatement(std::unique_ptr<Node> pred):
-        Node(), predicate(std::move(pred)) {};
+        Node(), predicate(std::move(pred)), ifBody(nullptr), elseBody(nullptr) {};
 
     std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;

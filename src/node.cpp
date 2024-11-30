@@ -82,13 +82,7 @@ std::string FunctionDeclaration::toString(const int shift_size=1) const {
     }
     result += "))," + s;
 
-    result += "statements=(" + s + "    ";
-    for (size_t i = 0; i < statements.size(); ++i) {
-        result += statements[i]->toString(shift_size + 2);
-        if (i!=statements.size()-1)
-            result += "," + s;
-    }
-    result += "))";
+    result += "statements=" + statements->toString(shift_size + 1) + ")";
     return result;
 }
 
@@ -104,20 +98,8 @@ std::string IfStatement::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string result = "(IfStatement:" + s + 
         "predicate=" + predicate->toString(shift_size + 1) + "," + s +
-        "ifBody=(" + s + "    ";
-    for (size_t i = 0; i < ifBody.size(); ++i) {
-        result += ifBody[i]->toString(shift_size + 2);
-        if (i!=ifBody.size()-1)
-            result += "," + s;
-    }
-    result += ")," + s + 
-        "elseBody=(" + s + "    ";
-    for (size_t i = 0; i < elseBody.size(); ++i) {
-        result += elseBody[i]->toString(shift_size + 2);
-        if (i!=elseBody.size()-1)
-            result += "," + s;
-    }
-    result += "))";
+        "ifBody=" + ifBody->toString(shift_size + 1) + "," + s +
+        "elseBody=" + (elseBody.get() ? elseBody->toString(shift_size + 1) : "") + ")";
     return result;
 }
 
