@@ -5,6 +5,7 @@ class Program;
 class FunctionDeclaration;
 class VariableDeclaration;
 class WhileLoopStatement;
+class IfStatement;
 class ReturnStatement;
 class ExpressionStatement;
 class AssignementExpression;
@@ -25,6 +26,7 @@ public:
     virtual void visit(FunctionDeclaration&) = 0;
     virtual void visit(VariableDeclaration&) = 0;
     virtual void visit(WhileLoopStatement&) = 0;
+    virtual void visit(IfStatement&) = 0;
     virtual void visit(ReturnStatement&) = 0;
     virtual void visit(ExpressionStatement&) = 0;
     virtual void visit(AssignementExpression&) = 0;
@@ -50,6 +52,7 @@ public:
     void visit(FunctionDeclaration &fd) override;
     void visit(VariableDeclaration &vd) override;
     void visit(WhileLoopStatement &wls) override;
+    void visit(IfStatement &wls) override;
     void visit(ReturnStatement &rs) override;
     void visit(ExpressionStatement &es) override;
     void visit(AssignementExpression &ae) override;

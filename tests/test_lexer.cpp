@@ -209,7 +209,7 @@ const map<const string, const Token> INTEGERS {
         Token(ERROR_INTEGER_OUT_OF_BOUND, string(NUMERIC_MAX_SIZE, '1'))
     },
     {
-        string("33333" + NUMERIC_MAX_SIZE*2, '1'),
+        "33333" + string(NUMERIC_MAX_SIZE*2, '1'),
         Token(
             ERROR_INTEGER_OUT_OF_BOUND,
             "33333" + string((NUMERIC_MAX_SIZE-5), '1')

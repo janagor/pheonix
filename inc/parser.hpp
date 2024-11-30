@@ -15,6 +15,7 @@ private:
     std::unique_ptr<Node> parseFunctionDeclaration();
     std::unique_ptr<Node> parseVariableDeclaration();
     std::unique_ptr<Node> parseWhileLoopStatement();
+    std::unique_ptr<Node> parseIfStatement();
     std::unique_ptr<Node> parseReturnStatement();
     std::unique_ptr<Node> parseStatement();
     std::unique_ptr<Node> parseExpressionStatement();

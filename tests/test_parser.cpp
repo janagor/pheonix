@@ -271,6 +271,7 @@ const map<string, string> TRIVIAL_CASES {
             expression=(IntegerLiteral:\n\
                 value=123))))"
     },
+    // function declaration
     {
 "fn returnOne(mut num) {\n\
     return 123;\n\
@@ -287,6 +288,27 @@ const map<string, string> TRIVIAL_CASES {
                 expression=(ExpressionStatement:\n\
                     expression=(IntegerLiteral:\n\
                         value=123))))))"
+    },
+    // if statement without else
+    {
+"if (1 == 1) {\n\
+    return 123;\n\
+}",
+"(Program:\n\
+    (IfStatement:\n\
+        predicate=(ComparisonExpression:\n\
+            left=(IntegerLiteral:\n\
+                value=1),\n\
+            operator=[==],\n\
+            right=(IntegerLiteral:\n\
+                value=1)),\n\
+        ifBody=(\n\
+            (ReturnStatement:\n\
+                expression=(ExpressionStatement:\n\
+                    expression=(IntegerLiteral:\n\
+                        value=123)))),\n\
+        elseBody=(\n\
+            )))"
     },
 };
 

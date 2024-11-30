@@ -19,6 +19,8 @@ std::unique_ptr<Node> Parser::parseStatement() {
         return parseVariableDeclaration();
     case token::WHILE:
         return parseWhileLoopStatement();
+    case token::IF:
+        return parseIfStatement();
     case token::FN:
         return parseFunctionDeclaration();
     case token::RETURN:
@@ -103,6 +105,26 @@ std::unique_ptr<Node> Parser::parseWhileLoopStatement() {
     assert(current.token.tokenType==token::TokenType::RBRACE);
     readLex();
     return whileLoopStmt;
+}
+
+std::unique_ptr<Node> Parser::parseIfStatement() {
+    assert(current.token.tokenType==token::TokenType::IF);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::LPARENT);
+    readLex();
+    auto predicate = parseExpression();
+    auto ifStmt = std::make_unique<IfStatement>(std::move(predicate));
+    assert(current.token.tokenType==token::TokenType::RPARENT);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::LBRACE);
+    readLex();
+    while ( current.token.tokenType != token::RBRACE) {
+        auto statement = parseStatement();
+        ifStmt->ifBody.push_back(std::move(statement));
+    }
+    assert(current.token.tokenType==token::TokenType::RBRACE);
+    readLex();
+    return ifStmt;
 }
 
 std::unique_ptr<Node> Parser::parseReturnStatement() {

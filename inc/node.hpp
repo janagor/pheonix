@@ -81,6 +81,18 @@ struct WhileLoopStatement: public Node {
     void accept(Visitor& v) override;
 };
 
+struct IfStatement: public Node {
+    std::unique_ptr<Node> predicate;
+    std::vector<std::unique_ptr<Node>> ifBody;
+    std::vector<std::unique_ptr<Node>> elseBody;
+
+    IfStatement(std::unique_ptr<Node> pred):
+        Node(), predicate(std::move(pred)) {};
+
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
 struct ReturnStatement: public Node {
     std::unique_ptr<Node> expression;
     ReturnStatement(std::unique_ptr<Node> e):
