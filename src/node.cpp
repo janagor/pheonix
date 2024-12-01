@@ -240,6 +240,14 @@ std::string Identifier::toString(const int shift_size) const {
     ")";
 }
 
+std::string ParentExpression::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return
+    "(ParentExpression:" + s +
+    "expression=" + expression->toString(shift_size + 1) +
+    ")";
+}
+
 std::string IntegerLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(IntegerLiteral:" + s +
@@ -335,6 +343,9 @@ void CallArguments::accept(Visitor& v) {
     v.visit(*this);
 }
 void Identifier::accept(Visitor& v) {
+    v.visit(*this);
+}
+void ParentExpression::accept(Visitor& v) {
     v.visit(*this);
 }
 void IntegerLiteral::accept(Visitor& v) {

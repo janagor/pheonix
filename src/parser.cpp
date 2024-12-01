@@ -304,6 +304,8 @@ std::unique_ptr<Node> Parser::parsePrefixExpression() {
     }
     if (current.token.tokenType == token::IDENTIFIER)
         expression = parseIdentifierLike();
+    else if (current.token.tokenType == token::LPARENT)
+        expression = parseParentExpression();
     else
         expression = parseLiteral();
     return expression;
@@ -336,6 +338,15 @@ std::unique_ptr<Node> Parser::parseCallArguments() {
     assert(current.token.tokenType==token::TokenType::RPARENT);
     readLex();
     return arguments;
+}
+
+std::unique_ptr<Node> Parser::parseParentExpression() {
+    assert(current.token.tokenType==token::TokenType::LPARENT);
+    readLex();
+    auto pExpression = std::make_unique<ParentExpression>(parseExpression());
+    assert(current.token.tokenType==token::TokenType::RPARENT);
+    readLex();
+    return pExpression;
 }
 
 std::unique_ptr<Node> Parser::parseLiteral() {

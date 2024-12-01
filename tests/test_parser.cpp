@@ -420,6 +420,28 @@ const map<string, string> TRIVIAL_CASES {
                 (IntegerLiteral:\n\
                     value=1)))))"
     },
+    /*
+    {
+"(call)(1);",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(ParentExpression:(\n\
+                expression=Identifier:\n\
+                    value=call)),\n\
+            arguments=(CallArguments:\n\
+                (IntegerLiteral:\n\
+                    value=1)))))"
+    },
+    */
+    {
+"(1);",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(ParentExpression:\n\
+            expression=(IntegerLiteral:\n\
+                value=1))))"
+    },
 };
 
 TEST(TestParser, testTrivialCases) {

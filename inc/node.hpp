@@ -231,6 +231,14 @@ struct CallArguments: public Node {
     void accept(Visitor& v) override;
 };
 
+struct ParentExpression: public Node {
+    std::unique_ptr<Node> expression;
+    ParentExpression(std::unique_ptr<Node> e):
+        Node(), expression(std::move(e)){};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
  struct IntegerLiteral: public Node {
     int value;
     IntegerLiteral(int val): Node(), value(val) {};

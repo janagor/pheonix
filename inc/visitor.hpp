@@ -20,8 +20,9 @@ class CastExpression;
 class PrefixExpression;
 class CallExpression;
 class CallArguments;
-class IntegerLiteral;
 class Identifier;
+class ParentExpression;
+class IntegerLiteral;
 class FloatLiteral;
 class BoolLiteral;
 class StringLiteral;
@@ -49,6 +50,7 @@ public:
     virtual void visit(CallExpression&) = 0;
     virtual void visit(CallArguments&) = 0;
     virtual void visit(Identifier&) = 0;
+    virtual void visit(ParentExpression&) = 0;
     virtual void visit(IntegerLiteral&) = 0;
     virtual void visit(FloatLiteral&) = 0;
     virtual void visit(BoolLiteral&) = 0;
@@ -82,6 +84,7 @@ public:
     void visit(CallExpression &ce) override;
     void visit(CallArguments &ca) override;
     void visit(Identifier &i) override;
+    void visit(ParentExpression &pe) override;
     void visit(IntegerLiteral &il) override;
     void visit(FloatLiteral &fl) override;
     void visit(BoolLiteral &il) override;
