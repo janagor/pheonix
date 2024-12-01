@@ -13,6 +13,8 @@ struct Parser {
 private:
     std::unique_ptr<Node> parseProgram();
     std::unique_ptr<Node> parseBlock();
+    std::unique_ptr<Node> parseDeclarationArguments();
+    std::unique_ptr<Node> parseParameter();
     std::unique_ptr<Node> parseFunctionDeclaration();
     std::unique_ptr<Node> parseVariableDeclaration();
     std::unique_ptr<Node> parseWhileLoopStatement();

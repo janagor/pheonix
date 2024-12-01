@@ -2,6 +2,8 @@
 
 #include <iostream>
 class Program;
+class Parameter;
+class DeclarationArguments;
 class Block;
 class FunctionDeclaration;
 class VariableDeclaration;
@@ -31,6 +33,8 @@ class TypeSpecifier;
 class Visitor {
 public:
     virtual void visit(Program&) = 0;
+    virtual void visit(Parameter&) = 0;
+    virtual void visit(DeclarationArguments&) = 0;
     virtual void visit(Block&) = 0;
     virtual void visit(FunctionDeclaration&) = 0;
     virtual void visit(VariableDeclaration&) = 0;
@@ -65,6 +69,8 @@ public:
     std::string getResult();
 
     void visit(Program &p) override;
+    void visit(Parameter &p) override;
+    void visit(DeclarationArguments &p) override;
     void visit(Block &p) override;
     void visit(FunctionDeclaration &fd) override;
     void visit(VariableDeclaration &vd) override;

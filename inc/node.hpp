@@ -34,38 +34,38 @@ struct Program: public Node {
     void accept(Visitor& v) override;
 };
 
+struct Parameter: public Node {
+    Parameter(bool isMut, const std::string& ident):
+        Node(),
+        isMutable(isMut),
+        identifier(ident)
+    {}
+    bool isMutable;
+    std::string identifier;
+
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
+struct DeclarationArguments: public Node {
+    DeclarationArguments(): Node() {}
+    std::vector<std::unique_ptr<Node>> arguments;
+
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
 // Statements
 struct FunctionDeclaration: public Node {
-    struct Parameter;
-
     std::string identifier;
-    std::vector<Parameter> parameters;
+    std::unique_ptr<Node> arguments;
     std::unique_ptr<Node> statements;
 
     FunctionDeclaration( std::string i):
         Node(), identifier(i) {};
 
-    void push_parameter(bool isMut, std::string ident) {
-        parameters.push_back(Parameter(isMut, ident));
-    }
-
     std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;
 
-    struct Parameter {
-        Parameter(bool isMut, std::string ident):
-            isMutable(isMut),
-            identifier(ident)
-        {}
-        bool isMutable;
-        std::string identifier;
-        std::string toString(const int shift_size) const {
-            std::string s = "\n" + std::string(shift_size*4, ' ');
-            return "parameter=(" + s + 
-            "isMutable=" + (isMutable ? "true" : "false") + "," + s +
-            "identifier=" + identifier + ")";
-        }
-    };
 };
 
 struct VariableDeclaration: public Node {
@@ -217,13 +217,6 @@ struct CallExpression: public Node {
     void accept(Visitor& v) override;
 };
 
-struct CallArguments: public Node {
-    std::vector<std::unique_ptr<Node>> arguments;
-    CallArguments(): Node() {};
-    std::string toString(const int shift_size) const override;
-    void accept(Visitor& v) override;
-};
-
  struct Identifier: public Node {
     std::string value;
     Identifier(const std::string& val): Node(), value(val) {};
@@ -293,6 +286,13 @@ static const std::map<TypeName, std::string> TypeToString {
     TypeName typeName;
     TypeSpecifier(const TypeName& type): Node(), typeName(type) {};
     TypeSpecifier(const token::TokenType& token): Node(), typeName(TokenToType.at(token)) {};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
+struct CallArguments: public Node {
+    std::vector<std::unique_ptr<Node>> arguments;
+    CallArguments(): Node() {};
     std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;
 };

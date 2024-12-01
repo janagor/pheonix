@@ -58,6 +58,26 @@ std::string Program::toString(const int shift_size=1) const {
     return result;
 }
 
+std::string Parameter::toString(const int shift_size) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(Parameter:" + s + 
+    "isMutable=" + (isMutable ? "true" : "false") + "," + s +
+    "identifier=" + identifier + ")";
+}
+
+std::string DeclarationArguments::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::string result = "(DeclarationArguments:";
+    if (arguments.size()) result += s;
+    for (size_t i = 0; i < arguments.size(); ++i) {
+        result += arguments[i]->toString(shift_size + 1);
+        if (i != arguments.size()-1)
+            result += "," + s;
+    }
+    result += ")";
+    return result;
+}
+
 std::string Block::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string result = "(Block:" + s;
@@ -73,19 +93,11 @@ std::string Block::toString(const int shift_size=1) const {
 // statements
 std::string FunctionDeclaration::toString(const int shift_size=1) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    std::string result = "(FunctionDeclaration:" + s +
+    return "(FunctionDeclaration:" + s +
     "identifier=" + identifier + "," + s +
-    "parameterList=(" + s + "    (";
-
-    for (size_t i = 0; i < parameters.size(); ++i) {
-        result += parameters[i].toString(shift_size + 2);
-        if (i!=parameters.size()-1)
-            result += "," + s;
-    }
-    result += "))," + s;
-
-    result += "statements=" + statements->toString(shift_size + 1) + ")";
-    return result;
+    "arguments=" + arguments->toString(shift_size + 1) + "," + s +
+    "statements=" + statements->toString(shift_size + 1) +
+    ")";
 }
 
 std::string WhileLoopStatement::toString(const int shift_size=1) const {
@@ -287,6 +299,12 @@ std::string TypeSpecifier::toString(const int shift_size) const {
 }
 
 void Program::accept(Visitor& v) {
+    v.visit(*this);
+}
+void Parameter::accept(Visitor& v) {
+    v.visit(*this);
+}
+void DeclarationArguments::accept(Visitor& v) {
     v.visit(*this);
 }
 void Block::accept(Visitor& v) {

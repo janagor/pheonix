@@ -312,16 +312,30 @@ const map<string, string> TRIVIAL_CASES {
     },
     // function declaration
     {
+"fn returnOne() {\n\
+    return 123;\n\
+}",
+"(Program:\n\
+    (FunctionDeclaration:\n\
+        identifier=returnOne,\n\
+        arguments=(DeclarationArguments:),\n\
+        statements=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(ExpressionStatement:\n\
+                    expression=(IntegerLiteral:\n\
+                        value=123))))))"
+    },
+    {
 "fn returnOne(mut num) {\n\
     return 123;\n\
 }",
 "(Program:\n\
     (FunctionDeclaration:\n\
         identifier=returnOne,\n\
-        parameterList=(\n\
-            (parameter=(\n\
+        arguments=(DeclarationArguments:\n\
+            (Parameter:\n\
                 isMutable=true,\n\
-                identifier=num))),\n\
+                identifier=num)),\n\
         statements=(Block:\n\
             (ReturnStatement:\n\
                 expression=(ExpressionStatement:\n\

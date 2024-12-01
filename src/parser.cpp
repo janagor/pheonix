@@ -45,13 +45,8 @@ std::unique_ptr<Node> Parser::parseStatement() {
     }
 }
 
-std::unique_ptr<Node> Parser::parseFunctionDeclaration() {
-    assert(current.token.tokenType==token::TokenType::FN);
-    readLex();
-    assert(current.token.tokenType==token::TokenType::IDENTIFIER);
-    std::string identifier = std::get<std::string>(*current.token.value);
-    auto functionDeclaration = std::make_unique<FunctionDeclaration>(identifier);
-    readLex();
+std::unique_ptr<Node> Parser::parseDeclarationArguments() {
+    auto args = std::make_unique<DeclarationArguments>();
     assert(current.token.tokenType==token::TokenType::LPARENT);
     readLex();
     while (
@@ -63,19 +58,33 @@ std::unique_ptr<Node> Parser::parseFunctionDeclaration() {
             isMutable = true;
             readLex();
         }
-        std::string param_identifier =
+        std::string paramIdentifier =
             std::get<std::string>(*current.token.value);
-        functionDeclaration->push_parameter(isMutable, param_identifier);
+        auto arg = std::make_unique<Parameter>(isMutable, paramIdentifier);
+        args->arguments.push_back(std::move(arg));
         if (current.token.tokenType==token::TokenType::COMMA)
             readLex();
         readLex();
     }
     assert(current.token.tokenType==token::TokenType::RPARENT);
     readLex();
+    return args;
+}
+
+
+std::unique_ptr<Node> Parser::parseFunctionDeclaration() {
+    assert(current.token.tokenType==token::TokenType::FN);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::IDENTIFIER);
+    std::string identifier = std::get<std::string>(*current.token.value);
+    auto functionDeclaration = std::make_unique<FunctionDeclaration>(identifier);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::LPARENT);
+    auto declarationArguments = parseDeclarationArguments();
+    functionDeclaration->arguments = std::move(declarationArguments);
     assert(current.token.tokenType==token::TokenType::LBRACE);
     auto block = parseBlock();
     functionDeclaration->statements = std::move(block);
-
     return functionDeclaration;
 }
 
