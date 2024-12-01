@@ -619,6 +619,38 @@ const map<string, string> FUNCTION_CALLS {
                                 value=12))))),\n\
             arguments=(CallArguments:))))"
     },
+    // with lambda expressions
+    {
+"#(){return 123;}()",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(LambdaExpression:\n\
+                arguments=(DeclarationArguments:),\n\
+                statements=(Block:\n\
+                    (ReturnStatement:\n\
+                        expression=(ExpressionStatement:\n\
+                            expression=(IntegerLiteral:\n\
+                                value=123))))),\n\
+            arguments=(CallArguments:))))"
+    },
+    {
+"#(mut num){ return 123; }()",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(LambdaExpression:\n\
+                arguments=(DeclarationArguments:\n\
+                    (Parameter:\n\
+                        isMutable=true,\n\
+                        identifier=num)),\n\
+                statements=(Block:\n\
+                    (ReturnStatement:\n\
+                        expression=(ExpressionStatement:\n\
+                            expression=(IntegerLiteral:\n\
+                                value=123))))),\n\
+            arguments=(CallArguments:))))"
+    },
 };
 
 TEST(TestParser, testFunctionCalls) {

@@ -382,6 +382,8 @@ std::unique_ptr<Node> Parser::parseLambdaExpression() {
     assert(current.token.tokenType==token::TokenType::LBRACE);
     auto block = parseBlock();
     lambda->statements = std::move(block);
+    if (current.token.tokenType==token::TokenType::LPARENT)
+        return parseCallExpression(std::move(lambda));
     return lambda;
 }
 
