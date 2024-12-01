@@ -295,7 +295,7 @@ std::unique_ptr<Node> Parser::parsePrefixExpression() {
         token::TokenType op = current.token.tokenType;
         readLex();
         if (current.token.tokenType == token::IDENTIFIER)
-            expression = parseIdentifier();
+            expression = parseIdentifierLike();
         else
             expression = parseLiteral();
         return std::make_unique<PrefixExpression>(
@@ -303,16 +303,39 @@ std::unique_ptr<Node> Parser::parsePrefixExpression() {
         );
     }
     if (current.token.tokenType == token::IDENTIFIER)
-        expression = parseIdentifier();
+        expression = parseIdentifierLike();
     else
         expression = parseLiteral();
     return expression;
 }
 
-std::unique_ptr<Node> Parser::parseIdentifier() {
+std::unique_ptr<Node> Parser::parseIdentifierLike() {
     std::string val = std::get<std::string>(*current.token.value);
     readLex();
-    return std::make_unique<Identifier>(val);
+    auto ident = std::make_unique<Identifier>(val);
+    std::unique_ptr<Node> callArgsMaybe;
+    if (current.token.tokenType==token::TokenType::LPARENT) {
+        callArgsMaybe = parseCallArguments();
+        return std::make_unique<CallExpression>(
+            std::move(ident),
+            std::move(callArgsMaybe)
+        );
+    }
+    return ident;
+}
+
+std::unique_ptr<Node> Parser::parseCallArguments() {
+    auto arguments = std::make_unique<CallArguments>();
+    assert(current.token.tokenType==token::TokenType::LPARENT);
+    readLex();
+    while (current.token.tokenType != token::TokenType::RPARENT){
+        arguments->arguments.push_back(std::move(parseExpression()));
+        if (current.token.tokenType != token::TokenType::COMMA) break;
+        readLex();
+    }
+    assert(current.token.tokenType==token::TokenType::RPARENT);
+    readLex();
+    return arguments;
 }
 
 std::unique_ptr<Node> Parser::parseLiteral() {

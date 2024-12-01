@@ -55,6 +55,12 @@ void TreeGenVisitor::visit(CastExpression &ce) {
 void TreeGenVisitor::visit(PrefixExpression &pe) {
     result += pe.toString(1);
 }
+void TreeGenVisitor::visit(CallExpression &ce) {
+    result += ce.toString(1);
+}
+void TreeGenVisitor::visit(CallArguments &ca) {
+    result += ca.toString(1);
+}
 void TreeGenVisitor::visit(Identifier &i) {
     result += i.toString(1);
 }

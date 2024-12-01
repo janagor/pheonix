@@ -208,14 +208,21 @@ struct PrefixExpression: public Node {
     void accept(Visitor& v) override;
 };
 
-// struct CallExpression: public Node {
-//     std::unique_ptr<Node> function;
-//     std::unique_ptr<Node> parameterList;
-//     CallExpression(std::unique_ptr<Node> f, std::unique_ptr<Node> p):
-//         Node(), function(std::move(f), parameterList(std::move(p)){};
-//     std::string toString(const int shift_size) const override;
-//     void accept(Visitor& v) override;
-// };
+struct CallExpression: public Node {
+    std::unique_ptr<Node> function;
+    std::unique_ptr<Node> arguments;
+    CallExpression(std::unique_ptr<Node> f, std::unique_ptr<Node> a):
+        Node(), function(std::move(f)), arguments(std::move(a)){};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
+struct CallArguments: public Node {
+    std::vector<std::unique_ptr<Node>> arguments;
+    CallArguments(): Node() {};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
 
  struct Identifier: public Node {
     std::string value;

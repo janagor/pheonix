@@ -58,7 +58,7 @@ const map<string, string> TRIVIAL_CASES {
         expression=(FloatLiteral:\n\
             value=1.100)))"
     },
-    // CastExpression
+    // Identifier
     {
 "duck;",
 "(Program:\n\
@@ -66,6 +66,7 @@ const map<string, string> TRIVIAL_CASES {
         expression=(Identifier:\n\
             value=duck)))"
     },
+    // CastExpression
     {
 "1<-int;",
 "(Program:\n\
@@ -406,6 +407,18 @@ const map<string, string> TRIVIAL_CASES {
                         expression=(IntegerLiteral:\n\
                             value=123)))),\n\
             elseBody=)))"
+    },
+    // CallExpression
+    {
+"call(1);",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(Identifier:\n\
+                value=call),\n\
+            arguments=(CallArguments:\n\
+                (IntegerLiteral:\n\
+                    value=1)))))"
     },
 };
 

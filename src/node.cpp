@@ -213,13 +213,25 @@ std::string PrefixExpression::toString(const int shift_size) const  {
     ")";
 }
 
-// std::string CallExpression::toString(const int shift_size) const  {
-//     std::string s = "\n" + std::string(shift_size*4, ' ');
-//     return "(CallExpression:" + s +
-//     "function=" + function->toString(shift_size+1) + "," + s +
-//     "parameterList=" + parameterList->toString(shift_size+1) +
-//     ")";
-// }
+std::string CallExpression::toString(const int shift_size) const  {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(CallExpression:" + s +
+    "function=" + function->toString(shift_size+1) + "," + s +
+    "arguments=" + arguments->toString(shift_size+1) +
+    ")";
+}
+
+std::string CallArguments::toString(const int shift_size) const  {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    std::string result = "(CallArguments:" + s;
+    for (size_t i = 0; i < arguments.size(); ++i) {
+        result += arguments[i]->toString(shift_size + 1);
+        if (i!=arguments.size()-1)
+            result += "," + s;
+    }
+    result += ")";
+    return result;
+}
 
 std::string Identifier::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
@@ -268,91 +280,75 @@ std::string TypeSpecifier::toString(const int shift_size) const {
 void Program::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void Block::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void FunctionDeclaration::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void VariableDeclaration::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void WhileLoopStatement::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void IfStatement::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void ReturnStatement::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void ExpressionStatement::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void AssignementExpression::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void OrExpression::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void AndExpression::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void ComparisonExpression::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void RelationalExpression::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void AdditiveExpression::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void MultiplicativeExpression::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void CastExpression::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void PrefixExpression::accept(Visitor& v) {
     v.visit(*this);
 }
-
+void CallExpression::accept(Visitor& v) {
+    v.visit(*this);
+}
+void CallArguments::accept(Visitor& v) {
+    v.visit(*this);
+}
 void Identifier::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void IntegerLiteral::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void FloatLiteral::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void BoolLiteral::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void StringLiteral::accept(Visitor& v) {
     v.visit(*this);
 }
-
 void TypeSpecifier::accept(Visitor& v) {
     v.visit(*this);
 }
