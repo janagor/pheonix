@@ -346,14 +346,15 @@ std::unique_ptr<Node> Parser::parseParentExpression() {
 }
 
 std::unique_ptr<Node> Parser::parseCallExpression(std::unique_ptr<Node> function) {
+    std::unique_ptr<Node> result = std::move(function);
     assert(current.token.tokenType==token::TokenType::LPARENT);
-    while (current.token.tokenType == token::LPARENT) {
+    do {
         std::unique_ptr<Node> callArguments = parseCallArguments();
-        return std::make_unique<CallExpression>(
-            std::move(function), std::move(callArguments)
+        result = std::make_unique<CallExpression>(
+            std::move(result), std::move(callArguments)
         );
-    }
-    throw std::runtime_error("Function call without call arguments.");
+    } while (current.token.tokenType == token::LPARENT);
+    return result;
 }
 
 std::unique_ptr<Node> Parser::parseLiteral() {

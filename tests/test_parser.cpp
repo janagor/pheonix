@@ -511,33 +511,72 @@ const map<string, string> FUNCTION_CALLS {
                 (IntegerLiteral:\n\
                     value=12)))))"
     },
-    /*
-    // TODO: these examples do not have yet a proper parsing tree in these tests
+    {
+"call()();",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(CallExpression:\n\
+                function=(Identifier:\n\
+                    value=call),\n\
+                arguments=(CallArguments:)),\n\
+            arguments=(CallArguments:))))"
+    },
+    {
+"call(12)(12);",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(CallExpression:\n\
+                function=(Identifier:\n\
+                    value=call),\n\
+                arguments=(CallArguments:\n\
+                    (IntegerLiteral:\n\
+                        value=12))),\n\
+            arguments=(CallArguments:\n\
+                (IntegerLiteral:\n\
+                    value=12)))))"
+    },
     {
 "call(12)((1), 12)();",
 "(Program:\n\
     (ExpressionStatement:\n\
         expression=(CallExpression:\n\
-            function=(ParentExpression:(\n\
-                expression=Identifier:\n\
-                    value=call)),\n\
-            arguments=(CallArguments:\n\
-                (IntegerLiteral:\n\
-                    value=1)))))"
+            function=(CallExpression:\n\
+                function=(CallExpression:\n\
+                    function=(Identifier:\n\
+                        value=call),\n\
+                    arguments=(CallArguments:\n\
+                        (IntegerLiteral:\n\
+                            value=12))),\n\
+                arguments=(CallArguments:\n\
+                    (ParentExpression:\n\
+                        expression=(IntegerLiteral:\n\
+                            value=1)),\n\
+                    (IntegerLiteral:\n\
+                        value=12))),\n\
+            arguments=(CallArguments:))))"
     },
     {
 "call1(call2((1), 12))();",
 "(Program:\n\
     (ExpressionStatement:\n\
         expression=(CallExpression:\n\
-            function=(ParentExpression:(\n\
-                expression=Identifier:\n\
-                    value=call)),\n\
-            arguments=(CallArguments:\n\
-                (IntegerLiteral:\n\
-                    value=1)))))"
+            function=(CallExpression:\n\
+                function=(Identifier:\n\
+                    value=call1),\n\
+                arguments=(CallArguments:\n\
+                    (CallExpression:\n\
+                        function=(Identifier:\n\
+                            value=call2),\n\
+                        arguments=(CallArguments:\n\
+                            (ParentExpression:\n\
+                                expression=(IntegerLiteral:\n\
+                                    value=1)),\n\
+                            (IntegerLiteral:\n\
+                                value=12))))),\n\
+            arguments=(CallArguments:))))"
     },
-    */
 };
 
 TEST(TestParser, testFunctionCalls) {

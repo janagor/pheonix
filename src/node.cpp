@@ -223,7 +223,8 @@ std::string CallExpression::toString(const int shift_size) const  {
 
 std::string CallArguments::toString(const int shift_size) const  {
     std::string s = "\n" + std::string(shift_size*4, ' ');
-    std::string result = "(CallArguments:" + s;
+    std::string result = "(CallArguments:";
+    if (arguments.size()) result += s;
     for (size_t i = 0; i < arguments.size(); ++i) {
         result += arguments[i]->toString(shift_size + 1);
         if (i!=arguments.size()-1)
