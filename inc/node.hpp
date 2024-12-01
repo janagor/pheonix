@@ -216,6 +216,15 @@ struct CallExpression: public Node {
     void accept(Visitor& v) override;
 };
 
+struct DebugExpression: public Node {
+    std::unique_ptr<Node> function;
+    std::unique_ptr<Node> arguments;
+    DebugExpression(std::unique_ptr<Node> f, std::unique_ptr<Node> a):
+        Node(), function(std::move(f)), arguments(std::move(a)){};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
 struct LambdaExpression: public Node {
     std::unique_ptr<Node> arguments;
     std::unique_ptr<Node> statements;

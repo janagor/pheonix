@@ -233,6 +233,14 @@ std::string CallExpression::toString(const int shift_size) const  {
     ")";
 }
 
+std::string DebugExpression::toString(const int shift_size) const  {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(DebugExpression:" + s +
+    "function=" + function->toString(shift_size+1) + "," + s +
+    "arguments=" + arguments->toString(shift_size+1) +
+    ")";
+}
+
 std::string CallArguments::toString(const int shift_size) const  {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string result = "(CallArguments:";
@@ -364,6 +372,9 @@ void PrefixExpression::accept(Visitor& v) {
     v.visit(*this);
 }
 void CallExpression::accept(Visitor& v) {
+    v.visit(*this);
+}
+void DebugExpression::accept(Visitor& v) {
     v.visit(*this);
 }
 void CallArguments::accept(Visitor& v) {

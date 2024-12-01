@@ -434,6 +434,7 @@ const map<string, string> TRIVIAL_CASES {
                 (IntegerLiteral:\n\
                     value=1)))))"
     },
+    //ParentExpression
     {
 "(1);",
 "(Program:\n\
@@ -469,6 +470,18 @@ const map<string, string> TRIVIAL_CASES {
                     expression=(ExpressionStatement:\n\
                         expression=(IntegerLiteral:\n\
                             value=123)))))))"
+    },
+    // DebugExpression
+    {
+"[call](1);",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(DebugExpression:\n\
+            function=(Identifier:\n\
+                value=call),\n\
+            arguments=(CallArguments:\n\
+                (IntegerLiteral:\n\
+                    value=1)))))"
     },
 };
 

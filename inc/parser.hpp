@@ -36,6 +36,7 @@ private:
     std::unique_ptr<Node> parseCallArguments();
     std::unique_ptr<Node> parseParentExpression();
     std::unique_ptr<Node> parseCallExpression(std::unique_ptr<Node> function);
+    std::unique_ptr<Node> parseDebugExpression();
     std::unique_ptr<Node> parseLambdaExpression();
     std::unique_ptr<Node> parseLiteral();
     std::unique_ptr<Node> parseIntegerLiteral();

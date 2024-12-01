@@ -309,6 +309,8 @@ std::unique_ptr<Node> Parser::parsePrefixExpression() {
             expression = parseParentExpression();
         else if (current.token.tokenType == token::HASH)
             expression = parseLambdaExpression();
+        else if (current.token.tokenType == token::LBRACKET)
+            expression = parseDebugExpression();
         else
             expression = parseLiteral();
         return std::make_unique<PrefixExpression>(
@@ -321,6 +323,8 @@ std::unique_ptr<Node> Parser::parsePrefixExpression() {
         expression = parseParentExpression();
     else if (current.token.tokenType == token::HASH)
         expression = parseLambdaExpression();
+    else if (current.token.tokenType == token::LBRACKET)
+        expression = parseDebugExpression();
     else
         expression = parseLiteral();
     return expression;
@@ -369,6 +373,28 @@ std::unique_ptr<Node> Parser::parseCallExpression(std::unique_ptr<Node> function
             std::move(result), std::move(callArguments)
         );
     } while (current.token.tokenType == token::LPARENT);
+    return result;
+}
+
+std::unique_ptr<Node> Parser::parseDebugExpression() {
+    assert(current.token.tokenType==token::TokenType::LBRACKET);
+    readLex();
+    auto function = parseExpression();
+    assert(current.token.tokenType==token::TokenType::RBRACKET);
+    readLex();
+
+    std::unique_ptr<Node> result = std::move(function);
+    assert(current.token.tokenType==token::TokenType::LPARENT);
+    std::unique_ptr<Node> callArguments = parseCallArguments();
+    result = std::make_unique<DebugExpression>(
+        std::move(result), std::move(callArguments));
+
+    while (current.token.tokenType == token::LPARENT) {
+        std::unique_ptr<Node> callArguments = parseCallArguments();
+        result = std::make_unique<CallExpression>(
+            std::move(result), std::move(callArguments)
+        );
+    }
     return result;
 }
 
