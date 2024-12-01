@@ -208,6 +208,22 @@ struct PrefixExpression: public Node {
     void accept(Visitor& v) override;
 };
 
+// struct CallExpression: public Node {
+//     std::unique_ptr<Node> function;
+//     std::unique_ptr<Node> parameterList;
+//     CallExpression(std::unique_ptr<Node> f, std::unique_ptr<Node> p):
+//         Node(), function(std::move(f), parameterList(std::move(p)){};
+//     std::string toString(const int shift_size) const override;
+//     void accept(Visitor& v) override;
+// };
+
+ struct Identifier: public Node {
+    std::string value;
+    Identifier(const std::string& val): Node(), value(val) {};
+    std::string toString(const int shift_size) const override;
+    void accept(Visitor& v) override;
+};
+
  struct IntegerLiteral: public Node {
     int value;
     IntegerLiteral(int val): Node(), value(val) {};

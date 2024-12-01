@@ -294,13 +294,25 @@ std::unique_ptr<Node> Parser::parsePrefixExpression() {
     ) {
         token::TokenType op = current.token.tokenType;
         readLex();
-        expression = parseLiteral();
+        if (current.token.tokenType == token::IDENTIFIER)
+            expression = parseIdentifier();
+        else
+            expression = parseLiteral();
         return std::make_unique<PrefixExpression>(
             op, std::move(expression)
         );
     }
-    expression = parseLiteral();
+    if (current.token.tokenType == token::IDENTIFIER)
+        expression = parseIdentifier();
+    else
+        expression = parseLiteral();
     return expression;
+}
+
+std::unique_ptr<Node> Parser::parseIdentifier() {
+    std::string val = std::get<std::string>(*current.token.value);
+    readLex();
+    return std::make_unique<Identifier>(val);
 }
 
 std::unique_ptr<Node> Parser::parseLiteral() {

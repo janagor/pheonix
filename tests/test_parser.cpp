@@ -60,6 +60,13 @@ const map<string, string> TRIVIAL_CASES {
     },
     // CastExpression
     {
+"duck;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(Identifier:\n\
+            value=duck)))"
+    },
+    {
 "1<-int;",
 "(Program:\n\
     (ExpressionStatement:\n\

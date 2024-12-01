@@ -19,6 +19,7 @@ class MultiplicativeExpression;
 class CastExpression;
 class PrefixExpression;
 class IntegerLiteral;
+class Identifier;
 class FloatLiteral;
 class BoolLiteral;
 class StringLiteral;
@@ -43,6 +44,7 @@ public:
     virtual void visit(MultiplicativeExpression&) = 0;
     virtual void visit(CastExpression&) = 0;
     virtual void visit(PrefixExpression&) = 0;
+    virtual void visit(Identifier&) = 0;
     virtual void visit(IntegerLiteral&) = 0;
     virtual void visit(FloatLiteral&) = 0;
     virtual void visit(BoolLiteral&) = 0;
@@ -73,6 +75,7 @@ public:
     void visit(AdditiveExpression &ae) override;
     void visit(CastExpression &ce) override;
     void visit(PrefixExpression &pe) override;
+    void visit(Identifier &i) override;
     void visit(IntegerLiteral &il) override;
     void visit(FloatLiteral &fl) override;
     void visit(BoolLiteral &il) override;

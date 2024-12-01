@@ -213,6 +213,21 @@ std::string PrefixExpression::toString(const int shift_size) const  {
     ")";
 }
 
+// std::string CallExpression::toString(const int shift_size) const  {
+//     std::string s = "\n" + std::string(shift_size*4, ' ');
+//     return "(CallExpression:" + s +
+//     "function=" + function->toString(shift_size+1) + "," + s +
+//     "parameterList=" + parameterList->toString(shift_size+1) +
+//     ")";
+// }
+
+std::string Identifier::toString(const int shift_size) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(Identifier:" + s +
+    "value=" + value +
+    ")";
+}
+
 std::string IntegerLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(IntegerLiteral:" + s +
@@ -315,6 +330,10 @@ void CastExpression::accept(Visitor& v) {
 }
 
 void PrefixExpression::accept(Visitor& v) {
+    v.visit(*this);
+}
+
+void Identifier::accept(Visitor& v) {
     v.visit(*this);
 }
 
