@@ -184,7 +184,7 @@ std::unique_ptr<Node> Parser::parseOrExpression() {
         token::TokenType op = current.token.tokenType;
         readLex();
         auto right = parseAndExpression();
-        return std::make_unique<OrExpression>(
+        left = std::make_unique<OrExpression>(
             std::move(left), std::move(right), op
         );
     }
@@ -199,7 +199,7 @@ std::unique_ptr<Node> Parser::parseAndExpression() {
         token::TokenType op = current.token.tokenType;
         readLex();
         auto right = parseComparisonExpression();
-        return std::make_unique<AndExpression>(
+        left = std::make_unique<AndExpression>(
             std::move(left), std::move(right), op
         );
     }
@@ -214,7 +214,7 @@ std::unique_ptr<Node> Parser::parseComparisonExpression() {
         token::TokenType op = current.token.tokenType;
         readLex();
         auto right = parseRelationalExpression();
-        return std::make_unique<ComparisonExpression>(
+        left = std::make_unique<ComparisonExpression>(
             std::move(left), std::move(right), op
         );
     }
@@ -232,7 +232,7 @@ std::unique_ptr<Node> Parser::parseRelationalExpression() {
         token::TokenType op = current.token.tokenType;
         readLex();
         auto right = parseAdditiveExpression();
-        return std::make_unique<RelationalExpression>(
+        left = std::make_unique<RelationalExpression>(
             std::move(left), std::move(right), op
         );
     }
@@ -248,7 +248,7 @@ std::unique_ptr<Node> Parser::parseAdditiveExpression() {
         token::TokenType op = current.token.tokenType;
         readLex();
         auto right = parseMultiplicativeExpression();
-        return std::make_unique<AdditiveExpression>(
+        left = std::make_unique<AdditiveExpression>(
             std::move(left), std::move(right), op
         );
     }
@@ -265,7 +265,7 @@ std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
         token::TokenType op = current.token.tokenType;
         readLex();
         std::unique_ptr<Node> right = parseCastExpression();
-        return std::make_unique<MultiplicativeExpression>(
+        left = std::make_unique<MultiplicativeExpression>(
             std::move(left), std::move(right), op
         );
     }

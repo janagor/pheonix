@@ -558,6 +558,158 @@ const map<string, string> TWO_STATEMENTS {
         expression=(IntegerLiteral:\n\
             value=1)))"
     },
+    {
+"-2 + 12;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(PrefixExpression:\n\
+                operator=[-],\n\
+                expression=(IntegerLiteral:\n\
+                    value=2)),\n\
+            operator=[+],\n\
+            right=(IntegerLiteral:\n\
+                value=12))))"
+    },
+    {
+"12 + -2;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(IntegerLiteral:\n\
+                value=12),\n\
+            operator=[+],\n\
+            right=(PrefixExpression:\n\
+                operator=[-],\n\
+                expression=(IntegerLiteral:\n\
+                    value=2)))))"
+    },
+    {
+"9*123+12;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(IntegerLiteral:\n\
+                    value=9),\n\
+                operator=[*],\n\
+                right=(IntegerLiteral:\n\
+                    value=123)),\n\
+            operator=[+],\n\
+            right=(IntegerLiteral:\n\
+                value=12))))"
+    },
+    {
+"12+9*123;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(IntegerLiteral:\n\
+                value=12),\n\
+            operator=[+],\n\
+            right=(MultiplicativeExpression:\n\
+                left=(IntegerLiteral:\n\
+                    value=9),\n\
+                operator=[*],\n\
+                right=(IntegerLiteral:\n\
+                    value=123)))))"
+    },
+    // AdditiveExpressions
+    {
+"12+9+123;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(AdditiveExpression:\n\
+                left=(IntegerLiteral:\n\
+                    value=12),\n\
+                operator=[+],\n\
+                right=(IntegerLiteral:\n\
+                    value=9)),\n\
+            operator=[+],\n\
+            right=(IntegerLiteral:\n\
+                value=123))))"
+    },
+    // MultiplicativeExpressions
+    {
+"12*9*123;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(IntegerLiteral:\n\
+                    value=12),\n\
+                operator=[*],\n\
+                right=(IntegerLiteral:\n\
+                    value=9)),\n\
+            operator=[*],\n\
+            right=(IntegerLiteral:\n\
+                value=123))))"
+    },
+    // RelationalExpression
+    {
+"12<9<123;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(RelationalExpression:\n\
+            left=(RelationalExpression:\n\
+                left=(IntegerLiteral:\n\
+                    value=12),\n\
+                operator=[<],\n\
+                right=(IntegerLiteral:\n\
+                    value=9)),\n\
+            operator=[<],\n\
+            right=(IntegerLiteral:\n\
+                value=123))))"
+    },
+    // ComparisonExpressions
+    {
+"12==9==123;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(ComparisonExpression:\n\
+            left=(ComparisonExpression:\n\
+                left=(IntegerLiteral:\n\
+                    value=12),\n\
+                operator=[==],\n\
+                right=(IntegerLiteral:\n\
+                    value=9)),\n\
+            operator=[==],\n\
+            right=(IntegerLiteral:\n\
+                value=123))))"
+    },
+    // AndExpressions
+    {
+"12&&9&&123;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AndExpression:\n\
+            left=(AndExpression:\n\
+                left=(IntegerLiteral:\n\
+                    value=12),\n\
+                operator=[&&],\n\
+                right=(IntegerLiteral:\n\
+                    value=9)),\n\
+            operator=[&&],\n\
+            right=(IntegerLiteral:\n\
+                value=123))))"
+    },
+    // OrExpressions
+    {
+"12||9||123;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(OrExpression:\n\
+            left=(OrExpression:\n\
+                left=(IntegerLiteral:\n\
+                    value=12),\n\
+                operator=[||],\n\
+                right=(IntegerLiteral:\n\
+                    value=9)),\n\
+            operator=[||],\n\
+            right=(IntegerLiteral:\n\
+                value=123))))"
+    },
 };
 
 TEST(TestParser, testTwoStatements) {
