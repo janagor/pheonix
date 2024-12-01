@@ -420,20 +420,6 @@ const map<string, string> TRIVIAL_CASES {
                 (IntegerLiteral:\n\
                     value=1)))))"
     },
-    /*
-    {
-"(call)(1);",
-"(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(CallExpression:\n\
-            function=(ParentExpression:(\n\
-                expression=Identifier:\n\
-                    value=call)),\n\
-            arguments=(CallArguments:\n\
-                (IntegerLiteral:\n\
-                    value=1)))))"
-    },
-    */
     {
 "(1);",
 "(Program:\n\
@@ -450,7 +436,116 @@ TEST(TestParser, testTrivialCases) {
     }
 }
 ///////////////////////////////////////////////////////////////////////////////
+const map<string, string> FUNCTION_CALLS {
+    {
+"(call)(1);",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(ParentExpression:\n\
+                expression=(Identifier:\n\
+                    value=call)),\n\
+            arguments=(CallArguments:\n\
+                (IntegerLiteral:\n\
+                    value=1)))))"
+    },
+    {
+"((call))(1);",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(ParentExpression:\n\
+                expression=(ParentExpression:\n\
+                    expression=(Identifier:\n\
+                        value=call))),\n\
+            arguments=(CallArguments:\n\
+                (IntegerLiteral:\n\
+                    value=1)))))"
+    },
+    {
+"((call))((1));",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(ParentExpression:\n\
+                expression=(ParentExpression:\n\
+                    expression=(Identifier:\n\
+                        value=call))),\n\
+            arguments=(CallArguments:\n\
+                (ParentExpression:\n\
+                    expression=(IntegerLiteral:\n\
+                        value=1))))))"
+    },
+    {
+"((call))((1), 12);",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(ParentExpression:\n\
+                expression=(ParentExpression:\n\
+                    expression=(Identifier:\n\
+                        value=call))),\n\
+            arguments=(CallArguments:\n\
+                (ParentExpression:\n\
+                    expression=(IntegerLiteral:\n\
+                        value=1)),\n\
+                (IntegerLiteral:\n\
+                    value=12)))))"
+    },
+    {
+"(call(12))((1), 12);",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(ParentExpression:\n\
+                expression=(CallExpression:\n\
+                    function=(Identifier:\n\
+                        value=call),\n\
+                    arguments=(CallArguments:\n\
+                        (IntegerLiteral:\n\
+                            value=12)))),\n\
+            arguments=(CallArguments:\n\
+                (ParentExpression:\n\
+                    expression=(IntegerLiteral:\n\
+                        value=1)),\n\
+                (IntegerLiteral:\n\
+                    value=12)))))"
+    },
+    /*
+    // TODO: these examples do not have yet a proper parsing tree in these tests
+    {
+"call(12)((1), 12)();",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(ParentExpression:(\n\
+                expression=Identifier:\n\
+                    value=call)),\n\
+            arguments=(CallArguments:\n\
+                (IntegerLiteral:\n\
+                    value=1)))))"
+    },
+    {
+"call1(call2((1), 12))();",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CallExpression:\n\
+            function=(ParentExpression:(\n\
+                expression=Identifier:\n\
+                    value=call)),\n\
+            arguments=(CallArguments:\n\
+                (IntegerLiteral:\n\
+                    value=1)))))"
+    },
+    */
+};
 
+TEST(TestParser, testFunctionCalls) {
+    for (const auto& [i, e] : FUNCTION_CALLS) {
+        compareExpectedAndReceived(i, e);
+    }
+}
+///////////////////////////////////////////////////////////////////////////////
 const map<string, string> TWO_STATEMENTS {
     //IntegerLiteral
     {

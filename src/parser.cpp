@@ -315,14 +315,8 @@ std::unique_ptr<Node> Parser::parseIdentifierLike() {
     std::string val = std::get<std::string>(*current.token.value);
     readLex();
     auto ident = std::make_unique<Identifier>(val);
-    std::unique_ptr<Node> callArgsMaybe;
-    if (current.token.tokenType==token::TokenType::LPARENT) {
-        callArgsMaybe = parseCallArguments();
-        return std::make_unique<CallExpression>(
-            std::move(ident),
-            std::move(callArgsMaybe)
-        );
-    }
+    if (current.token.tokenType==token::TokenType::LPARENT)
+        return parseCallExpression(std::move(ident));
     return ident;
 }
 
@@ -346,7 +340,20 @@ std::unique_ptr<Node> Parser::parseParentExpression() {
     auto pExpression = std::make_unique<ParentExpression>(parseExpression());
     assert(current.token.tokenType==token::TokenType::RPARENT);
     readLex();
+    if (current.token.tokenType==token::TokenType::LPARENT)
+        return parseCallExpression(std::move(pExpression));
     return pExpression;
+}
+
+std::unique_ptr<Node> Parser::parseCallExpression(std::unique_ptr<Node> function) {
+    assert(current.token.tokenType==token::TokenType::LPARENT);
+    while (current.token.tokenType == token::LPARENT) {
+        std::unique_ptr<Node> callArguments = parseCallArguments();
+        return std::make_unique<CallExpression>(
+            std::move(function), std::move(callArguments)
+        );
+    }
+    throw std::runtime_error("Function call without call arguments.");
 }
 
 std::unique_ptr<Node> Parser::parseLiteral() {

@@ -33,6 +33,7 @@ private:
     std::unique_ptr<Node> parseIdentifierLike();
     std::unique_ptr<Node> parseCallArguments();
     std::unique_ptr<Node> parseParentExpression();
+    std::unique_ptr<Node> parseCallExpression(std::unique_ptr<Node> function);
     std::unique_ptr<Node> parseLiteral();
     std::unique_ptr<Node> parseIntegerLiteral();
     std::unique_ptr<Node> parseFloatLiteral();
