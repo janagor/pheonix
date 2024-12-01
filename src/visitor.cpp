@@ -67,6 +67,9 @@ void TreeGenVisitor::visit(CallExpression &ce) {
 void TreeGenVisitor::visit(CallArguments &ca) {
     result += ca.toString(1);
 }
+void TreeGenVisitor::visit(LambdaExpression &le) {
+    result += le.toString(1);
+}
 void TreeGenVisitor::visit(Identifier &i) {
     result += i.toString(1);
 }

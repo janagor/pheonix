@@ -22,6 +22,7 @@ class CastExpression;
 class PrefixExpression;
 class CallExpression;
 class CallArguments;
+class LambdaExpression;
 class Identifier;
 class ParentExpression;
 class IntegerLiteral;
@@ -53,6 +54,7 @@ public:
     virtual void visit(PrefixExpression&) = 0;
     virtual void visit(CallExpression&) = 0;
     virtual void visit(CallArguments&) = 0;
+    virtual void visit(LambdaExpression&) = 0;
     virtual void visit(Identifier&) = 0;
     virtual void visit(ParentExpression&) = 0;
     virtual void visit(IntegerLiteral&) = 0;
@@ -89,6 +91,7 @@ public:
     void visit(PrefixExpression &pe) override;
     void visit(CallExpression &ce) override;
     void visit(CallArguments &ca) override;
+    void visit(LambdaExpression &le) override;
     void visit(Identifier &i) override;
     void visit(ParentExpression &pe) override;
     void visit(IntegerLiteral &il) override;

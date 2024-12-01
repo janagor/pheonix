@@ -246,6 +246,14 @@ std::string CallArguments::toString(const int shift_size) const  {
     return result;
 }
 
+std::string LambdaExpression::toString(const int shift_size=1) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(LambdaExpression:" + s +
+    "arguments=" + arguments->toString(shift_size + 1) + "," + s +
+    "statements=" + statements->toString(shift_size + 1) +
+    ")";
+}
+
 std::string Identifier::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(Identifier:" + s +
@@ -359,6 +367,9 @@ void CallExpression::accept(Visitor& v) {
     v.visit(*this);
 }
 void CallArguments::accept(Visitor& v) {
+    v.visit(*this);
+}
+void LambdaExpression::accept(Visitor& v) {
     v.visit(*this);
 }
 void Identifier::accept(Visitor& v) {

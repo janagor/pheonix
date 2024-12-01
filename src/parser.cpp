@@ -305,6 +305,10 @@ std::unique_ptr<Node> Parser::parsePrefixExpression() {
         readLex();
         if (current.token.tokenType == token::IDENTIFIER)
             expression = parseIdentifierLike();
+        else if (current.token.tokenType == token::LPARENT)
+            expression = parseParentExpression();
+        else if (current.token.tokenType == token::HASH)
+            expression = parseLambdaExpression();
         else
             expression = parseLiteral();
         return std::make_unique<PrefixExpression>(
@@ -315,6 +319,8 @@ std::unique_ptr<Node> Parser::parsePrefixExpression() {
         expression = parseIdentifierLike();
     else if (current.token.tokenType == token::LPARENT)
         expression = parseParentExpression();
+    else if (current.token.tokenType == token::HASH)
+        expression = parseLambdaExpression();
     else
         expression = parseLiteral();
     return expression;
@@ -364,6 +370,19 @@ std::unique_ptr<Node> Parser::parseCallExpression(std::unique_ptr<Node> function
         );
     } while (current.token.tokenType == token::LPARENT);
     return result;
+}
+
+std::unique_ptr<Node> Parser::parseLambdaExpression() {
+    auto lambda = std::make_unique<LambdaExpression>();
+    assert(current.token.tokenType==token::TokenType::HASH);
+    readLex();
+    assert(current.token.tokenType==token::TokenType::LPARENT);
+    auto declarationArguments = parseDeclarationArguments();
+    lambda->arguments = std::move(declarationArguments);
+    assert(current.token.tokenType==token::TokenType::LBRACE);
+    auto block = parseBlock();
+    lambda->statements = std::move(block);
+    return lambda;
 }
 
 std::unique_ptr<Node> Parser::parseLiteral() {
