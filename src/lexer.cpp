@@ -24,23 +24,14 @@ std::ostream& operator<<(std::ostream& os, const Lexem& l) {
 }
 
 Lexem Lexer::nextLexem() {
-    std::optional<Lexem> result;
     skipWhiteSpaces();
-
-    result = tryEndOfFile();
-    if (result.has_value()) return result.value();
-    result = trySlashOrToken();
-    if (result.has_value()) return result.value();
-    result = tryParenthesis();
-    if (result.has_value()) return result.value();
-    result = tryTwoCharOperator();
-    if (result.has_value()) return result.value();
-    result = tryOneCharOperator();
-    if (result.has_value()) return result.value();
-    result = trySeparator();
-    if (result.has_value()) return result.value();
-    result = tryString();
-    if (result.has_value()) return result.value();
+    if (auto result = tryEndOfFile()) return result.value();
+    if (auto result = trySlashOrToken()) return result.value();
+    if (auto result = tryParenthesis()) return result.value();
+    if (auto result = tryTwoCharOperator()) return result.value();
+    if (auto result = tryOneCharOperator()) return result.value();
+    if (auto result = trySeparator()) return result.value();
+    if(auto result = tryString()) return result.value();
     return tryLiteralOrNotAToken();
 }
 
