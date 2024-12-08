@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "token.hpp"
+#include "types.hpp"
 #include "visitor.hpp"
 
 
@@ -251,15 +252,15 @@ struct ParentExpression: public Node {
 };
 
  struct IntegerLiteral: public Node {
-    int value;
-    IntegerLiteral(int val): Node(), value(val) {};
+    types::Integer value;
+    IntegerLiteral(types::Integer val): Node(), value(val) {};
     std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;
 };
 
  struct FloatLiteral: public Node {
-    double value;
-    FloatLiteral(double val): Node(), value(val) {};
+    types::Float value;
+    FloatLiteral(types::Float val): Node(), value(val) {};
     std::string toString(const int shift_size) const override;
     void accept(Visitor& v) override;
 };

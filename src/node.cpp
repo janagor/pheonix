@@ -280,7 +280,7 @@ std::string ParentExpression::toString(const int shift_size=1) const {
 std::string IntegerLiteral::toString(const int shift_size) const {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     return "(IntegerLiteral:" + s +
-    "value=" + std::to_string(value) +
+    "value=" + std::to_string(value.getValue()) +
     ")";
 }
 

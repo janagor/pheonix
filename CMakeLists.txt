@@ -32,6 +32,7 @@ set(HEADER_FILES
     inc/node.hpp
     inc/parser.hpp
     inc/visitor.hpp
+    inc/types.hpp
 )
 
 set(SOURCE_FILES
@@ -41,6 +42,7 @@ set(SOURCE_FILES
     src/node.cpp
     src/parser.cpp
     src/visitor.cpp
+    src/types.cpp
 )
 
 # add_executable(

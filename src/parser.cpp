@@ -434,13 +434,13 @@ std::unique_ptr<Node> Parser::parseLiteral() {
 }
 
 std::unique_ptr<Node> Parser::parseIntegerLiteral() {
-    int val =std::get<int>(*current.token.getValue());
+    types::Integer val =std::get<types::Integer>(*current.token.getValue());
     readLex();
     return std::make_unique<IntegerLiteral>(val);
 }
 
 std::unique_ptr<Node> Parser::parseFloatLiteral() {
-    double val =std::get<double>(*current.token.getValue());
+    types::Float val =std::get<types::Float>(*current.token.getValue());
     readLex();
     return std::make_unique<FloatLiteral>(val);
 }
