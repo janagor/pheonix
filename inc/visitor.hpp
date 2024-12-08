@@ -18,6 +18,7 @@ class ComparisonExpression;
 class RelationalExpression;
 class AdditiveExpression;
 class MultiplicativeExpression;
+class CompositiveExpression;
 class CastExpression;
 class PrefixExpression;
 class CallExpression;
@@ -51,6 +52,7 @@ public:
     virtual void visit(RelationalExpression&) = 0;
     virtual void visit(AdditiveExpression&) = 0;
     virtual void visit(MultiplicativeExpression&) = 0;
+    virtual void visit(CompositiveExpression&) = 0;
     virtual void visit(CastExpression&) = 0;
     virtual void visit(PrefixExpression&) = 0;
     virtual void visit(CallExpression&) = 0;
@@ -88,6 +90,7 @@ public:
     void visit(ComparisonExpression &ce) override;
     void visit(RelationalExpression &re) override;
     void visit(MultiplicativeExpression &me) override;
+    void visit(CompositiveExpression &me) override;
     void visit(AdditiveExpression &ae) override;
     void visit(CastExpression &ce) override;
     void visit(PrefixExpression &pe) override;

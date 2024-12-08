@@ -30,6 +30,7 @@ private:
     std::unique_ptr<Node> parseRelationalExpression();
     std::unique_ptr<Node> parseAdditiveExpression();
     std::unique_ptr<Node> parseMultiplicativeExpression();
+    std::unique_ptr<Node> parseCompositiveExpression();
     std::unique_ptr<Node> parseCastExpression();
     std::unique_ptr<Node> parsePrefixExpression();
     std::unique_ptr<Node> parseIdentifierLike();

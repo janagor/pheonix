@@ -52,6 +52,9 @@ void TreeGenVisitor::visit(RelationalExpression &re) {
 void TreeGenVisitor::visit(MultiplicativeExpression &me) {
     result += me.toString(1);
 }
+void TreeGenVisitor::visit(CompositiveExpression &me) {
+    result += me.toString(1);
+}
 void TreeGenVisitor::visit(AdditiveExpression &ae) {
     result += ae.toString(1);
 }

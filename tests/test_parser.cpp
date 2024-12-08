@@ -172,6 +172,17 @@ const map<string, string> TRIVIAL_CASES {
             right=(IntegerLiteral:\n\
                 value=123))))"
     },
+    // CompositiveExpression
+    {
+"9|123;",
+"(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CompositiveExpression:\n\
+            left=(IntegerLiteral:\n\
+                value=9),\n\
+            right=(IntegerLiteral:\n\
+                value=123))))"
+    },
     // RelationalExpression
     {
 "9<123;",

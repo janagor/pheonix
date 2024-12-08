@@ -265,7 +265,7 @@ std::unique_ptr<Node> Parser::parseAdditiveExpression() {
 } 
 
 std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
-    std::unique_ptr<Node> left = parseCastExpression();
+    std::unique_ptr<Node> left = parseCompositiveExpression();
     while (
         current.token.getTokenType() == token::STAR
         || current.token.getTokenType() == token::SLASH
@@ -273,9 +273,21 @@ std::unique_ptr<Node> Parser::parseMultiplicativeExpression() {
     ) {
         token::TokenType op = current.token.getTokenType();
         readLex();
-        std::unique_ptr<Node> right = parseCastExpression();
+        std::unique_ptr<Node> right = parseCompositiveExpression();
         left = std::make_unique<MultiplicativeExpression>(
             std::move(left), std::move(right), op
+        );
+    }
+    return left;
+}
+
+std::unique_ptr<Node> Parser::parseCompositiveExpression() {
+    std::unique_ptr<Node> left = parseCastExpression();
+    while (current.token.getTokenType() == token::PIPE) {
+        readLex();
+        std::unique_ptr<Node> right = parseCastExpression();
+        left = std::make_unique<CompositiveExpression>(
+            std::move(left), std::move(right)
         );
     }
     return left;

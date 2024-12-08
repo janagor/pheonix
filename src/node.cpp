@@ -198,6 +198,14 @@ std::string MultiplicativeExpression::toString(const int shift_size) const {
     ")";
 }
 
+std::string CompositiveExpression::toString(const int shift_size) const {
+    std::string s = "\n" + std::string(shift_size*4, ' ');
+    return "(CompositiveExpression:" + s +
+    "left=" + left->toString(shift_size+1) + "," + s +
+    "right=" + right->toString(shift_size + 1) +
+    ")";
+}
+
 std::string AdditiveExpression::toString(const int shift_size) const  {
     std::string s = "\n" + std::string(shift_size*4, ' ');
     std::string oper = opToString(op);
@@ -363,6 +371,9 @@ void AdditiveExpression::accept(Visitor& v) {
     v.visit(*this);
 }
 void MultiplicativeExpression::accept(Visitor& v) {
+    v.visit(*this);
+}
+void CompositiveExpression::accept(Visitor& v) {
     v.visit(*this);
 }
 void CastExpression::accept(Visitor& v) {
