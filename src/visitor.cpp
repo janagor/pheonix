@@ -1,99 +1,53 @@
-#include "../inc/visitor.hpp"
-#include "../inc/node.hpp"
+#include "visitor.hpp"
+#include "node.hpp"
 
-std::string TreeGenVisitor::getResult() {
-    return result;
-}
-void TreeGenVisitor::visit(Program &p) {
-    result += p.toString(1);
-}
-void TreeGenVisitor::visit(Parameter &p) {
-    result += p.toString(1);
-}
-void TreeGenVisitor::visit(DeclarationArguments &p) {
-    result += p.toString(1);
-}
-void TreeGenVisitor::visit(Block &b) {
-    result += b.toString(1);
-}
+std::string TreeGenVisitor::getResult() { return result; }
+void TreeGenVisitor::visit(Program &p) { result += p.toString(1); }
+void TreeGenVisitor::visit(Parameter &p) { result += p.toString(1); }
+void TreeGenVisitor::visit(DeclarationArguments &p) { result += p.toString(1); }
+void TreeGenVisitor::visit(Block &b) { result += b.toString(1); }
 void TreeGenVisitor::visit(FunctionDeclaration &fd) {
-    result += fd.toString(1);
+  result += fd.toString(1);
 }
 void TreeGenVisitor::visit(VariableDeclaration &vd) {
-    result += vd.toString(1);
+  result += vd.toString(1);
 }
 void TreeGenVisitor::visit(WhileLoopStatement &wls) {
-    result += wls.toString(1);
+  result += wls.toString(1);
 }
-void TreeGenVisitor::visit(IfStatement &is) {
-    result += is.toString(1);
-}
-void TreeGenVisitor::visit(ReturnStatement &rs) {
-    result += rs.toString(1);
-}
+void TreeGenVisitor::visit(IfStatement &is) { result += is.toString(1); }
+void TreeGenVisitor::visit(ReturnStatement &rs) { result += rs.toString(1); }
 void TreeGenVisitor::visit(ExpressionStatement &es) {
-    result += es.toString(1);
+  result += es.toString(1);
 }
 void TreeGenVisitor::visit(AssignementExpression &ae) {
-    result += ae.toString(1);
+  result += ae.toString(1);
 }
-void TreeGenVisitor::visit(OrExpression &oe) {
-    result += oe.toString(1);
-}
-void TreeGenVisitor::visit(AndExpression &ae) {
-    result += ae.toString(1);
-}
+void TreeGenVisitor::visit(OrExpression &oe) { result += oe.toString(1); }
+void TreeGenVisitor::visit(AndExpression &ae) { result += ae.toString(1); }
 void TreeGenVisitor::visit(ComparisonExpression &ce) {
-    result += ce.toString(1);
+  result += ce.toString(1);
 }
 void TreeGenVisitor::visit(RelationalExpression &re) {
-    result += re.toString(1);
+  result += re.toString(1);
 }
 void TreeGenVisitor::visit(MultiplicativeExpression &me) {
-    result += me.toString(1);
+  result += me.toString(1);
 }
 void TreeGenVisitor::visit(CompositiveExpression &me) {
-    result += me.toString(1);
+  result += me.toString(1);
 }
-void TreeGenVisitor::visit(AdditiveExpression &ae) {
-    result += ae.toString(1);
-}
-void TreeGenVisitor::visit(CastExpression &ce) {
-    result += ce.toString(1);
-}
-void TreeGenVisitor::visit(PrefixExpression &pe) {
-    result += pe.toString(1);
-}
-void TreeGenVisitor::visit(CallExpression &ce) {
-    result += ce.toString(1);
-}
-void TreeGenVisitor::visit(DebugExpression &de) {
-    result += de.toString(1);
-}
-void TreeGenVisitor::visit(CallArguments &ca) {
-    result += ca.toString(1);
-}
-void TreeGenVisitor::visit(LambdaExpression &le) {
-    result += le.toString(1);
-}
-void TreeGenVisitor::visit(Identifier &i) {
-    result += i.toString(1);
-}
-void TreeGenVisitor::visit(ParentExpression &pe) {
-    result += pe.toString(1);
-}
-void TreeGenVisitor::visit(IntegerLiteral &il) {
-    result += il.toString(1);
-}
-void TreeGenVisitor::visit(FloatLiteral &il) {
-    result += il.toString(1);
-}
-void TreeGenVisitor::visit(BoolLiteral &bl) {
-    result += bl.toString(1);
-}
-void TreeGenVisitor::visit(StringLiteral &sl) {
-    result += sl.toString(1);
-}
-void TreeGenVisitor::visit(TypeSpecifier &ts) {
-    result += ts.toString(1);
-}
+void TreeGenVisitor::visit(AdditiveExpression &ae) { result += ae.toString(1); }
+void TreeGenVisitor::visit(CastExpression &ce) { result += ce.toString(1); }
+void TreeGenVisitor::visit(PrefixExpression &pe) { result += pe.toString(1); }
+void TreeGenVisitor::visit(CallExpression &ce) { result += ce.toString(1); }
+void TreeGenVisitor::visit(DebugExpression &de) { result += de.toString(1); }
+void TreeGenVisitor::visit(CallArguments &ca) { result += ca.toString(1); }
+void TreeGenVisitor::visit(LambdaExpression &le) { result += le.toString(1); }
+void TreeGenVisitor::visit(Identifier &i) { result += i.toString(1); }
+void TreeGenVisitor::visit(ParentExpression &pe) { result += pe.toString(1); }
+void TreeGenVisitor::visit(IntegerLiteral &il) { result += il.toString(1); }
+void TreeGenVisitor::visit(FloatLiteral &il) { result += il.toString(1); }
+void TreeGenVisitor::visit(BoolLiteral &bl) { result += bl.toString(1); }
+void TreeGenVisitor::visit(StringLiteral &sl) { result += sl.toString(1); }
+void TreeGenVisitor::visit(TypeSpecifier &ts) { result += ts.toString(1); }

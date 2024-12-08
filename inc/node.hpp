@@ -1,6 +1,6 @@
 #pragma once
-#include <string>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "token.hpp"
