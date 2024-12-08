@@ -45,12 +45,8 @@ Lexem Lexer::nextLexem() {
 }
 
 std::optional<Lexem> Lexer::tryEndOfFile() {
-    switch (ch) {
-    case EOF:
-        return Lexem{token::Token(token::END_OF_FILE), line, column};
-    default:
-        return std::nullopt;
-    }
+    if (ch == EOF) return Lexem{token::Token(token::END_OF_FILE), line, column};
+    return std::nullopt;
 }
 
 std::optional<Lexem> Lexer::trySlashOrToken() {
