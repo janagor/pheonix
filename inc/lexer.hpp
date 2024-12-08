@@ -1,14 +1,10 @@
 #pragma once
 
-#include <exception>
-#include <limits>
-#include <sstream>
 #include <stdexcept>
-#include <vector>
 
 #include "token.hpp"
 
-namespace lexer {
+namespace pheonix::lexer {
 
 class LexerException : public std::runtime_error {
   size_t line;
@@ -73,4 +69,4 @@ private:
   size_t column;
 };
 
-} // namespace lexer
+} // namespace pheonix::lexer

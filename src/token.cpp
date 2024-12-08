@@ -1,6 +1,8 @@
 #include "token.hpp"
 
-namespace token {
+#include <map>
+
+namespace pheonix::token {
 
 namespace {
 static const std::map<TokenType, std::string> TokenTypeToLiteral{
@@ -107,4 +109,4 @@ std::optional<TokenType> searchForKeyword(std::string &word) {
   return {};
 }
 
-} // namespace token
+} // namespace pheonix::token

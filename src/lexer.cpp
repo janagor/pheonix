@@ -2,10 +2,13 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <exception>
+#include <limits>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
-namespace lexer {
+namespace pheonix::lexer {
 
 size_t LexerException::getLine() const { return line; }
 size_t LexerException::getColumn() const { return column; }
@@ -423,4 +426,4 @@ token::Token Lexer::handleString(size_t line, size_t column) {
   throw LexerException("String literal to long.", line, column);
 }
 
-} // namespace lexer
+} // namespace pheonix::lexer

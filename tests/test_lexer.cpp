@@ -1,4 +1,6 @@
-#include "../inc/lexer.hpp"
+#include "lexer.hpp"
+#include "types.hpp"
+
 #include <cassert>
 #include <cstdio>
 #include <fstream>
@@ -8,8 +10,9 @@
 #include <map>
 
 using namespace std;
-using namespace token;
-using namespace lexer;
+using namespace pheonix::token;
+using namespace pheonix::types;
+using namespace pheonix::lexer;
 
 // helpers
 void compareLexemVectors(const vector<Lexem> &expected,
@@ -20,12 +23,12 @@ void compareLexemVectors(const vector<Lexem> &expected,
     EXPECT_EQ(expected[i], received[i]);
   }
 }
-std::vector<Lexem> lexerize(Lexer &lexer) {
-  std::vector<Lexem> result;
+vector<Lexem> lexerize(Lexer &lexer) {
+  vector<Lexem> result;
   while (true) {
     Lexem l = lexer.nextLexem();
     result.emplace_back(l);
-    if (l.token.getTokenType() == token::END_OF_FILE) {
+    if (l.token.getTokenType() == END_OF_FILE) {
       return result;
     }
   }
@@ -297,7 +300,7 @@ TEST(TestLexer, testIntegersErrors) {
     try {
       lexerize(l);
       FAIL() << "Expected runtime_error";
-    } catch (const std::runtime_error &e) {
+    } catch (const runtime_error &e) {
       EXPECT_STREQ(e.what(), value.c_str());
     } catch (...) {
       FAIL() << "Unexpected exception type thrown";
@@ -340,8 +343,7 @@ TEST(TestLexer, testIntegersFrom0to1000) {
         {Token(INTEGER, i), 1, 1},
         {Token(END_OF_FILE), 1, shift},
     };
-    assert(std::get<types::Integer>(expected[0].token.getValue().value())
-               .getValue() == i);
+    assert(get<Integer>(expected[0].token.getValue().value()).getValue() == i);
     istringstream in(input);
     Lexer l(in);
     vector<Lexem> result = lexerize(l);
@@ -399,7 +401,7 @@ TEST(TestLexer, testNotATokens) {
     Lexer l(in);
     try {
       lexerize(l);
-      std::cout << input << std::endl;
+      cout << input << endl;
       FAIL() << "Expected LexerException";
     } catch (const LexerException &e) {
       EXPECT_STREQ(e.what(), "Not a token.");
@@ -490,7 +492,7 @@ TEST(TestLexer, testReadingFromFile) {
 while(x < 12) { x = x + 0.; }
 let mut b = 123<-str;
 )";
-  std::ofstream file("test.txt");
+  ofstream file("test.txt");
   if (file.is_open()) {
     file << input;
     file.close();
@@ -551,7 +553,7 @@ let mut b = 123<-str;
   EXPECT_EQ(expected.size(), result.size());
 
   compareLexemVectors(expected, result);
-  std::remove("test.txt");
+  remove("test.txt");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

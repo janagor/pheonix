@@ -1,6 +1,9 @@
 #include "types.hpp"
 
-namespace types {
+#include <limits>
+#include <stdexcept>
+
+namespace pheonix::types {
 
 Integer &Integer::operator=(int val) {
   value = val;
@@ -211,4 +214,4 @@ std::ostream &operator<<(std::ostream &os, const Float &obj) {
   return os;
 }
 
-} // namespace types
+} // namespace pheonix::types

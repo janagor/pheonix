@@ -1,11 +1,15 @@
-#include "../inc/parser.hpp"
+#include "parser.hpp"
+
 #include <cassert>
 #include <gtest/gtest.h>
 #include <map>
+
 using namespace std;
-using namespace token;
-using namespace lexer;
-using namespace parser;
+using namespace pheonix::token;
+using namespace pheonix::node;
+using namespace pheonix::visitor;
+using namespace pheonix::lexer;
+using namespace pheonix::parser;
 
 // helper
 void compareExpectedAndReceived(const string &input, const string &expected) {

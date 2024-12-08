@@ -1,13 +1,13 @@
 #pragma once
 
 #include "types.hpp"
+
 #include <iostream>
-#include <map>
 #include <optional>
 #include <string>
 #include <variant>
 
-namespace token {
+namespace pheonix::token {
 
 enum TokenType : int {
   END_OF_FILE = 0,
@@ -86,4 +86,4 @@ std::ostream &operator<<(
         &opt);
 std::ostream &operator<<(std::ostream &os, const Token &t);
 
-} // namespace token
+} // namespace pheonix::token

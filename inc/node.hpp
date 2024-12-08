@@ -1,20 +1,22 @@
 #pragma once
-#include <memory>
-#include <string>
-#include <vector>
 
 #include "token.hpp"
 #include "types.hpp"
 #include "visitor.hpp"
 
-// namespace pheonix::node {
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace pheonix::node {
 
 std::string opToString(const token::TokenType &tok);
 
 struct Node {
   virtual ~Node() = default;
   virtual std::string toString(const int shift_size) const = 0;
-  virtual void accept(Visitor &v) = 0;
+  virtual void accept(visitor::Visitor &v) = 0;
 };
 
 struct Block : public Node {
@@ -23,7 +25,7 @@ struct Block : public Node {
   Block() : Node() {};
 
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct Program : public Node {
@@ -32,7 +34,7 @@ struct Program : public Node {
   Program() : Node() {};
 
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct Parameter : public Node {
@@ -42,7 +44,7 @@ struct Parameter : public Node {
   std::string identifier;
 
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct DeclarationArguments : public Node {
@@ -50,7 +52,7 @@ struct DeclarationArguments : public Node {
   std::vector<std::unique_ptr<Node>> arguments;
 
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 // Statements
 struct FunctionDeclaration : public Node {
@@ -61,7 +63,7 @@ struct FunctionDeclaration : public Node {
   FunctionDeclaration(std::string i) : Node(), identifier(i) {};
 
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct VariableDeclaration : public Node {
@@ -73,7 +75,7 @@ struct VariableDeclaration : public Node {
       : Node(), isMutable(isMut), identifier(i), expression(std::move(e)) {};
 
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct WhileLoopStatement : public Node {
@@ -84,7 +86,7 @@ struct WhileLoopStatement : public Node {
       : Node(), expression(std::move(e)), statements(std::move(s)) {};
 
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct IfStatement : public Node {
@@ -97,7 +99,7 @@ struct IfStatement : public Node {
         elseBody(nullptr) {};
 
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct ReturnStatement : public Node {
@@ -105,7 +107,7 @@ struct ReturnStatement : public Node {
   ReturnStatement(std::unique_ptr<Node> e)
       : Node(), expression(std::move(e)) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct ExpressionStatement : public Node {
@@ -113,7 +115,7 @@ struct ExpressionStatement : public Node {
   ExpressionStatement(std::unique_ptr<Node> e)
       : Node(), expression(std::move(e)) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 // Expressions
 struct AssignementExpression : public Node {
@@ -124,7 +126,7 @@ struct AssignementExpression : public Node {
       : Node(), identifier(i), expression(std::move(e)) {};
 
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct OrExpression : public Node {
@@ -135,7 +137,7 @@ struct OrExpression : public Node {
                token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct AndExpression : public Node {
@@ -146,7 +148,7 @@ struct AndExpression : public Node {
                 token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct ComparisonExpression : public Node {
@@ -157,7 +159,7 @@ struct ComparisonExpression : public Node {
                        token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct RelationalExpression : public Node {
@@ -168,7 +170,7 @@ struct RelationalExpression : public Node {
                        token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct AdditiveExpression : public Node {
@@ -179,7 +181,7 @@ struct AdditiveExpression : public Node {
                      token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct MultiplicativeExpression : public Node {
@@ -190,7 +192,7 @@ struct MultiplicativeExpression : public Node {
                            token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct CompositiveExpression : public Node {
@@ -199,7 +201,7 @@ struct CompositiveExpression : public Node {
   CompositiveExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r)
       : Node(), left(std::move(l)), right(std::move(r)) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct CastExpression : public Node {
@@ -208,7 +210,7 @@ struct CastExpression : public Node {
   CastExpression(std::unique_ptr<Node> e, std::unique_ptr<Node> t)
       : Node(), expression(std::move(e)), type(std::move(t)) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct PrefixExpression : public Node {
@@ -217,7 +219,7 @@ struct PrefixExpression : public Node {
   PrefixExpression(token::TokenType o, std::unique_ptr<Node> e)
       : Node(), op(o), expression(std::move(e)) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct CallExpression : public Node {
@@ -226,7 +228,7 @@ struct CallExpression : public Node {
   CallExpression(std::unique_ptr<Node> f, std::unique_ptr<Node> a)
       : Node(), function(std::move(f)), arguments(std::move(a)) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct DebugExpression : public Node {
@@ -235,7 +237,7 @@ struct DebugExpression : public Node {
   DebugExpression(std::unique_ptr<Node> f, std::unique_ptr<Node> a)
       : Node(), function(std::move(f)), arguments(std::move(a)) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct LambdaExpression : public Node {
@@ -245,14 +247,14 @@ struct LambdaExpression : public Node {
   LambdaExpression() : Node() {};
 
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct Identifier : public Node {
   std::string value;
   Identifier(const std::string &val) : Node(), value(val) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct ParentExpression : public Node {
@@ -260,35 +262,35 @@ struct ParentExpression : public Node {
   ParentExpression(std::unique_ptr<Node> e)
       : Node(), expression(std::move(e)) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct IntegerLiteral : public Node {
   types::Integer value;
   IntegerLiteral(types::Integer val) : Node(), value(val) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct FloatLiteral : public Node {
   types::Float value;
   FloatLiteral(types::Float val) : Node(), value(val) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct BoolLiteral : public Node {
   bool value;
   BoolLiteral(bool val) : Node(), value(val) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct StringLiteral : public Node {
   std::string value;
   StringLiteral(const std::string &val) : Node(), value(val) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 enum TypeName : int {
@@ -317,14 +319,14 @@ struct TypeSpecifier : public Node {
   TypeSpecifier(const token::TokenType &token)
       : Node(), typeName(TokenToType.at(token)) {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
 struct CallArguments : public Node {
   std::vector<std::unique_ptr<Node>> arguments;
   CallArguments() : Node() {};
   std::string toString(const int shift_size) const override;
-  void accept(Visitor &v) override;
+  void accept(visitor::Visitor &v) override;
 };
 
-// } // namespace pheonix::node
+} // namespace pheonix::node

@@ -1,7 +1,7 @@
-#include "../inc/repl.hpp"
+#include "repl.hpp"
 
 using namespace std;
-namespace repl {
+namespace pheonix::repl {
 
 string dosth(const string &in) { return "doing sth with {" + in + "}"; }
 
@@ -30,4 +30,4 @@ void start(istream &is, ostream &os) {
   }
 }
 
-} // namespace repl
+} // namespace pheonix::repl

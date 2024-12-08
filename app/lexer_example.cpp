@@ -1,10 +1,9 @@
 #include "lexer.hpp"
 #include <iostream>
+#include <sstream>
 #include <vector>
-using namespace std;
-using namespace lexer;
 
-const vector<string> EXAMPLES = {
+const std::vector<std::string> EXAMPLES = {
     // Ex1
     R"(// These are one line comments.
 /* these
@@ -245,12 +244,12 @@ false
 };
 
 // helper
-std::vector<Lexem> lexerize(Lexer &lexer) {
-  std::vector<Lexem> result;
+std::vector<pheonix::lexer::Lexem> lexerize(pheonix::lexer::Lexer &lexer) {
+  std::vector<pheonix::lexer::Lexem> result;
   while (true) {
-    Lexem l = lexer.nextLexem();
+    pheonix::lexer::Lexem l = lexer.nextLexem();
     result.emplace_back(l);
-    if (l.token.getTokenType() == token::END_OF_FILE) {
+    if (l.token.getTokenType() == pheonix::token::END_OF_FILE) {
       return result;
     }
   }
@@ -259,32 +258,32 @@ std::vector<Lexem> lexerize(Lexer &lexer) {
 int main(int argc, char **argv) {
   if (argc == 2) {
     size_t test_case = 1;
-    test_case = atoi(argv[1]) - 1;
+    test_case = std::atoi(argv[1]) - 1;
     if (test_case >= EXAMPLES.size()) {
-      cout << "wrong test case use index from [0, " << EXAMPLES.size() << '.'
-           << endl;
+      std::cout << "wrong test case use index from [0, " << EXAMPLES.size()
+                << '.' << std::endl;
       return 1;
     }
-    istringstream in(EXAMPLES[test_case]);
-    Lexer l(in);
-    vector<Lexem> result = lexerize(l);
-    cout << "Example nr. " << ++test_case << endl;
+    std::istringstream in(EXAMPLES[test_case]);
+    pheonix::lexer::Lexer l(in);
+    std::vector<pheonix::lexer::Lexem> result = lexerize(l);
+    std::cout << "Example nr. " << ++test_case << std::endl;
     for (const auto &lexem : result) {
-      cout << lexem << std::endl;
+      std::cout << lexem << std::endl;
     }
-    cout << endl;
+    std::cout << std::endl;
     return 0;
   }
 
   int i = 0;
   for (const auto &ex : EXAMPLES) {
-    istringstream in(ex);
-    Lexer l(in);
-    vector<Lexem> result = lexerize(l);
-    cout << "Example nr. " << ++i << endl;
+    std::istringstream in(ex);
+    pheonix::lexer::Lexer l(in);
+    std::vector<pheonix::lexer::Lexem> result = lexerize(l);
+    std::cout << "Example nr. " << ++i << std::endl;
     for (const auto &lexem : result) {
-      cout << lexem << std::endl;
+      std::cout << lexem << std::endl;
     }
-    cout << endl;
+    std::cout << std::endl;
   }
 }

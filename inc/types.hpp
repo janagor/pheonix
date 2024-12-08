@@ -1,9 +1,7 @@
 #pragma once
 #include <iostream>
-#include <limits>
-#include <stdexcept>
 
-namespace types {
+namespace pheonix::types {
 
 struct Integer {
   Integer() : value(0) {}
@@ -96,4 +94,4 @@ private:
   double value;
 };
 
-} // namespace types
+} // namespace pheonix::types
