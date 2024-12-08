@@ -20,6 +20,7 @@ static const std::map<TokenType, std::string> TokenTypeToLiteral {
     { DOLAR,"DOLAR" },
     { SEMICOLON,"SEMICOLON" },
     { COMMA,"COMMA" },
+    { PIPE,"PIPE" },
 
     { LPARENT,"LPARENT" },
     { RPARENT,"RPARENT" },

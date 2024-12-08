@@ -53,6 +53,7 @@ const map<const string, const Token> SPECIAL_CHARS_AND_KEYWORDS {
     { "*", Token(STAR) },
     { "%", Token(PERCENT) },
     { "#", Token(HASH) },
+    { "|", Token(PIPE) },
     { "$", Token(DOLAR) },
     { ";", Token(SEMICOLON) },
     { ",", Token(COMMA) },
@@ -451,7 +452,7 @@ TEST(TestLexer, testNewLineCharactersWithSomethingAfter) {
     }
 }
 
-const vector<string> NOT_A_TOKENS { ".", "`", "~", "|", "@", "^", "&", "?", "\\" };
+const vector<string> NOT_A_TOKENS { ".", "`", "~", "@", "^", "&", "?", "\\" };
 
 TEST(TestLexer, testNotATokens) {
     for (const auto& input : NOT_A_TOKENS) {

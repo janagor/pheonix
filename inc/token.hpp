@@ -21,6 +21,7 @@ enum TokenType : int {
     SLASH,
     PERCENT,
     HASH,
+    PIPE,
     DOLAR,
     SEMICOLON,
     COMMA,
