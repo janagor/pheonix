@@ -82,7 +82,7 @@ TokenType Token::getTokenType() const {
     return tokenType;
 }
 
-std::optional<std::variant<int, double, std::string>> Token::getValue() const {
+std::optional<std::variant<types::Integer, types::Float, std::string>> Token::getValue() const {
     return value;
 }
 
@@ -92,7 +92,7 @@ bool Token::operator==(const Token& t) const {
 
 std::ostream& operator<<(
     std::ostream& os,
-    const std::optional<std::variant<int, double, std::string>>& opt
+    const std::optional<std::variant<types::Integer, types::Float, std::string>>& opt
 ) {
     if (opt) {
         std::visit([&os](const auto& value) {

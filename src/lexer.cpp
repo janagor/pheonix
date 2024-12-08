@@ -336,38 +336,34 @@ token::Token Lexer::handleIdentifier(size_t row, size_t column){
 }
 
 token::Token Lexer::handleNumber(size_t row, size_t column){
-    std::string buffer = "";
-    buffer += ch;
-    long integerPart = 0;
+    types::Integer integerPart;
 
     while (isdigit(ch)) {
-        if(
-            (integerPart = 10*integerPart + static_cast<long>(ch - '0'))
-            > std::numeric_limits<int>::max()
-        )
-            throw LexerException("Integer literal out of range.", row, column);
-        buffer += ch;
+        // if(
+        //     (integerPart = 10*integerPart + static_cast<long>(ch - '0'))
+        //     > std::numeric_limits<int>::max()
+        // )
+        //     throw LexerException("Integer literal out of range.", row, column);
+        integerPart = integerPart * 10 + static_cast<long>(ch - '0');
         readChar();
     }
     if (ch == '.') {
         readChar();
-        return handleFloat(row, column, integerPart);
+        return handleFloat(row, column, integerPart.getValue());
     }
     if (isalpha(ch))
         throw LexerException("Undefined value.", row, column);
 
-    return token::Token(token::INTEGER, static_cast<int>(integerPart));
+    return token::Token(token::INTEGER, integerPart);
 }
 
 token::Token Lexer::handleFloat(size_t row, size_t column, long intPart){
-    std::string buffer = "";
     int fractionalPart = 0;
     int length = 0;
 
     while (isdigit(ch) && fractionalPart <= std::numeric_limits<int>::max()) {
         fractionalPart = 10*fractionalPart + static_cast<long>(ch - '0');
         ++length;
-        buffer += ch;
         readChar();
     }
     if (isalpha(ch))

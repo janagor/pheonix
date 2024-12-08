@@ -29,11 +29,13 @@ include_directories(app)
 set(HEADER_FILES
     inc/token.hpp
     inc/lexer.hpp
+    inc/types.hpp
 )
 
 set(SOURCE_FILES
     src/token.cpp
     src/lexer.cpp
+    src/types.cpp
 )
 
 add_executable(

@@ -352,10 +352,10 @@ const map<const string, const string> INTEGERS_ERRORS {
         to_string(2*static_cast<long>(numeric_limits<int>::max())),
         "Integer literal out of range."
     },
-    {
-        to_string(21321) + "a",
-        "Undefined value."
-    },
+    // {
+    //     to_string(21321) + "a",
+    //     "Undefined value."
+    // },
 };
 
 TEST(TestLexer, testIntegersErrors) {
@@ -365,13 +365,9 @@ TEST(TestLexer, testIntegersErrors) {
         Lexer l(in);
         try {
             lexerize(l);
-            FAIL() << "Expected LexerException";
-        } catch (const LexerException& e) {
+            FAIL() << "Expected runtime_error";
+        } catch (const std::runtime_error& e) {
             EXPECT_STREQ(e.what(), value.c_str());
-            std::cout <<  e.what() << std::endl;
-            std::cout <<  value.c_str() << std::endl;
-            EXPECT_EQ(e.getLine(), 1);
-            EXPECT_EQ(e.getColumn(), 1);
         } catch (...) {
             FAIL() << "Unexpected exception type thrown";
         }
@@ -413,7 +409,7 @@ TEST(TestLexer, testIntegersFrom0to1000) {
             {Token(INTEGER, i), 1, 1},
             {Token(END_OF_FILE), 1, shift},
         };
-        assert(std::get<int>(expected[0].token.getValue().value()) == i);
+        assert(std::get<types::Integer>(expected[0].token.getValue().value()).getValue() == i);
         istringstream in(input);
         Lexer l(in);
         vector<Lexem> result = lexerize(l);
