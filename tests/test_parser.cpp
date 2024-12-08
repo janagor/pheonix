@@ -134,6 +134,7 @@ const map<string, string> TRIVIAL_CASES{
         expression=(CompositiveExpression:\n\
             left=(IntegerLiteral:\n\
                 value=9),\n\
+            operator=[|],\n\
             right=(IntegerLiteral:\n\
                 value=123))))"},
     // RelationalExpression

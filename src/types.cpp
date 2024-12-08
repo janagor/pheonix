@@ -84,6 +84,50 @@ std::optional<types::TokenType> searchForKeyword(std::string &word) {
   return {};
 }
 
+// TODO: make it a map
+std::string opToString(const types::TokenType &tok) {
+  switch (tok) {
+  case TokenType::EQUALS:
+    return "==";
+    break;
+  case TokenType::NEQ:
+    return "!=";
+    break;
+  case TokenType::PLUS:
+    return "+";
+    break;
+  case TokenType::MINUS:
+    return "-";
+    break;
+  case TokenType::BANG:
+    return "!";
+    break;
+  case TokenType::STAR:
+    return "*";
+    break;
+  case TokenType::SLASH:
+    return "/";
+    break;
+  case TokenType::PERCENT:
+    return "%";
+    break;
+  case TokenType::LEQ:
+    return "<=";
+    break;
+  case TokenType::LESS:
+    return "<";
+    break;
+  case TokenType::GEQ:
+    return ">=";
+    break;
+  case TokenType::GREATER:
+    return ">";
+    break;
+  default:
+    return "";
+  }
+}
+
 Integer &Integer::operator=(int val) {
   value = val;
   return *this;

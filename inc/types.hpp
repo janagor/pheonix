@@ -82,6 +82,8 @@ static const std::map<TypeName, std::string> TypeNameToString{
     {TypeName::TYPE_FLT, "flt"},
     {TypeName::TYPE_BOL, "bol"}};
 
+std::string opToString(const types::TokenType &tok);
+
 struct Integer {
   Integer() : value(0) {}
   Integer(int v) : value(v) {}
