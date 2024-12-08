@@ -1,9 +1,88 @@
 #include "types.hpp"
 
 #include <limits>
+#include <map>
 #include <stdexcept>
 
 namespace pheonix::types {
+namespace {
+
+const std::map<TokenType, std::string> TokenTypeToLiteral{
+    {END_OF_FILE, "END_OF_FILE"},
+
+    {ONE_LINE_COMMENT, "ONE_LINE_COMMENT"},
+    {MULTILINE_COMMENT, "MULTILINE_COMMENT"},
+
+    {ASSIGN, "ASSIGN"},
+    {BANG, "BANG"},
+    {PLUS, "PLUS"},
+    {MINUS, "MINUS"},
+    {STAR, "STAR"},
+    {SLASH, "SLASH"},
+    {PERCENT, "PERCENT"},
+    {HASH, "HASH"},
+    {DOLAR, "DOLAR"},
+    {SEMICOLON, "SEMICOLON"},
+    {COMMA, "COMMA"},
+    {PIPE, "PIPE"},
+
+    {LPARENT, "LPARENT"},
+    {RPARENT, "RPARENT"},
+    {LBRACE, "LBRACE"},
+    {RBRACE, "RBRACE"},
+    {LBRACKET, "LBRACKET"},
+    {RBRACKET, "RBRACKET"},
+    {AND, "AND"},
+    {OR, "OR"},
+    {EQUALS, "EQUALS"},
+    {NEQ, "NEQ"},
+    {LEQ, "LEQ"},
+    {GEQ, "GEQ"},
+    {GREATER, "GREATER"},
+    {LESS, "LESS"},
+    {LARROW, "LARROW"},
+
+    {IDENTIFIER, "IDENTIFIER"},
+    {STRING, "STRING"},
+    {INTEGER, "INTEGER"},
+    {FLOAT, "FLOAT"},
+
+    {FN, "FN"},
+    {LET, "LET"},
+    {MUT, "MUT"},
+    {RETURN, "RETURN"},
+    {IF, "IF"},
+    {ELSE, "ELSE"},
+    {WHILE, "WHILE"},
+    {INT, "INT"},
+    {STR, "STR"},
+    {FLT, "FLT"},
+    {BOL, "BOL"},
+    {TRUE, "TRUE"},
+    {FALSE, "FALSE"},
+
+    {NOT_A_TOKEN, "NOT_A_TOKEN"},
+};
+
+static const std::map<std::string, TokenType> Keywords = {
+    {"fn", FN},     {"let", LET},     {"mut", MUT},     {"return", RETURN},
+
+    {"if", IF},     {"else", ELSE},   {"while", WHILE},
+
+    {"int", INT},   {"str", STR},     {"bol", BOL},     {"flt", FLT},
+
+    {"true", TRUE}, {"false", FALSE},
+};
+
+} // namespace
+
+std::optional<types::TokenType> searchForKeyword(std::string &word) {
+  auto token = types::Keywords.find(word);
+  if (token != Keywords.end()) {
+    return token->second;
+  }
+  return {};
+}
 
 Integer &Integer::operator=(int val) {
   value = val;

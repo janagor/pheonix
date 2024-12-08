@@ -249,7 +249,7 @@ std::vector<pheonix::lexer::Lexem> lexerize(pheonix::lexer::Lexer &lexer) {
   while (true) {
     pheonix::lexer::Lexem l = lexer.nextLexem();
     result.emplace_back(l);
-    if (l.token.getTokenType() == pheonix::token::END_OF_FILE) {
+    if (l.token.getTokenType() == pheonix::types::END_OF_FILE) {
       return result;
     }
   }

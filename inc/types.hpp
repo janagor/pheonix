@@ -1,7 +1,86 @@
 #pragma once
 #include <iostream>
+#include <map>
+#include <optional>
 
 namespace pheonix::types {
+
+// tokens
+enum TokenType : int {
+  END_OF_FILE = 0,
+  ONE_LINE_COMMENT,
+  MULTILINE_COMMENT,
+  ASSIGN,
+  BANG,
+  PLUS,
+  MINUS,
+  STAR,
+  SLASH,
+  PERCENT,
+  HASH,
+  PIPE,
+  DOLAR,
+  SEMICOLON,
+  COMMA,
+  LPARENT,
+  RPARENT,
+  LBRACE,
+  RBRACE,
+  LBRACKET,
+  RBRACKET,
+  AND,
+  OR,
+  EQUALS,
+  NEQ,
+  LEQ,
+  GEQ,
+  GREATER,
+  LESS,
+  LARROW,
+  IDENTIFIER,
+  STRING,
+  INTEGER,
+  FLOAT,
+  FN,
+  LET,
+  MUT,
+  RETURN,
+  IF,
+  ELSE,
+  WHILE,
+  INT,
+  STR,
+  FLT,
+  BOL,
+  TRUE,
+  FALSE,
+  NOT_A_TOKEN,
+};
+
+std::optional<TokenType> searchForKeyword(std::string &word);
+
+const std::map<TokenType, std::string> TokenTypeToLiteral;
+// nodes typenames
+
+enum TypeName : int {
+  ERROR = 0,
+  TYPE_STR,
+  TYPE_INT,
+  TYPE_FLT,
+  TYPE_BOL,
+};
+
+static const std::map<TokenType, TypeName> TokenToType{
+    {types::TokenType::INT, TypeName::TYPE_INT},
+    {types::TokenType::STR, TypeName::TYPE_STR},
+    {types::TokenType::FLT, TypeName::TYPE_FLT},
+    {types::TokenType::BOL, TypeName::TYPE_BOL}};
+
+static const std::map<TypeName, std::string> TypeNameToString{
+    {TypeName::TYPE_INT, "int"},
+    {TypeName::TYPE_STR, "str"},
+    {TypeName::TYPE_FLT, "flt"},
+    {TypeName::TYPE_BOL, "bol"}};
 
 struct Integer {
   Integer() : value(0) {}
@@ -85,10 +164,10 @@ struct Float {
   bool operator>(const Float &other) const;
   bool operator>=(const Float &other) const;
 
+  friend std::ostream &operator<<(std::ostream &os, const Float &obj);
+
   double getValue() const;
   void setValue(double val);
-
-  friend std::ostream &operator<<(std::ostream &os, const Float &obj);
 
 private:
   double value;

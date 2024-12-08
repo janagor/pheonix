@@ -114,6 +114,18 @@ public:
 
 private:
   std::string result;
+  // TODO: move toString to the visitor after resolvin problems with maps
+  // int shift_size;
+  // std::string s; // separator
+  //
+  // void inc() {
+  //   ++shift_size;
+  //   s += std::string(4, ' ');
+  // }
+  // void dec() {
+  //   --shift_size;
+  //   s.resize(s.size() - 4);
+  // }
 };
 
 } // namespace pheonix::visitor

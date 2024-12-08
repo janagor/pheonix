@@ -11,7 +11,7 @@
 
 namespace pheonix::node {
 
-std::string opToString(const token::TokenType &tok);
+std::string opToString(const types::TokenType &tok);
 
 struct Node {
   virtual ~Node() = default;
@@ -132,9 +132,9 @@ struct AssignementExpression : public Node {
 struct OrExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  token::TokenType op;
+  types::TokenType op;
   OrExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-               token::TokenType t)
+               types::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
   void accept(visitor::Visitor &v) override;
@@ -143,9 +143,9 @@ struct OrExpression : public Node {
 struct AndExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  token::TokenType op;
+  types::TokenType op;
   AndExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-                token::TokenType t)
+                types::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
   void accept(visitor::Visitor &v) override;
@@ -154,9 +154,9 @@ struct AndExpression : public Node {
 struct ComparisonExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  token::TokenType op;
+  types::TokenType op;
   ComparisonExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-                       token::TokenType t)
+                       types::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
   void accept(visitor::Visitor &v) override;
@@ -165,9 +165,9 @@ struct ComparisonExpression : public Node {
 struct RelationalExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  token::TokenType op;
+  types::TokenType op;
   RelationalExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-                       token::TokenType t)
+                       types::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
   void accept(visitor::Visitor &v) override;
@@ -176,9 +176,9 @@ struct RelationalExpression : public Node {
 struct AdditiveExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  token::TokenType op;
+  types::TokenType op;
   AdditiveExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-                     token::TokenType t)
+                     types::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
   void accept(visitor::Visitor &v) override;
@@ -187,9 +187,9 @@ struct AdditiveExpression : public Node {
 struct MultiplicativeExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  token::TokenType op;
+  types::TokenType op;
   MultiplicativeExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-                           token::TokenType t)
+                           types::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   std::string toString(const int shift_size) const override;
   void accept(visitor::Visitor &v) override;
@@ -214,9 +214,9 @@ struct CastExpression : public Node {
 };
 
 struct PrefixExpression : public Node {
-  token::TokenType op;
+  types::TokenType op;
   std::unique_ptr<Node> expression;
-  PrefixExpression(token::TokenType o, std::unique_ptr<Node> e)
+  PrefixExpression(types::TokenType o, std::unique_ptr<Node> e)
       : Node(), op(o), expression(std::move(e)) {};
   std::string toString(const int shift_size) const override;
   void accept(visitor::Visitor &v) override;
@@ -293,31 +293,11 @@ struct StringLiteral : public Node {
   void accept(visitor::Visitor &v) override;
 };
 
-enum TypeName : int {
-  ERROR = 0,
-  STR,
-  INT,
-  FLT,
-  BOL,
-};
-
-static const std::map<token::TokenType, TypeName> TokenToType{
-    {token::TokenType::INT, TypeName::INT},
-    {token::TokenType::STR, TypeName::STR},
-    {token::TokenType::FLT, TypeName::FLT},
-    {token::TokenType::BOL, TypeName::BOL}};
-
-static const std::map<TypeName, std::string> TypeToString{
-    {TypeName::INT, "int"},
-    {TypeName::STR, "str"},
-    {TypeName::FLT, "flt"},
-    {TypeName::BOL, "bol"}};
-
 struct TypeSpecifier : public Node {
-  TypeName typeName;
-  TypeSpecifier(const TypeName &type) : Node(), typeName(type) {};
-  TypeSpecifier(const token::TokenType &token)
-      : Node(), typeName(TokenToType.at(token)) {};
+  types::TypeName typeName;
+  TypeSpecifier(const types::TypeName &type) : Node(), typeName(type) {};
+  TypeSpecifier(const types::TokenType &token)
+      : Node(), typeName(types::TokenToType.at(token)) {};
   std::string toString(const int shift_size) const override;
   void accept(visitor::Visitor &v) override;
 };

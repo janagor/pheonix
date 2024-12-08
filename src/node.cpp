@@ -8,42 +8,42 @@
 
 namespace pheonix::node {
 
-std::string opToString(const token::TokenType &tok) {
+std::string opToString(const types::TokenType &tok) {
   switch (tok) {
-  case token::EQUALS:
+  case types::TokenType::EQUALS:
     return "==";
     break;
-  case token::NEQ:
+  case types::TokenType::NEQ:
     return "!=";
     break;
-  case token::PLUS:
+  case types::TokenType::PLUS:
     return "+";
     break;
-  case token::MINUS:
+  case types::TokenType::MINUS:
     return "-";
     break;
-  case token::BANG:
+  case types::TokenType::BANG:
     return "!";
     break;
-  case token::STAR:
+  case types::TokenType::STAR:
     return "*";
     break;
-  case token::SLASH:
+  case types::TokenType::SLASH:
     return "/";
     break;
-  case token::PERCENT:
+  case types::TokenType::PERCENT:
     return "%";
     break;
-  case token::LEQ:
+  case types::TokenType::LEQ:
     return "<=";
     break;
-  case token::LESS:
+  case types::TokenType::LESS:
     return "<";
     break;
-  case token::GEQ:
+  case types::TokenType::GEQ:
     return ">=";
     break;
-  case token::GREATER:
+  case types::TokenType::GREATER:
     return ">";
     break;
   default:
@@ -282,7 +282,8 @@ std::string StringLiteral::toString(const int shift_size) const {
 
 std::string TypeSpecifier::toString(const int shift_size) const {
   std::string s = "\n" + std::string(shift_size * 4, ' ');
-  return "(TypeSpecifier:" + s + "value=" + TypeToString.at(typeName) + ")";
+  return "(TypeSpecifier:" + s +
+         "value=" + types::TypeNameToString.at(typeName) + ")";
 }
 
 void Program::accept(visitor::Visitor &v) { v.visit(*this); }

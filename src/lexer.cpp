@@ -45,7 +45,7 @@ Lexem Lexer::nextLexem() {
 
 std::optional<Lexem> Lexer::tryEndOfFile() {
   if (ch == EOF)
-    return Lexem{token::Token(token::END_OF_FILE), line, column};
+    return Lexem{token::Token(types::TokenType::END_OF_FILE), line, column};
   return std::nullopt;
 }
 
@@ -66,7 +66,7 @@ std::optional<Lexem> Lexer::trySlashOrToken() {
       break;
     }
     readChar();
-    return Lexem{token::Token(token::SLASH), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::SLASH), sline, scolumn};
   default:
     return std::nullopt;
   }
@@ -78,22 +78,22 @@ std::optional<Lexem> Lexer::tryParenthesis() {
   switch (ch) {
   case '(':
     readChar();
-    return Lexem{token::Token(token::LPARENT), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::LPARENT), sline, scolumn};
   case ')':
     readChar();
-    return Lexem{token::Token(token::RPARENT), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::RPARENT), sline, scolumn};
   case '{':
     readChar();
-    return Lexem{token::Token(token::LBRACE), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::LBRACE), sline, scolumn};
   case '}':
     readChar();
-    return Lexem{token::Token(token::RBRACE), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::RBRACE), sline, scolumn};
   case '[':
     readChar();
-    return Lexem{token::Token(token::LBRACKET), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::LBRACKET), sline, scolumn};
   case ']':
     readChar();
-    return Lexem{token::Token(token::RBRACKET), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::RBRACKET), sline, scolumn};
   default:
     return std::nullopt;
   }
@@ -107,48 +107,48 @@ std::optional<Lexem> Lexer::tryTwoCharOperator() {
     readChar();
     if (ch == '=') {
       readChar();
-      return Lexem{token::Token(token::LEQ), sline, scolumn};
+      return Lexem{token::Token(types::TokenType::LEQ), sline, scolumn};
     }
     if (ch == '-') {
       readChar();
-      return Lexem{token::Token(token::LARROW), sline, scolumn};
+      return Lexem{token::Token(types::TokenType::LARROW), sline, scolumn};
     }
-    return Lexem{token::Token(token::LESS), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::LESS), sline, scolumn};
   case '>':
     readChar();
     if (ch == '=') {
       readChar();
-      return Lexem{token::Token(token::GEQ), sline, scolumn};
+      return Lexem{token::Token(types::TokenType::GEQ), sline, scolumn};
     }
-    return Lexem{token::Token(token::GREATER), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::GREATER), sline, scolumn};
   case '=':
     readChar();
     if (ch == '=') {
       readChar();
-      return Lexem{token::Token(token::EQUALS), sline, scolumn};
+      return Lexem{token::Token(types::TokenType::EQUALS), sline, scolumn};
     }
-    return Lexem{token::Token(token::ASSIGN), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::ASSIGN), sline, scolumn};
   case '!':
     readChar();
     if (ch == '=') {
       readChar();
-      return Lexem{token::Token(token::NEQ), sline, scolumn};
+      return Lexem{token::Token(types::TokenType::NEQ), sline, scolumn};
     }
-    return Lexem{token::Token(token::BANG), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::BANG), sline, scolumn};
   case '&':
     readChar();
     if (ch == '&') {
       readChar();
-      return Lexem{token::Token(token::AND), sline, scolumn};
+      return Lexem{token::Token(types::TokenType::AND), sline, scolumn};
     }
     throw LexerException("Not a token.", sline, scolumn);
   case '|':
     readChar();
     if (ch == '|') {
       readChar();
-      return Lexem{token::Token(token::OR), sline, scolumn};
+      return Lexem{token::Token(types::TokenType::OR), sline, scolumn};
     }
-    return Lexem{token::Token(token::PIPE), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::PIPE), sline, scolumn};
   default:
     return std::nullopt;
   }
@@ -160,22 +160,22 @@ std::optional<Lexem> Lexer::tryOneCharOperator() {
   switch (ch) {
   case '-':
     readChar();
-    return Lexem{token::Token(token::MINUS), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::MINUS), sline, scolumn};
   case '+':
     readChar();
-    return Lexem{token::Token(token::PLUS), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::PLUS), sline, scolumn};
   case '*':
     readChar();
-    return Lexem{token::Token(token::STAR), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::STAR), sline, scolumn};
   case '%':
     readChar();
-    return Lexem{token::Token(token::PERCENT), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::PERCENT), sline, scolumn};
   case '$':
     readChar();
-    return Lexem{token::Token(token::DOLAR), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::DOLAR), sline, scolumn};
   case '#':
     readChar();
-    return Lexem{token::Token(token::HASH), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::HASH), sline, scolumn};
   default:
     return std::nullopt;
   }
@@ -187,10 +187,10 @@ std::optional<Lexem> Lexer::trySeparator() {
   switch (ch) {
   case ';':
     readChar();
-    return Lexem{token::Token(token::SEMICOLON), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::SEMICOLON), sline, scolumn};
   case ',':
     readChar();
-    return Lexem{token::Token(token::COMMA), sline, scolumn};
+    return Lexem{token::Token(types::TokenType::COMMA), sline, scolumn};
   default:
     return std::nullopt;
   }
@@ -277,7 +277,7 @@ token::Token Lexer::handleOnelineCommentToken(size_t row, size_t column) {
     case '\n':
     case EOF:
       readChar();
-      return token::Token(token::ONE_LINE_COMMENT, buffer);
+      return token::Token(types::TokenType::ONE_LINE_COMMENT, buffer);
       break;
     default:
       buffer += ch;
@@ -304,7 +304,7 @@ token::Token Lexer::handleMultilineCommentToken(size_t row, size_t column) {
       if (ch == '/') {
         buffer += ch;
         readChar();
-        return token::Token(token::MULTILINE_COMMENT, buffer);
+        return token::Token(types::TokenType::MULTILINE_COMMENT, buffer);
       }
       if (ch == EOF) {
         throw LexerException("Unfinished multiline comment.", row, column);
@@ -333,11 +333,11 @@ token::Token Lexer::handleIdentifier(size_t row, size_t column) {
   if (buffer.size() > IDENTIFIER_MAX_SIZE)
     throw LexerException("Identifier too long.", row, column);
 
-  std::optional<token::TokenType> result = token::searchForKeyword(buffer);
+  std::optional<types::TokenType> result = types::searchForKeyword(buffer);
   if (result)
     return token::Token(*result);
 
-  return token::Token(token::IDENTIFIER, buffer);
+  return token::Token(types::TokenType::IDENTIFIER, buffer);
 }
 
 token::Token Lexer::handleNumber(size_t row, size_t column) {
@@ -359,7 +359,7 @@ token::Token Lexer::handleNumber(size_t row, size_t column) {
   if (isalpha(ch))
     throw LexerException("Undefined value.", row, column);
 
-  return token::Token(token::INTEGER, integerPart);
+  return token::Token(types::TokenType::INTEGER, integerPart);
 }
 
 token::Token Lexer::handleFloat(size_t row, size_t column, long intPart) {
@@ -377,7 +377,7 @@ token::Token Lexer::handleFloat(size_t row, size_t column, long intPart) {
   double result = static_cast<double>(intPart) +
                   static_cast<double>(fractionalPart) *
                       std::pow(10., static_cast<double>(-length));
-  return token::Token(token::FLOAT, result);
+  return token::Token(types::TokenType::FLOAT, result);
 }
 
 token::Token Lexer::handleString(size_t line, size_t column) {
@@ -416,7 +416,7 @@ token::Token Lexer::handleString(size_t line, size_t column) {
 
   if (ch == '"' && buffer.size() <= STRING_MAX_SIZE) {
     readChar();
-    return token::Token(token::STRING, buffer);
+    return token::Token(types::TokenType::STRING, buffer);
   }
 
   if (ch == EOF && buffer.size() <= STRING_MAX_SIZE) {
