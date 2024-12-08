@@ -12,8 +12,6 @@ elseif (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
 endif()
 
-enable_testing()
-
 include(FetchContent)
 FetchContent_Declare( 
    googletest
@@ -22,8 +20,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-find_package(Boost 1.86 CONFIG REQUIRED COMPONENTS program_options)
-
 include_directories(src)
 include_directories(inc)
 include_directories(tests)
@@ -31,9 +27,9 @@ include_directories(app)
 
 set(HEADER_FILES
     inc/token.hpp
-    inc/repl.hpp
-    inc/node.hpp
     inc/lexer.hpp
+    # inc/repl.hpp
+    inc/node.hpp
     inc/parser.hpp
     inc/visitor.hpp
 )
@@ -41,18 +37,18 @@ set(HEADER_FILES
 set(SOURCE_FILES
     src/token.cpp
     src/lexer.cpp
-    src/repl.cpp
+    # src/repl.cpp
     src/node.cpp
     src/parser.cpp
     src/visitor.cpp
 )
 
-add_executable(
-my-language
-    src/my-language.cpp
-    ${SOURCE_FILES} ${HEADER_FILES}
-)
-target_link_libraries(my-language Boost::program_options)
+# add_executable(
+# my-language
+#     src/my-language.cpp
+#     ${SOURCE_FILES} ${HEADER_FILES}
+# )
+# target_link_libraries(my-language Boost::program_options)
 
 add_executable(
 lexer_example
@@ -60,6 +56,8 @@ lexer_example
     ${SOURCE_FILES} ${HEADER_FILES}
 )
 target_link_libraries(lexer_example)
+
+enable_testing()
 
 add_executable(
 test_lexer

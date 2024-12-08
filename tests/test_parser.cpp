@@ -445,7 +445,7 @@ const map<string, string> TRIVIAL_CASES {
     },
     // LambdaExpression
     {
-"#(){return 123;}",
+"#(){return 123;};",
 "(Program:\n\
     (ExpressionStatement:\n\
         expression=(LambdaExpression:\n\
@@ -457,7 +457,7 @@ const map<string, string> TRIVIAL_CASES {
                             value=123)))))))"
     },
     {
-"#(mut num){ return 123; }",
+"#(mut num){ return 123; };",
 "(Program:\n\
     (ExpressionStatement:\n\
         expression=(LambdaExpression:\n\
@@ -634,7 +634,7 @@ const map<string, string> FUNCTION_CALLS {
     },
     // with lambda expressions
     {
-"#(){return 123;}()",
+"#(){return 123;}();",
 "(Program:\n\
     (ExpressionStatement:\n\
         expression=(CallExpression:\n\
@@ -648,7 +648,7 @@ const map<string, string> FUNCTION_CALLS {
             arguments=(CallArguments:))))"
     },
     {
-"#(mut num){ return 123; }()",
+"#(mut num){ return 123; }();",
 "(Program:\n\
     (ExpressionStatement:\n\
         expression=(CallExpression:\n\
@@ -853,4 +853,3 @@ const map<string, string> NON_TRIVIAL_CASES {
         value=1))"
     },
 };
-
