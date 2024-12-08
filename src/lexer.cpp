@@ -351,10 +351,14 @@ token::Token Lexer::handleIdentifier(size_t row, size_t column){
 token::Token Lexer::handleNumber(size_t row, size_t column){
     std::string buffer = "";
     buffer += ch;
-    long integerPart = static_cast<long>(ch - '0');
-    readChar();
-    while (isdigit(ch) && integerPart <= std::numeric_limits<int>::max()) {
-        integerPart = 10*integerPart + static_cast<long>(ch - '0');
+    long integerPart = 0;
+
+    while (isdigit(ch)) {
+        if(
+            (integerPart = 10*integerPart + static_cast<long>(ch - '0'))
+            > std::numeric_limits<int>::max()
+        )
+            throw LexerException("Integer literal out of range.", row, column);
         buffer += ch;
         readChar();
     }
@@ -362,8 +366,6 @@ token::Token Lexer::handleNumber(size_t row, size_t column){
         readChar();
         return handleFloat(row, column, integerPart);
     }
-    if (integerPart > std::numeric_limits<int>::max())
-        throw LexerException("Integer literal out of range.", row, column);
     if (isalpha(ch))
         throw LexerException("Undefined value.", row, column);
 
