@@ -3,22 +3,19 @@
 #include <sstream>
 #include <vector>
 #include <exception>
+#include <stdexcept>
 
 #include "token.hpp"
 
 namespace lexer {
 
-class LexerException: public std::exception {
-    std::string message;
+class LexerException: public std::runtime_error {
     size_t line;
     size_t column;
 public:
     LexerException(const std::string& msg, size_t ln, size_t col)
-    : message(msg), line(ln), column(col) {}
+    : std::runtime_error(msg), line(ln), column(col) {}
 
-    const char* what() const noexcept override {
-        return message.c_str();
-    }
     size_t getLine() const;
     size_t getColumn() const;
 };
