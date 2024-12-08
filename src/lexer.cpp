@@ -139,7 +139,7 @@ std::optional<Lexem> Lexer::tryTwoCharOperator() {
             readChar();
             return Lexem{token::Token(token::OR), sline, scolumn};
         }
-        throw LexerException("Not a token.", sline, scolumn);
+        return Lexem{token::Token(token::PIPE), sline, scolumn};
     default:
         return std::nullopt;
     }

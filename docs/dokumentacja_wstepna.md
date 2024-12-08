@@ -31,8 +31,9 @@ innej funkcji, przypisywane do zmiennych itd.,
    * ciąg znaków (`str`),
    * funkcje,
 * operatory przyjmujące funkcje jako argument:
-   * `[]()` - operator `debug` - wyświetla informacje dotyczące wywołania funkcji.
+   * `|` - operator tworzący kompozycję funkcji.
    * `#(){}` - wyrażenie `lambda`.
+   * _opcjonalnie_: `[]()` - operator `debug` - wyświetla informacje dotyczące wywołania funkcji.
 
 # Formalna specyfikacja i składnia **EBNF** realizowanego języka
 ``` EBNF
@@ -92,14 +93,18 @@ innej funkcji, przypisywane do zmiennych itd.,
                             { ( "+" | "-" )
                             multiplicative_expression } ;
 
-multiplicative_expression = cast_expression
+multiplicative_expression = compositive_expression
                             { ( "*" | "/" | "%" )
-                            cast_expression } ;
+                            compositive_expression } ;
 
-          cast_expression = prefix_expression "<-" type_name ;
+   compositive_expression = cast_expression
+                            { "|" cast_expression } ;
+
+          cast_expression = prefix_expression { "<-" type_name } ;
 
         prefix_expression = "!" primary_expression
-                          | "-" primary_expression ;
+                          | "-" primary_expression
+                          | primary_expression ;
 
        primary_expression = ( 
                             identifier
@@ -511,7 +516,7 @@ print(is_prime(7)); // true
 print(is_prime(10));  // false
 ```
 
-16. Operator `[]()`
+19. Operator `[]()`
 
 Operator `[]()` służy do wyświetlenia wartości `instrukcji-wyrażeń`, tj.
 wyświetlenia wyrażeń zakończonych znakiem `;`, które interpreter napotka w
@@ -541,7 +546,7 @@ fn double(num) {
 */
 ```
 
-19. Przykład rekurencji w operatorze `[]()`
+20. Przykład rekurencji w operatorze `[]()`
 
 ```
 fn is_prime(num) {
@@ -584,6 +589,14 @@ print(is_prime(10));
 false
 */
 ```
+
+21. Operator '|`
+
+Operator `|` służy do tworzenia kompozycji funkcji. Załóżmy, że `f1` i `f2` są
+funcjami, gdzie, `f1` przyjmują listy argumentów odpowiednio `A1` i `A2` oraz
+zwracają odpowiednio `B1` i `B2`. Wyrażenie `f1|f2` jest równoznaczne z 
+wyrażeniem lambda: `let f3 = #(**A1**){return f2(f1(A1));};`.
+
 
 # Przykładowe typy komunikatów o błędzię
 
