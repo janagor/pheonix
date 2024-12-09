@@ -11,6 +11,7 @@
 
 using namespace std;
 using namespace pheonix::token;
+using namespace pheonix::exception;
 using namespace pheonix::types;
 using namespace pheonix::lexer;
 

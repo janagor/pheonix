@@ -34,6 +34,7 @@ set(HEADER_FILES
     inc/parser.hpp
     inc/visitor.hpp
     inc/types.hpp
+    inc/exception.hpp
 )
 
 set(SOURCE_FILES
@@ -44,6 +45,7 @@ set(SOURCE_FILES
     src/parser.cpp
     src/visitor.cpp
     src/types.cpp
+    src/exception.cpp
 )
 
 # add_executable(

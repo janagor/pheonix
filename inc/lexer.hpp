@@ -1,22 +1,9 @@
 #pragma once
 
-#include <stdexcept>
-
+#include "exception.hpp"
 #include "token.hpp"
 
 namespace pheonix::lexer {
-
-class LexerException : public std::runtime_error {
-  size_t line;
-  size_t column;
-
-public:
-  LexerException(const std::string &msg, size_t ln, size_t col)
-      : std::runtime_error(msg), line(ln), column(col) {}
-
-  size_t getLine() const;
-  size_t getColumn() const;
-};
 
 static const int IDENTIFIER_MAX_SIZE = 1200;
 static const int NUMERIC_MAX_SIZE = 1200;

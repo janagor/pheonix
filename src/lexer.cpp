@@ -10,9 +10,6 @@
 
 namespace pheonix::lexer {
 
-size_t LexerException::getLine() const { return line; }
-size_t LexerException::getColumn() const { return column; }
-
 bool Lexem::operator==(const Lexem &l) const {
   return this->token == l.token && this->line == l.line &&
          this->column == l.column;
@@ -141,7 +138,7 @@ std::optional<Lexem> Lexer::tryTwoCharOperator() {
       readChar();
       return Lexem{token::Token(types::TokenType::AND), sline, scolumn};
     }
-    throw LexerException("Not a token.", sline, scolumn);
+    throw exception::LexerException("Not a token.", sline, scolumn);
   case '|':
     readChar();
     if (ch == '|') {
@@ -211,7 +208,7 @@ Lexem Lexer::tryLiteralOrNotAToken() {
   size_t scolumn = column;
   token::Token token;
   if (!isalnum(ch)) {
-    throw LexerException("Not a token.", sline, scolumn);
+    throw exception::LexerException("Not a token.", sline, scolumn);
   }
   if (isdigit(ch)) {
     token = handleNumber(sline, scolumn);
@@ -284,7 +281,7 @@ token::Token Lexer::handleOnelineCommentToken(size_t row, size_t column) {
       readChar();
     }
   }
-  throw LexerException("Oneline comment too long.", row, column);
+  throw exception::LexerException("Oneline comment too long.", row, column);
 }
 
 token::Token Lexer::handleMultilineCommentToken(size_t row, size_t column) {
@@ -307,19 +304,21 @@ token::Token Lexer::handleMultilineCommentToken(size_t row, size_t column) {
         return token::Token(types::TokenType::MULTILINE_COMMENT, buffer);
       }
       if (ch == EOF) {
-        throw LexerException("Unfinished multiline comment.", row, column);
+        throw exception::LexerException("Unfinished multiline comment.", row,
+                                        column);
       }
       buffer += ch;
       readChar();
       break;
     case EOF:
-      throw LexerException("Unfinished multiline comment.", row, column);
+      throw exception::LexerException("Unfinished multiline comment.", row,
+                                      column);
     default:
       buffer += ch;
       readChar();
     }
   }
-  throw LexerException("Multiline comment too long.", row, column);
+  throw exception::LexerException("Multiline comment too long.", row, column);
 }
 
 token::Token Lexer::handleIdentifier(size_t row, size_t column) {
@@ -331,7 +330,7 @@ token::Token Lexer::handleIdentifier(size_t row, size_t column) {
     readChar();
   }
   if (buffer.size() > IDENTIFIER_MAX_SIZE)
-    throw LexerException("Identifier too long.", row, column);
+    throw exception::LexerException("Identifier too long.", row, column);
 
   std::optional<types::TokenType> result = types::searchForKeyword(buffer);
   if (result)
@@ -344,11 +343,6 @@ token::Token Lexer::handleNumber(size_t row, size_t column) {
   types::Integer integerPart;
 
   while (isdigit(ch)) {
-    // if(
-    //     (integerPart = 10*integerPart + static_cast<long>(ch - '0'))
-    //     > std::numeric_limits<int>::max()
-    // )
-    //     throw LexerException("Integer literal out of range.", row, column);
     integerPart = integerPart * 10 + static_cast<long>(ch - '0');
     readChar();
   }
@@ -357,7 +351,7 @@ token::Token Lexer::handleNumber(size_t row, size_t column) {
     return handleFloat(row, column, integerPart.getValue());
   }
   if (isalpha(ch))
-    throw LexerException("Undefined value.", row, column);
+    throw exception::LexerException("Undefined value.", row, column);
 
   return token::Token(types::TokenType::INTEGER, integerPart);
 }
@@ -372,7 +366,7 @@ token::Token Lexer::handleFloat(size_t row, size_t column, long intPart) {
     readChar();
   }
   if (isalpha(ch))
-    throw LexerException("Undefined value.", row, column);
+    throw exception::LexerException("Undefined value.", row, column);
 
   double result = static_cast<double>(intPart) +
                   static_cast<double>(fractionalPart) *
@@ -404,8 +398,8 @@ token::Token Lexer::handleString(size_t line, size_t column) {
         buffer += '\t';
         break;
       default:
-        throw LexerException("Wrong usage of \\ character in string literal",
-                             line, column);
+        throw exception::LexerException(
+            "Wrong usage of \\ character in string literal", line, column);
       }
       readChar();
       continue;
@@ -420,10 +414,10 @@ token::Token Lexer::handleString(size_t line, size_t column) {
   }
 
   if (ch == EOF && buffer.size() <= STRING_MAX_SIZE) {
-    throw LexerException("Unfinished string literal.", line, column);
+    throw exception::LexerException("Unfinished string literal.", line, column);
   }
 
-  throw LexerException("String literal to long.", line, column);
+  throw exception::LexerException("String literal to long.", line, column);
 }
 
 } // namespace pheonix::lexer
