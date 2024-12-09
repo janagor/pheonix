@@ -10,7 +10,7 @@
 namespace pheonix::token {
 
 struct Token {
-  Token() : tokenType(types::NOT_A_TOKEN), value(std::nullopt) {}
+  Token() : tokenType(types::TokenType::NOT_A_TOKEN), value(std::nullopt) {}
   Token(types::TokenType t) : tokenType(t), value(std::nullopt) {}
   Token(types::TokenType t, std::string val) : tokenType(t), value(val) {}
   Token(types::TokenType t, char val)

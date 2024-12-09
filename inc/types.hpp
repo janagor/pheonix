@@ -6,7 +6,7 @@
 namespace pheonix::types {
 
 // tokens
-enum TokenType : int {
+enum class TokenType {
   END_OF_FILE = 0,
   ONE_LINE_COMMENT,
   MULTILINE_COMMENT,
