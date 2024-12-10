@@ -63,7 +63,12 @@ lexer_example
     app/lexer_example.cpp
     ${SOURCE_FILES} ${HEADER_FILES}
 )
-target_link_libraries(lexer_example)
+
+add_executable(
+pheonix
+    app/pheonix.cpp
+    ${SOURCE_FILES} ${HEADER_FILES}
+)
 
 enable_testing()
 
