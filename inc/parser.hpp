@@ -46,16 +46,22 @@ private:
   std::unique_ptr<node::Node> parseTypeSpecifier();
   void readLex();
 
-public:
-  Parser(std::istream &istream) : lexer(istream) {
-    current = lexer.nextLexem();
-  }
-  std::unique_ptr<node::Node> generateParsingTree();
-  std::optional<std::unique_ptr<node::Node>> parse();
-
 private:
   lexer::Lexer lexer;
   lexer::Lexem current;
+
+public:
+  Parser(std::istream &istream) : lexer(istream) {
+    current = lexer.nextLexem();
+    /*
+     */
+    if (current.token.getTokenType() == token::TokenType::ONE_LINE_COMMENT ||
+        current.token.getTokenType() == token::TokenType::MULTILINE_COMMENT) {
+      readLex();
+    }
+  };
+  std::unique_ptr<node::Node> generateParsingTree();
+  std::optional<std::unique_ptr<node::Node>> parse();
 };
 
 } // namespace pheonix::parser

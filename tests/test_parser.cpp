@@ -685,6 +685,31 @@ TEST(TestParser, testTwoStatements) {
 const map<string, string> NON_TRIVIAL_CASES{
     // IntegerLiteral
     {"1;", "(ExpressionStatement:\n\
-    expression=(IntegerLiteral:\n\
-        value=1))"},
+expression=(IntegerLiteral:\n\
+value=1))"},
 };
+///////////////////////////////////////////////////////////////////////////////
+
+const map<string, string> SOME_FROM_DOCUMENTATION{
+    {"fn returnOne(arg1, arg2) {\n\
+    \n\
+}",
+     "(Program:\n\
+    (FunctionDeclaration:\n\
+        identifier=returnOne,\n\
+        arguments=(DeclarationArguments:\n\
+            (Parameter:\n\
+                isMutable=false,\n\
+                identifier=arg1),\n\
+            (Parameter:\n\
+                isMutable=false,\n\
+                identifier=arg2)),\n\
+        statements=(Block:\n\
+            )))"},
+};
+
+TEST(TestParser, some_from_documentation) {
+  for (const auto &[i, e] : SOME_FROM_DOCUMENTATION) {
+    compareExpectedAndReceived(i, e);
+  }
+}

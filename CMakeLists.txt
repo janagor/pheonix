@@ -35,6 +35,8 @@ set(HEADER_FILES
     inc/visitor.hpp
     inc/types.hpp
     inc/exception.hpp
+    inc/helpers.hpp
+    inc/token_type.hpp
 )
 
 set(SOURCE_FILES
@@ -46,6 +48,7 @@ set(SOURCE_FILES
     src/visitor.cpp
     src/types.cpp
     src/exception.cpp
+    src/helpers.cpp
 )
 
 # add_executable(

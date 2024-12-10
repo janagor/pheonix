@@ -1,10 +1,8 @@
 #include "token.hpp"
 
-#include <map>
-
 namespace pheonix::token {
 
-types::TokenType Token::getTokenType() const { return tokenType; }
+token::TokenType Token::getTokenType() const { return tokenType; }
 
 std::optional<std::variant<types::Integer, types::Float, std::string>>
 Token::getValue() const {
@@ -20,7 +18,14 @@ std::ostream &operator<<(
     const std::optional<std::variant<types::Integer, types::Float, std::string>>
         &opt) {
   if (opt) {
-    std::visit([&os](const auto &value) { os << value; }, *opt);
+    const auto &value = *opt;
+    if (std::holds_alternative<types::Integer>(value)) {
+      os << std::get<types::Integer>(value).getValue();
+    } else if (std::holds_alternative<types::Float>(value)) {
+      os << std::get<types::Float>(value).getValue();
+    } else if (std::holds_alternative<std::string>(value)) {
+      os << std::get<std::string>(value);
+    }
   } else {
     os << "[]";
   }
@@ -29,7 +34,7 @@ std::ostream &operator<<(
 
 std::ostream &operator<<(std::ostream &os, const Token &t) {
   os << "Token(\n\t\ttokenType:``"
-     << types::TokenTypeToLiteral.at(t.getTokenType()) << "``, \n\t\tvalue:``"
+     << types::tokenTypeToLiteral(t.getTokenType()) << "``, \n\t\tvalue:``"
      << t.getValue() << "``,\n\t)";
   return os;
 }

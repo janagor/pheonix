@@ -118,9 +118,9 @@ struct AssignementExpression : public Node {
 struct OrExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  types::TokenType op;
+  token::TokenType op;
   OrExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-               types::TokenType t)
+               token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
 };
@@ -128,9 +128,9 @@ struct OrExpression : public Node {
 struct AndExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  types::TokenType op;
+  token::TokenType op;
   AndExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-                types::TokenType t)
+                token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
 };
@@ -138,9 +138,9 @@ struct AndExpression : public Node {
 struct ComparisonExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  types::TokenType op;
+  token::TokenType op;
   ComparisonExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-                       types::TokenType t)
+                       token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
 };
@@ -148,9 +148,9 @@ struct ComparisonExpression : public Node {
 struct RelationalExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  types::TokenType op;
+  token::TokenType op;
   RelationalExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-                       types::TokenType t)
+                       token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
 };
@@ -158,9 +158,9 @@ struct RelationalExpression : public Node {
 struct AdditiveExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  types::TokenType op;
+  token::TokenType op;
   AdditiveExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-                     types::TokenType t)
+                     token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
 };
@@ -168,9 +168,9 @@ struct AdditiveExpression : public Node {
 struct MultiplicativeExpression : public Node {
   std::unique_ptr<Node> left;
   std::unique_ptr<Node> right;
-  types::TokenType op;
+  token::TokenType op;
   MultiplicativeExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r,
-                           types::TokenType t)
+                           token::TokenType t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
 };
@@ -192,9 +192,9 @@ struct CastExpression : public Node {
 };
 
 struct PrefixExpression : public Node {
-  types::TokenType op;
+  token::TokenType op;
   std::unique_ptr<Node> expression;
-  PrefixExpression(types::TokenType o, std::unique_ptr<Node> e)
+  PrefixExpression(token::TokenType o, std::unique_ptr<Node> e)
       : Node(), op(o), expression(std::move(e)) {};
   void accept(visitor::Visitor &v) override;
 };
@@ -264,7 +264,7 @@ struct StringLiteral : public Node {
 struct TypeSpecifier : public Node {
   types::TypeName typeName;
   TypeSpecifier(const types::TypeName &type) : Node(), typeName(type) {};
-  TypeSpecifier(const types::TokenType &token)
+  TypeSpecifier(const token::TokenType &token)
       : Node(), typeName(types::TokenToType.at(token)) {};
   void accept(visitor::Visitor &v) override;
 };

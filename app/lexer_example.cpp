@@ -1,6 +1,10 @@
 #include "lexer.hpp"
+#include "parser.hpp"
+#include "visitor.hpp"
 #include <iostream>
 #include <sstream>
+#include <stdio.h>
+#include <string>
 #include <vector>
 
 const std::vector<std::string> EXAMPLES = {
@@ -42,11 +46,7 @@ $a = 1 <- bol; // true
 let mut a = 1;
 let mut b = 2;
 a + b; // 3
-<<<<<<< HEAD
-a <- flt + b <- flt; / 3.0
-=======
 a <- flt + b <- flt; // 3.0
->>>>>>> temp_lexer
 $a = "Hello"; $b = " World";
 a + b; // "Hello World"
 )",
@@ -71,6 +71,7 @@ print(1.12); // 1.12
 print(true); // true
 print(example); // function(_,_)
 )",
+    // Ex7
     R"(
 let mut result = 0;
 if (true) {
@@ -78,6 +79,7 @@ if (true) {
 }
 print(result); // 1
 )",
+    // Ex8
     R"(
 let mut result = 0;
 if (false) {
@@ -87,6 +89,7 @@ if (false) {
 }
 print(result); // 2
 )",
+    // Ex9
     R"(
 let mut i = 1;
 
@@ -95,6 +98,7 @@ while (i < 10) {
 }
 print(i); // 10
 )",
+    // Ex10
     R"(
 fn example(arg1, arg2) {
     // $arg1 = 12; // błąd
@@ -102,11 +106,13 @@ fn example(arg1, arg2) {
     $a = 12; // ok, `a` to inna zmienna
 }
 )",
+    // Ex11
     R"(
 fn example(arg1, arg2) {
     $arg1 = 12; // ok
 }
 )",
+    // Ex12
     R"(
 fn add_one(num) {
     let a = num + 1;
@@ -115,9 +121,10 @@ fn add_one(num) {
 let a = 1;
 let b = add_one(a); // 2
 )",
+    // Ex13
     R"(
 fn increment(mut a) {
-    a = a + 1;
+    $a = a + 1;
     return a;
 }
 let a = 1;
@@ -125,6 +132,7 @@ let b = increment(a);
 print(a); // 2
 print(b); // 2
 )",
+    // Ex14
     R"(
 let mut a = 0;
 
@@ -146,6 +154,7 @@ let c = a(b);
 print(b); // 12
 print(c); // 13
 )",
+    // Ex15
     R"(
 fn fibonacci(num) {
     if (num <= 1) {
@@ -156,6 +165,7 @@ fn fibonacci(num) {
 }
 let a = fibonacci(5); // 5
 )",
+    // Ex16
     R"(
 fn add_one(a) {
     return a + 1;
@@ -165,6 +175,7 @@ let b = #(x){ return x+1; }(1); // 2
 let c = #(x){ return x+1; };
 let d = c(1); // 2
 )",
+    // Ex17
     R"(
 fn is_prime(num) {
     let is_prime_rec = #(n, devisor) {
@@ -176,12 +187,13 @@ fn is_prime(num) {
                 else { return is_prime_rec(n, divisor - 1); }
             }
         }
-    }
+    };
     return is_prime_rec(num, num-1);
 }
 print(is_prime(7)); // true
 print(is_prime(10));  // false
 )",
+    // Ex18
     R"(
 fn double(num) {
     print(num);
@@ -200,6 +212,7 @@ fn double(num) {
 [return: 6]
 */
 )",
+    // Ex19
     R"(
 fn is_prime(num) {
     let is_prime_rec = #(n, devisor) {
@@ -213,7 +226,7 @@ fn is_prime(num) {
                 else { return [is_prime_rec](n, divisor - 1); }
             }
         }
-    }
+    };
     let res = is_prime_rec(num, num-1);
     return res;
 }
@@ -249,16 +262,16 @@ std::vector<pheonix::lexer::Lexem> lexerize(pheonix::lexer::Lexer &lexer) {
   while (true) {
     pheonix::lexer::Lexem l = lexer.nextLexem();
     result.emplace_back(l);
-    if (l.token.getTokenType() == pheonix::types::TokenType::END_OF_FILE) {
+    if (l.token.getTokenType() == pheonix::token::TokenType::END_OF_FILE) {
       return result;
     }
   }
 }
 
 int main(int argc, char **argv) {
-  if (argc == 2) {
+  if (argc == 3 && std::string(argv[1]) == "-l") {
     size_t test_case = 1;
-    test_case = std::atoi(argv[1]) - 1;
+    test_case = std::atoi(argv[2]) - 1;
     if (test_case >= EXAMPLES.size()) {
       std::cout << "wrong test case use index from [0, " << EXAMPLES.size()
                 << '.' << std::endl;
@@ -275,15 +288,58 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  int i = 0;
-  for (const auto &ex : EXAMPLES) {
-    std::istringstream in(ex);
-    pheonix::lexer::Lexer l(in);
-    std::vector<pheonix::lexer::Lexem> result = lexerize(l);
-    std::cout << "Example nr. " << ++i << std::endl;
-    for (const auto &lexem : result) {
-      std::cout << lexem << std::endl;
+  if (argc == 3 && std::string(argv[1]) == "-p") {
+    size_t test_case = 1;
+    test_case = std::atoi(argv[2]) - 1;
+    if (test_case >= EXAMPLES.size()) {
+      std::cout << "wrong test case use index from [0, " << EXAMPLES.size()
+                << '.' << std::endl;
+      return 1;
     }
-    std::cout << std::endl;
+    std::istringstream in(EXAMPLES[test_case]);
+    pheonix::parser::Parser p(in);
+
+    std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
+    pheonix::visitor::TreeGenVisitor visitor;
+    output->accept(visitor);
+    std::string received = visitor.getResult();
+
+    std::cout << "Example nr. " << ++test_case << std::endl;
+    std::cout << received << std::endl;
+    return 0;
   }
+
+  if (argc == 2 && std::string(argv[1]) == "-l") {
+
+    int i = 0;
+    for (const auto &ex : EXAMPLES) {
+      std::istringstream in(ex);
+      pheonix::lexer::Lexer l(in);
+      std::vector<pheonix::lexer::Lexem> result = lexerize(l);
+      std::cout << "Example nr. " << ++i << std::endl;
+      for (const auto &lexem : result) {
+        std::cout << lexem << std::endl;
+      }
+      std::cout << std::endl;
+    }
+    return 0;
+  }
+  if (argc == 2 && std::string(argv[1]) == "-p") {
+
+    int i = 0;
+    for (const auto &ex : EXAMPLES) {
+      std::istringstream in(ex);
+      pheonix::parser::Parser p(in);
+
+      std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
+      pheonix::visitor::TreeGenVisitor visitor;
+      output->accept(visitor);
+      std::string received = visitor.getResult();
+
+      std::cout << "Example nr. " << ++i << std::endl;
+      std::cout << received << std::endl;
+    }
+    return 0;
+  }
+  std::cout << "no such option" << std::endl;
 }

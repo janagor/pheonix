@@ -1,5 +1,7 @@
 #pragma once
 
+#include "helpers.hpp"
+#include "token_type.hpp"
 #include "types.hpp"
 
 #include <iostream>
@@ -10,26 +12,21 @@
 namespace pheonix::token {
 
 struct Token {
-  Token() : tokenType(types::TokenType::NOT_A_TOKEN), value(std::nullopt) {}
-  Token(types::TokenType t) : tokenType(t), value(std::nullopt) {}
-  Token(types::TokenType t, std::string val) : tokenType(t), value(val) {}
-  Token(types::TokenType t, char val)
-      : tokenType(t), value(std::string(1, val)) {}
-  Token(types::TokenType t, const types::Integer &val)
-      : tokenType(t), value(val) {}
-  Token(types::TokenType t, int val)
-      : tokenType(t), value(types::Integer(val)) {}
-  Token(types::TokenType t, double val)
-      : tokenType(t), value(types::Float(val)) {}
-  Token(types::TokenType t, const types::Float &val)
-      : tokenType(t), value(val) {}
+  Token() : tokenType(token::TokenType::NOT_A_TOKEN), value(std::nullopt) {}
+  Token(TokenType t) : tokenType(t), value(std::nullopt) {}
+  Token(TokenType t, std::string val) : tokenType(t), value(val) {}
+  Token(TokenType t, char val) : tokenType(t), value(std::string(1, val)) {}
+  Token(TokenType t, const types::Integer &val) : tokenType(t), value(val) {}
+  Token(TokenType t, int val) : tokenType(t), value(types::Integer(val)) {}
+  Token(TokenType t, double val) : tokenType(t), value(types::Float(val)) {}
+  Token(TokenType t, const types::Float &val) : tokenType(t), value(val) {}
   bool operator==(const Token &t) const;
-  types::TokenType getTokenType() const;
+  token::TokenType getTokenType() const;
   std::optional<std::variant<types::Integer, types::Float, std::string>>
   getValue() const;
 
 private:
-  types::TokenType tokenType;
+  token::TokenType tokenType;
   std::optional<std::variant<types::Integer, types::Float, std::string>> value;
 };
 std::ostream &operator<<(

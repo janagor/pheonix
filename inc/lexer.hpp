@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exception.hpp"
+#include "helpers.hpp"
 #include "token.hpp"
 
 namespace pheonix::lexer {

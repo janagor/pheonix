@@ -1,11 +1,18 @@
 #pragma once
 
-namespace pheonix::helpers {
+#include "token_type.hpp"
+
+#include <map>
+#include <optional>
+#include <stdexcept>
+#include <string>
+
+namespace pheonix::types {
 
 std::optional<token::TokenType> stringToTokenType(std::string &word);
 
-const std::map<token::TokenType, std::string> TokenTypeToLiteral;
-// nodes typenames
+std::string tokenTypeToLiteral(token::TokenType t);
+std::optional<token::TokenType> Keywords(const std::string &input);
 
 enum class TypeName {
   ERROR = 0,
@@ -29,4 +36,4 @@ static const std::map<TypeName, std::string> TypeNameToString{
 
 std::string opToString(const token::TokenType &tok);
 
-} // namespace pheonix::helpers
+} // namespace pheonix::types
