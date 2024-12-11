@@ -154,8 +154,7 @@ void TreeGenVisitor::visit(node::ComparisonExpression &ce) {
   inc();
   result += "(ComparisonExpression:" + s + "left=";
   ce.left->accept(*this);
-  result +=
-      "," + s + "operator=[" + types::opToString(ce.op) + "]," + s + "right=";
+  result += "," + s + "operator=[" + ce.op + "]," + s + "right=";
   ce.right->accept(*this);
   result += ")";
   dec();
@@ -165,8 +164,7 @@ void TreeGenVisitor::visit(node::RelationalExpression &re) {
   inc();
   result += "(RelationalExpression:" + s + "left=";
   re.left->accept(*this);
-  result +=
-      "," + s + "operator=[" + types::opToString(re.op) + "]," + s + "right=";
+  result += "," + s + "operator=[" + re.op + "]," + s + "right=";
   re.right->accept(*this);
   result += ")";
   dec();
@@ -176,8 +174,7 @@ void TreeGenVisitor::visit(node::MultiplicativeExpression &me) {
   inc();
   result += "(MultiplicativeExpression:" + s + "left=";
   me.left->accept(*this);
-  result +=
-      "," + s + "operator=[" + types::opToString(me.op) + "]," + s + "right=";
+  result += "," + s + "operator=[" + me.op + "]," + s + "right=";
   me.right->accept(*this);
   result += ")";
   dec();
@@ -197,8 +194,7 @@ void TreeGenVisitor::visit(node::AdditiveExpression &ae) {
   inc();
   result += "(AdditiveExpression:" + s + "left=";
   ae.left->accept(*this);
-  result +=
-      "," + s + "operator=[" + types::opToString(ae.op) + "]," + s + "right=";
+  result += "," + s + "operator=[" + ae.op + "]," + s + "right=";
   ae.right->accept(*this);
   result += ")";
   dec();
@@ -216,8 +212,8 @@ void TreeGenVisitor::visit(node::CastExpression &ce) {
 
 void TreeGenVisitor::visit(node::PrefixExpression &pe) {
   inc();
-  result += "(PrefixExpression:" + s + "operator=[" + types::opToString(pe.op) +
-            "]," + s + "expression=";
+  result += "(PrefixExpression:" + s + "operator=[" + pe.op + "]," + s +
+            "expression=";
   pe.expression->accept(*this);
   result += ")";
   dec();
@@ -311,8 +307,7 @@ void TreeGenVisitor::visit(node::StringLiteral &sl) {
 
 void TreeGenVisitor::visit(node::TypeSpecifier &ts) {
   inc();
-  result += "(TypeSpecifier:" + s +
-            "value=" + types::TypeNameToString.at(ts.typeName) + ")";
+  result += "(TypeSpecifier:" + s + "value=" + ts.typeName + ")";
   dec();
 }
 

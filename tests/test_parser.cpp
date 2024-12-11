@@ -6,6 +6,7 @@
 
 using namespace std;
 using namespace pheonix::token;
+using namespace pheonix::exception;
 using namespace pheonix::node;
 using namespace pheonix::visitor;
 using namespace pheonix::lexer;
@@ -719,5 +720,176 @@ const map<string, string> SOME_FROM_DOCUMENTATION{
 TEST(TestParser, some_from_documentation) {
   for (const auto &[i, e] : SOME_FROM_DOCUMENTATION) {
     compareExpectedAndReceived(i, e);
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+// testing errors
+
+TEST(TestParser, testErrorsNoSemicolon) {
+  string input = "kaczka";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected ';' at the end of expression.");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 7);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+
+TEST(TestParser, testErrorsNoSemicolon2) {
+  string input = "#(){}";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected ';' at the end of expression.");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 6);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+TEST(TestParser, notFinishedParenthesis1) {
+  string input = "#(){";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected expression. Got EOF.");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 5);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+TEST(TestParser, notFinishedParenthesis2) {
+  string input = "#({}";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected ')'");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 3);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+
+TEST(TestParser, NoRValue) {
+  string input = "let kaczka = ;";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected expression. Got nothing.");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 15);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+
+TEST(TestParser, wrongUsageOfKeyword) {
+  string input = "leT kaczka = 12 ;";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected ';' at the end of expression.");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 5);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+
+TEST(TestParser, WrongEQSign) {
+  string input = "if (kaczka = 12) {}";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected ')' in the if statement");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 12);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+
+TEST(TestParser, NoPredicate) {
+  string input = "if () {};";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected predicate in if statement");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 5);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+
+TEST(TestParser, NoPredicate2) {
+  string input = "while () {};";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected predicate in while statement");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 8);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
   }
 }
