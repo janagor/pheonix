@@ -20,6 +20,9 @@ class ParserException : public std::runtime_error {
   size_t column;
 
 public:
+  // TODO: add actual line and column
+  ParserException(const std::string &msg)
+      : std::runtime_error(msg), line(0), column(0) {}
   ParserException(const std::string &msg, size_t ln, size_t col)
       : std::runtime_error(msg), line(ln), column(col) {}
 
