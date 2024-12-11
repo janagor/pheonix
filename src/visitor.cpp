@@ -9,7 +9,9 @@ namespace pheonix::visitor {
 std::string TreeGenVisitor::getResult() { return result; }
 void TreeGenVisitor::visit(node::Program &p) {
   inc();
-  result += "(Program:" + s;
+  result += "(Program:";
+  if (p.statements.size())
+    result += s;
   for (size_t i = 0; i < p.statements.size(); ++i) {
     p.statements[i]->accept(*this);
     if (i != p.statements.size() - 1)
@@ -110,6 +112,12 @@ void TreeGenVisitor::visit(node::ExpressionStatement &es) {
   result += "(ExpressionStatement:" + s + "expression=";
   es.expression->accept(*this);
   result += ")";
+  dec();
+}
+
+void TreeGenVisitor::visit(node::NullStatement &) {
+  inc();
+  result += "(NullStatement:)";
   dec();
 }
 

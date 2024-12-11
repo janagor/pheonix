@@ -13,6 +13,7 @@ void WhileLoopStatement::accept(visitor::Visitor &v) { v.visit(*this); }
 void IfStatement::accept(visitor::Visitor &v) { v.visit(*this); }
 void ReturnStatement::accept(visitor::Visitor &v) { v.visit(*this); }
 void ExpressionStatement::accept(visitor::Visitor &v) { v.visit(*this); }
+void NullStatement::accept(visitor::Visitor &v) { v.visit(*this); }
 void AssignementExpression::accept(visitor::Visitor &v) { v.visit(*this); }
 void OrExpression::accept(visitor::Visitor &v) { v.visit(*this); }
 void AndExpression::accept(visitor::Visitor &v) { v.visit(*this); }

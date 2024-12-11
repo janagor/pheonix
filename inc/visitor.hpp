@@ -13,6 +13,7 @@ struct WhileLoopStatement;
 struct IfStatement;
 struct ReturnStatement;
 struct ExpressionStatement;
+struct NullStatement;
 struct AssignementExpression;
 struct OrExpression;
 struct AndExpression;
@@ -51,6 +52,7 @@ public:
   virtual void visit(node::IfStatement &) = 0;
   virtual void visit(node::ReturnStatement &) = 0;
   virtual void visit(node::ExpressionStatement &) = 0;
+  virtual void visit(node::NullStatement &) = 0;
   virtual void visit(node::AssignementExpression &) = 0;
   virtual void visit(node::OrExpression &) = 0;
   virtual void visit(node::AndExpression &) = 0;
@@ -90,6 +92,7 @@ public:
   void visit(node::IfStatement &wls) override;
   void visit(node::ReturnStatement &rs) override;
   void visit(node::ExpressionStatement &es) override;
+  void visit(node::NullStatement &ns) override;
   void visit(node::AssignementExpression &ae) override;
   void visit(node::OrExpression &oe) override;
   void visit(node::AndExpression &ae) override;

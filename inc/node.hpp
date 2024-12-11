@@ -104,6 +104,12 @@ struct ExpressionStatement : public Node {
       : Node(), expression(std::move(e)) {};
   void accept(visitor::Visitor &v) override;
 };
+
+struct NullStatement : public Node {
+  NullStatement() : Node() {};
+  void accept(visitor::Visitor &v) override;
+};
+
 // Expressions
 struct AssignementExpression : public Node {
   std::string identifier;

@@ -23,6 +23,11 @@ void compareExpectedAndReceived(const string &input, const string &expected) {
 }
 
 const map<string, string> TRIVIAL_CASES{
+    // Empty
+    {"", "(Program:)"},
+    // just ";"
+    {";", "(Program:\n\
+    (NullStatement:))"},
     // IntegerLiteral
     {"1;", "(Program:\n\
     (ExpressionStatement:\n\
@@ -234,6 +239,9 @@ const map<string, string> TRIVIAL_CASES{
                 expression=(IntegerLiteral:\n\
                     value=1)))))"},
     // ReturnStatement
+    {"return;", "(Program:\n\
+    (ReturnStatement:\n\
+        expression=(NullStatement:)))"},
     {"return 123;", "(Program:\n\
     (ReturnStatement:\n\
         expression=(ExpressionStatement:\n\

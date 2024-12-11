@@ -44,7 +44,8 @@ innej funkcji, przypisywane do zmiennych itd.,
                           | while_loop_statement
                           | if_statement
                           | return_statement
-                          | expression_statement ;
+                          | expression_statement
+                          | ";" ;
 
      variable_declaration = "let" [ "mut"] identifier [ "=" expession ] ";" ;
 
