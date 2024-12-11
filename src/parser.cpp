@@ -218,7 +218,6 @@ std::unique_ptr<node::Node> Parser::parseIfStatement() {
 /*
  * RETURN_STATEMENT = "RETURN" [ EXPRESSION ] ";" ;
  */
-// TODO: return statement does not have to have an expression in there
 std::unique_ptr<node::Node> Parser::parseReturnStatement() {
   assert(current.token.getTokenType() == token::TokenType::RETURN);
   readLex();

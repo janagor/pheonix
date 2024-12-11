@@ -142,7 +142,6 @@ std::optional<token::TokenType> stringToTokenType(std::string &word) {
   return {};
 }
 
-// TODO: make it a map
 std::string opToString(const token::TokenType &tok) {
   switch (tok) {
   case token::TokenType::EQUALS:
