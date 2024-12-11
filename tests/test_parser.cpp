@@ -773,7 +773,7 @@ TEST(TestParser, notFinishedParenthesis1) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected expression. Got EOF.");
+    EXPECT_STREQ(e.what(), "Expected expression.");
     EXPECT_EQ(e.getLine(), 1);
     EXPECT_EQ(e.getColumn(), 5);
   } catch (...) {
@@ -889,6 +889,44 @@ TEST(TestParser, NoPredicate2) {
     EXPECT_STREQ(e.what(), "Expected predicate in while statement");
     EXPECT_EQ(e.getLine(), 1);
     EXPECT_EQ(e.getColumn(), 8);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+
+TEST(TestParser, LetWithoutLvalue) {
+  string input = "let =12;";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected identifier in variable declaration");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 5);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+
+TEST(TestParser, AssignmentWithoutRvalue) {
+  string input = "$kaczka = ;";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Expected expression.");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 11);
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }

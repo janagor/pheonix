@@ -134,7 +134,10 @@ std::unique_ptr<node::Node> Parser::parseVariableDeclaration() {
     isMutable = true;
     readLex();
   }
-  assert(current.token.getTokenType() == token::TokenType::IDENTIFIER);
+  if (current.token.getTokenType() != token::TokenType::IDENTIFIER)
+    throw exception::ParserException(
+        "Expected identifier in variable declaration", current.line,
+        current.column);
   std::string identifier = std::get<std::string>(*current.token.getValue());
   readLex();
   assert(current.token.getTokenType() == token::TokenType::ASSIGN);
@@ -647,9 +650,10 @@ std::unique_ptr<node::Node> Parser::parseLiteral() {
              current.token.getTokenType() == token::TokenType::FALSE) {
     return parseBoolLiteral();
   }
-  if (current.token.getTokenType() == token::TokenType::END_OF_FILE)
-    throw exception::ParserException("Expected expression. Got EOF.",
-                                     current.line, current.column);
+  if (current.token.getTokenType() == token::TokenType::END_OF_FILE ||
+      current.token.getTokenType() == token::TokenType::SEMICOLON)
+    throw exception::ParserException("Expected expression.", current.line,
+                                     current.column);
   throw exception::ParserException("Could not parse.", current.line,
                                    current.column);
 }
