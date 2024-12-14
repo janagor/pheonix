@@ -14,9 +14,10 @@ namespace pheonix::parser {
  */
 std::unique_ptr<node::Node> Parser::parseProgram() {
   auto program = std::make_unique<node::Program>();
-  while (current.token.getTokenType() != token::TokenType::END_OF_FILE) {
-    program->statements.push_back(parseStatement());
+  while (auto statement = parseStatement()) {
+    program->statements.push_back(std::move(statement));
   }
+  expect(token::TokenType::END_OF_FILE);
   return program;
 }
 
@@ -29,11 +30,11 @@ std::unique_ptr<node::Node> Parser::parseBlock() {
   readLex();
   while (current.token.getTokenType() != token::TokenType::RBRACE) {
     auto statement = parseStatement();
+    if (!statement)
+      break;
     block->statements.push_back(std::move(statement));
   }
-  if (current.token.getTokenType() != token::TokenType::RBRACE)
-    throw exception::ParserException("Expected '}' in the end of the block.",
-                                     current.line, current.column);
+  expect(token::TokenType::RBRACE); // TODO: change to consumeIf
   readLex();
   return block;
 }
@@ -48,6 +49,10 @@ std::unique_ptr<node::Node> Parser::parseBlock() {
  *           | ";" ;
  */
 std::unique_ptr<node::Node> Parser::parseStatement() {
+  if (current.token.getTokenType() == token::TokenType::END_OF_FILE) {
+    return nullptr;
+  }
+
   std::unique_ptr<node::Node> node;
   switch (current.token.getTokenType()) {
   case token::TokenType::FN:
@@ -707,6 +712,25 @@ std::unique_ptr<node::Node> Parser::parseTypeSpecifier() {
   }
   throw exception::ParserException("Expected type specifier.", current.line,
                                    current.column);
+}
+
+void Parser::expect(token::TokenType token) {
+  if (current.token.getTokenType() != token)
+    throw exception::ParserException(
+        "Expected: " + types::tokenTypeToLiteral(token) + ", Got: " +
+            types::tokenTypeToLiteral(current.token.getTokenType()) + ".",
+        current.line, current.column);
+}
+
+void Parser::consumeIf(token::TokenType token) {
+  if (current.token.getTokenType() == token) {
+    readLex();
+    return;
+  }
+  throw exception::ParserException(
+      "Expected: " + types::tokenTypeToLiteral(token) + ", Got: " +
+          types::tokenTypeToLiteral(current.token.getTokenType()) + ".",
+      current.line, current.column);
 }
 
 std::unique_ptr<node::Node> Parser::generateParsingTree() {

@@ -60,6 +60,8 @@ public:
       readLex();
     }
   };
+  void consumeIf(token::TokenType token);
+  void expect(token::TokenType token);
   std::unique_ptr<node::Node> generateParsingTree();
   std::optional<std::unique_ptr<node::Node>> parse();
 };

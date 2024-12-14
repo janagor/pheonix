@@ -773,7 +773,7 @@ TEST(TestParser, notFinishedParenthesis1) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected expression.");
+    EXPECT_STREQ(e.what(), "Expected: RBRACE, Got: END_OF_FILE.");
     EXPECT_EQ(e.getLine(), 1);
     EXPECT_EQ(e.getColumn(), 5);
   } catch (...) {
