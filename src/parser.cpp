@@ -207,22 +207,26 @@ std::unique_ptr<node::Node> Parser::parseIfStatement() {
 
   auto predicate = parseExpression();
   auto ifStmt = std::make_unique<node::IfStatement>(std::move(predicate));
-
   consumeIf(token::TokenType::RPARENT);
   auto ifBody = parseBlock();
+  if (!ifBody)
+    throw exception::ParserException("Error parsing IfBody", current.line,
+                                     current.column);
+
   ifStmt->ifBody = std::move(ifBody);
-  if (current == token::TokenType::ELSE) {
-    readLex();
-    if (current == token::TokenType::IF) {
-      auto elseIfStmt = parseIfStatement();
-      ifStmt->elseBody = std::move(elseIfStmt);
-    } else {
-      expect(token::TokenType::LBRACE);
-      auto elseBody = parseBlock();
-      ifStmt->elseBody = std::move(elseBody);
-    }
-  }
+  auto elseBody = parseElse();
+  ifStmt->elseBody = std::move(elseBody);
   return ifStmt;
+}
+
+std::unique_ptr<node::Node> Parser::parseElse() {
+  if (current != token::TokenType::ELSE)
+    return nullptr;
+  readLex();
+  if (current == token::TokenType::IF)
+    return parseIfStatement();
+  expect(token::TokenType::LBRACE);
+  return parseBlock();
 }
 
 /*

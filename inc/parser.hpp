@@ -18,6 +18,7 @@ private:
   std::unique_ptr<node::Node> parseVariableDeclaration();
   std::unique_ptr<node::Node> parseWhileLoopStatement();
   std::unique_ptr<node::Node> parseIfStatement();
+  std::unique_ptr<node::Node> parseElse();
   std::unique_ptr<node::Node> parseReturnStatement();
   std::unique_ptr<node::Node> parseNullStatement();
   std::unique_ptr<node::Node> parseExpressionStatement();
