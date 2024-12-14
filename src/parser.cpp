@@ -111,6 +111,9 @@ std::unique_ptr<node::Node> Parser::parseDeclarationArguments() {
   while (current == token::TokenType::COMMA) {
     readLex();
     auto param = parseParameter();
+    if (!param)
+      throw exception::ParserException("Error parsing parameter list.",
+                                       current.line, current.column);
     args->arguments.push_back(std::move(param));
   }
   consumeIf(token::TokenType::RPARENT);

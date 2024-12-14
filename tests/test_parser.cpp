@@ -894,6 +894,25 @@ TEST(TestParser, NoPredicate2) {
   }
 }
 
+TEST(TestParser, ArgumentsListWithCommaAtTheEnd) {
+  string input = "fn kaczka(kaczka,){}";
+
+  istringstream in(input);
+  try {
+    Parser p(in);
+    unique_ptr<Node> output = p.generateParsingTree();
+    // TreeGenVisitor visitor;
+    // output->accept(visitor);
+    FAIL() << "Expected ParserException";
+  } catch (const ParserException &e) {
+    EXPECT_STREQ(e.what(), "Error parsing parameter list.");
+    EXPECT_EQ(e.getLine(), 1);
+    EXPECT_EQ(e.getColumn(), 18);
+  } catch (...) {
+    FAIL() << "Unexpected exception type thrown";
+  }
+}
+
 TEST(TestParser, LetWithoutLvalue) {
   string input = "let =12;";
 
