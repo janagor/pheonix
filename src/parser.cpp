@@ -153,10 +153,7 @@ std::unique_ptr<node::Node> Parser::parseVariableDeclaration() {
     isMutable = true;
     readLex();
   }
-  if (current != token::TokenType::IDENTIFIER)
-    throw exception::ParserException(
-        "Expected identifier in variable declaration", current.line,
-        current.column);
+  expect(token::TokenType::IDENTIFIER);
   std::string identifier = std::get<std::string>(*current.token.getValue());
   readLex();
   consumeIf(token::TokenType::ASSIGN);
@@ -203,20 +200,15 @@ std::unique_ptr<node::Node> Parser::parseIfStatement() {
   if (current != token::TokenType::IF)
     return nullptr;
   readLex();
-  if (current != token::TokenType::LPARENT)
-    throw exception::ParserException("Expected '(' after 'if'", current.line,
-                                     current.column);
-  readLex();
+  consumeIf(token::TokenType::LPARENT);
   if (current == token::TokenType::RPARENT)
     throw exception::ParserException("Expected predicate in if statement",
                                      current.line, current.column);
 
   auto predicate = parseExpression();
   auto ifStmt = std::make_unique<node::IfStatement>(std::move(predicate));
-  if (current != token::TokenType::RPARENT)
-    throw exception::ParserException("Expected ')' in the if statement",
-                                     current.line, current.column);
-  readLex();
+
+  consumeIf(token::TokenType::RPARENT);
   auto ifBody = parseBlock();
   ifStmt->ifBody = std::move(ifBody);
   if (current == token::TokenType::ELSE) {
@@ -253,17 +245,8 @@ std::unique_ptr<node::Node> Parser::parseReturnStatement() {
  * EXPRESSION_STATEMENT = EXPRESSION ";" ;
  */
 std::unique_ptr<node::Node> Parser::parseExpressionStatement() {
-  if (current == token::TokenType::SEMICOLON) {
-    readLex();
-    throw exception::ParserException("Expected expression. Got nothing.",
-                                     current.line, current.column);
-  }
   auto expression = parseExpression();
-  if (current != token::TokenType::SEMICOLON) {
-    throw exception::ParserException("Expected ';' at the end of expression.",
-                                     current.line, current.column);
-  }
-  readLex();
+  consumeIf(token::TokenType::SEMICOLON);
   return std::make_unique<node::ExpressionStatement>(std::move(expression));
 }
 
@@ -283,18 +266,11 @@ std::unique_ptr<node::Node> Parser::parseExpression() {
  */
 std::unique_ptr<node::Node> Parser::parseAssignementExpression() {
   readLex();
-  if (current != token::TokenType::IDENTIFIER)
-    throw exception::ParserException(
-        "Expected 'identifier' after the '$' sign.", current.line,
-        current.column);
+  expect(token::TokenType::IDENTIFIER);
 
   std::string identifier = std::get<std::string>(*current.token.getValue());
   readLex();
-  if (current != token::TokenType::ASSIGN)
-    throw exception::ParserException("Expected '=' after the '$ " + identifier +
-                                         "'.",
-                                     current.line, current.column);
-  readLex();
+  consumeIf(token::TokenType::ASSIGN);
   auto expression = parseOrExpression();
   return std::make_unique<node::AssignementExpression>(identifier,
                                                        std::move(expression));
@@ -511,11 +487,7 @@ std::unique_ptr<node::Node> Parser::parseCallArguments() {
       break;
     readLex();
   }
-  if (current != token::TokenType::RPARENT)
-    throw exception::ParserException(
-        "Expected ')' in the end of call arguments.", current.line,
-        current.column);
-  readLex();
+  consumeIf(token::TokenType::RPARENT);
   return arguments;
 }
 
@@ -537,12 +509,7 @@ std::unique_ptr<node::Node> Parser::parseParentExpression() {
   consumeIf(token::TokenType::LPARENT);
   auto pExpression =
       std::make_unique<node::ParentExpression>(parseExpression());
-  if (current != token::TokenType::RPARENT)
-    throw exception::ParserException(
-        "Expected ')' in the end of parent arguments.", current.line,
-        current.column);
-
-  readLex();
+  consumeIf(token::TokenType::RPARENT);
   if (current == token::TokenType::LPARENT)
     return parseCallExpression(std::move(pExpression));
   return pExpression;
@@ -591,15 +558,10 @@ Parser::parseCallExpression(std::unique_ptr<node::Node> function) {
 std::unique_ptr<node::Node> Parser::parseDebugExpression() {
   consumeIf(token::TokenType::LBRACKET);
   auto function = parseExpression();
-  if (current != token::TokenType::RBRACKET)
-    throw exception::ParserException("Expected ']' in debug expression.",
-                                     current.line, current.column);
-  readLex();
+  consumeIf(token::TokenType::RBRACKET);
 
   std::unique_ptr<node::Node> result = std::move(function);
-  if (current != token::TokenType::LPARENT)
-    throw exception::ParserException("Expected '(' in debug expression.",
-                                     current.line, current.column);
+  expect(token::TokenType::LPARENT);
   std::unique_ptr<node::Node> callArguments = parseCallArguments();
   result = std::make_unique<node::DebugExpression>(std::move(result),
                                                    std::move(callArguments));
@@ -629,15 +591,11 @@ std::unique_ptr<node::Node> Parser::parseDebugExpression() {
 std::unique_ptr<node::Node> Parser::parseLambdaExpression() {
   auto lambda = std::make_unique<node::LambdaExpression>();
   consumeIf(token::TokenType::HASH);
-  if (current != token::TokenType::LPARENT)
-    throw exception::ParserException("Expected '(' in lambda expression.",
-                                     current.line, current.column);
+  expect(token::TokenType::LPARENT);
 
   auto declarationArguments = parseDeclarationArguments();
   lambda->arguments = std::move(declarationArguments);
-  if (current != token::TokenType::LBRACE)
-    throw exception::ParserException("Expected '{' in lambda expression.",
-                                     current.line, current.column);
+  expect(token::TokenType::LBRACE);
   auto block = parseBlock();
   lambda->statements = std::move(block);
   if (current == token::TokenType::LPARENT)
@@ -662,6 +620,8 @@ std::unique_ptr<node::Node> Parser::parseLiteral() {
              current == token::TokenType::FALSE) {
     return parseBoolLiteral();
   }
+  // return nullptr;
+  // TODO: make it return nullptr rather then throw if failed parsing
   if (current == token::TokenType::END_OF_FILE ||
       current == token::TokenType::SEMICOLON)
     throw exception::ParserException("Expected expression.", current.line,

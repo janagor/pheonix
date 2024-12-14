@@ -735,7 +735,7 @@ TEST(TestParser, testErrorsNoSemicolon) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected ';' at the end of expression.");
+    EXPECT_STREQ(e.what(), "Expected: SEMICOLON, Got: END_OF_FILE.");
     EXPECT_EQ(e.getLine(), 1);
     EXPECT_EQ(e.getColumn(), 7);
   } catch (...) {
@@ -754,7 +754,7 @@ TEST(TestParser, testErrorsNoSemicolon2) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected ';' at the end of expression.");
+    EXPECT_STREQ(e.what(), "Expected: SEMICOLON, Got: END_OF_FILE.");
     EXPECT_EQ(e.getLine(), 1);
     EXPECT_EQ(e.getColumn(), 6);
   } catch (...) {
@@ -809,9 +809,9 @@ TEST(TestParser, NoRValue) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected expression. Got nothing.");
+    EXPECT_STREQ(e.what(), "Expected expression.");
     EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 15);
+    EXPECT_EQ(e.getColumn(), 14);
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -828,7 +828,7 @@ TEST(TestParser, wrongUsageOfKeyword) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected ';' at the end of expression.");
+    EXPECT_STREQ(e.what(), "Expected: SEMICOLON, Got: IDENTIFIER.");
     EXPECT_EQ(e.getLine(), 1);
     EXPECT_EQ(e.getColumn(), 5);
   } catch (...) {
@@ -847,7 +847,7 @@ TEST(TestParser, WrongEQSign) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected ')' in the if statement");
+    EXPECT_STREQ(e.what(), "Expected: RPARENT, Got: ASSIGN.");
     EXPECT_EQ(e.getLine(), 1);
     EXPECT_EQ(e.getColumn(), 12);
   } catch (...) {
@@ -923,7 +923,7 @@ TEST(TestParser, LetWithoutLvalue) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected identifier in variable declaration");
+    EXPECT_STREQ(e.what(), "Expected: IDENTIFIER, Got: ASSIGN.");
     EXPECT_EQ(e.getLine(), 1);
     EXPECT_EQ(e.getColumn(), 5);
   } catch (...) {
