@@ -1,7 +1,6 @@
 #include "parser.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
@@ -128,16 +127,15 @@ std::unique_ptr<node::Node> Parser::parseFunctionDeclaration() {
   if (current != token::TokenType::FN)
     return nullptr;
   readLex();
-  assert(current == token::TokenType::IDENTIFIER);
+  expect(token::TokenType::IDENTIFIER);
   std::string identifier = std::get<std::string>(*current.token.getValue());
   auto functionDeclaration =
       std::make_unique<node::FunctionDeclaration>(identifier);
   readLex();
-  assert(current == token::TokenType::LPARENT);
+  expect(token::TokenType::LPARENT);
   auto declarationArguments = parseDeclarationArguments();
   functionDeclaration->arguments = std::move(declarationArguments);
-  assert(current == token::TokenType::LBRACE);
-
+  expect(token::TokenType::LBRACE);
   auto block = parseBlock();
   functionDeclaration->statements = std::move(block);
   return functionDeclaration;
@@ -161,8 +159,7 @@ std::unique_ptr<node::Node> Parser::parseVariableDeclaration() {
         current.column);
   std::string identifier = std::get<std::string>(*current.token.getValue());
   readLex();
-  assert(current == token::TokenType::ASSIGN);
-  readLex();
+  consumeIf(token::TokenType::ASSIGN);
   auto expression = parseExpressionStatement();
   return std::make_unique<node::VariableDeclaration>(isMutable, identifier,
                                                      std::move(expression));
@@ -177,15 +174,13 @@ std::unique_ptr<node::Node> Parser::parseWhileLoopStatement() {
   if (current != token::TokenType::WHILE)
     return nullptr;
   readLex();
-  assert(current == token::TokenType::LPARENT);
-  readLex();
+  consumeIf(token::TokenType::LPARENT);
   if (current == token::TokenType::RPARENT)
     throw exception::ParserException("Expected predicate in while statement",
                                      current.line, current.column);
   auto expression = parseExpression();
 
-  assert(current == token::TokenType::RPARENT);
-  readLex();
+  consumeIf(token::TokenType::RPARENT);
   auto block = parseBlock();
 
   auto whileLoopStmt = std::make_unique<node::WhileLoopStatement>(
@@ -230,7 +225,7 @@ std::unique_ptr<node::Node> Parser::parseIfStatement() {
       auto elseIfStmt = parseIfStatement();
       ifStmt->elseBody = std::move(elseIfStmt);
     } else {
-      assert(current == token::TokenType::LBRACE);
+      expect(token::TokenType::LBRACE);
       auto elseBody = parseBlock();
       ifStmt->elseBody = std::move(elseBody);
     }
@@ -509,8 +504,7 @@ std::unique_ptr<node::Node> Parser::parseIdentifierLike() {
  */
 std::unique_ptr<node::Node> Parser::parseCallArguments() {
   auto arguments = std::make_unique<node::CallArguments>();
-  assert(current == token::TokenType::LPARENT);
-  readLex();
+  consumeIf(token::TokenType::LPARENT);
   while (current != token::TokenType::RPARENT) {
     arguments->arguments.push_back(parseExpression());
     if (current != token::TokenType::COMMA)
@@ -540,8 +534,7 @@ std::unique_ptr<node::Node> Parser::parseCallArguments() {
  * `primary_expression`.
  */
 std::unique_ptr<node::Node> Parser::parseParentExpression() {
-  assert(current == token::TokenType::LPARENT);
-  readLex();
+  consumeIf(token::TokenType::LPARENT);
   auto pExpression =
       std::make_unique<node::ParentExpression>(parseExpression());
   if (current != token::TokenType::RPARENT)
@@ -572,7 +565,7 @@ std::unique_ptr<node::Node> Parser::parseParentExpression() {
 std::unique_ptr<node::Node>
 Parser::parseCallExpression(std::unique_ptr<node::Node> function) {
   std::unique_ptr<node::Node> result = std::move(function);
-  assert(current == token::TokenType::LPARENT);
+  expect(token::TokenType::LPARENT);
   do {
     std::unique_ptr<node::Node> callArguments = parseCallArguments();
     result = std::make_unique<node::CallExpression>(std::move(result),
@@ -596,8 +589,7 @@ Parser::parseCallExpression(std::unique_ptr<node::Node> function) {
  * `primary_expression`.
  */
 std::unique_ptr<node::Node> Parser::parseDebugExpression() {
-  assert(current == token::TokenType::LBRACKET);
-  readLex();
+  consumeIf(token::TokenType::LBRACKET);
   auto function = parseExpression();
   if (current != token::TokenType::RBRACKET)
     throw exception::ParserException("Expected ']' in debug expression.",
@@ -636,8 +628,7 @@ std::unique_ptr<node::Node> Parser::parseDebugExpression() {
  */
 std::unique_ptr<node::Node> Parser::parseLambdaExpression() {
   auto lambda = std::make_unique<node::LambdaExpression>();
-  assert(current == token::TokenType::HASH);
-  readLex();
+  consumeIf(token::TokenType::HASH);
   if (current != token::TokenType::LPARENT)
     throw exception::ParserException("Expected '(' in lambda expression.",
                                      current.line, current.column);
