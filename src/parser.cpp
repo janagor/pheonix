@@ -50,26 +50,29 @@ std::unique_ptr<node::Node> Parser::parseStatement() {
     return nullptr;
   }
 
-  std::unique_ptr<node::Node> node;
-  switch (current.token.getTokenType()) {
-  case token::TokenType::FN:
-    return parseFunctionDeclaration();
-  case token::TokenType::LET:
-    return parseVariableDeclaration();
-  case token::TokenType::WHILE:
-    return parseWhileLoopStatement();
-  case token::TokenType::IF:
-    return parseIfStatement();
-  case token::TokenType::RETURN:
-    return parseReturnStatement();
-  case token::TokenType::SEMICOLON:
-    readLex();
-    return std::make_unique<node::NullStatement>();
-  default:
-    return parseExpressionStatement();
-  }
+  if (auto node = parseFunctionDeclaration())
+    return node;
+  if (auto node = parseVariableDeclaration())
+    return node;
+  if (auto node = parseWhileLoopStatement())
+    return node;
+  if (auto node = parseIfStatement())
+    return node;
+  if (auto node = parseReturnStatement())
+    return node;
+  if (auto node = parseNullStatement())
+    return node;
+  if (auto node = parseExpressionStatement())
+    return node;
+  return nullptr;
 }
 
+std::unique_ptr<node::Node> Parser::parseNullStatement() {
+  if (current.token.getTokenType() != token::TokenType::SEMICOLON)
+    return nullptr;
+  readLex();
+  return std::make_unique<node::NullStatement>();
+}
 /*
  * ENCLOSED_PARAMETER_LIST = "(" PARAMETER_LIST ")" ;
  *          PARAMETER_LIST = [
@@ -108,7 +111,8 @@ std::unique_ptr<node::Node> Parser::parseDeclarationArguments() {
  *                        ENCLOSED_PARAMETER_LIST FUNCTION_BODY ;
  */
 std::unique_ptr<node::Node> Parser::parseFunctionDeclaration() {
-  assert(current.token.getTokenType() == token::TokenType::FN);
+  if (current.token.getTokenType() != token::TokenType::FN)
+    return nullptr;
   readLex();
   assert(current.token.getTokenType() == token::TokenType::IDENTIFIER);
   std::string identifier = std::get<std::string>(*current.token.getValue());
@@ -129,7 +133,8 @@ std::unique_ptr<node::Node> Parser::parseFunctionDeclaration() {
  * VARIABLE_DECLARATION = "LET" [ "MUT"] IDENTIFIER [ "=" EXPESSION ] ";" ;
  */
 std::unique_ptr<node::Node> Parser::parseVariableDeclaration() {
-  assert(current.token.getTokenType() == token::TokenType::LET);
+  if (current.token.getTokenType() != token::TokenType::LET)
+    return nullptr;
   readLex();
   bool isMutable = false;
   if (current.token.getTokenType() == token::TokenType::MUT) {
@@ -155,7 +160,8 @@ std::unique_ptr<node::Node> Parser::parseVariableDeclaration() {
  *                        "{"  { STATEMENT } "}" ;
  */
 std::unique_ptr<node::Node> Parser::parseWhileLoopStatement() {
-  assert(current.token.getTokenType() == token::TokenType::WHILE);
+  if (current.token.getTokenType() != token::TokenType::WHILE)
+    return nullptr;
   readLex();
   assert(current.token.getTokenType() == token::TokenType::LPARENT);
   readLex();
@@ -185,7 +191,8 @@ std::unique_ptr<node::Node> Parser::parseWhileLoopStatement() {
  *                ) ;
  */
 std::unique_ptr<node::Node> Parser::parseIfStatement() {
-  assert(current.token.getTokenType() == token::TokenType::IF);
+  if (current.token.getTokenType() != token::TokenType::IF)
+    return nullptr;
   readLex();
   if (current.token.getTokenType() != token::TokenType::LPARENT)
     throw exception::ParserException("Expected '(' after 'if'", current.line,
@@ -221,7 +228,8 @@ std::unique_ptr<node::Node> Parser::parseIfStatement() {
  * RETURN_STATEMENT = "RETURN" [ EXPRESSION ] ";" ;
  */
 std::unique_ptr<node::Node> Parser::parseReturnStatement() {
-  assert(current.token.getTokenType() == token::TokenType::RETURN);
+  if (current.token.getTokenType() != token::TokenType::RETURN)
+    return nullptr;
   readLex();
   if (current.token.getTokenType() == token::TokenType::SEMICOLON) {
     readLex();
@@ -233,7 +241,7 @@ std::unique_ptr<node::Node> Parser::parseReturnStatement() {
 }
 
 /*
- * EXPRESSION_STATEMENT = [ EXPRESSION ] ";" ;
+ * EXPRESSION_STATEMENT = EXPRESSION ";" ;
  */
 std::unique_ptr<node::Node> Parser::parseExpressionStatement() {
   if (current.token.getTokenType() == token::TokenType::SEMICOLON) {
