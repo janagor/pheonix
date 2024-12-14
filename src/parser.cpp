@@ -34,8 +34,8 @@ std::unique_ptr<node::Node> Parser::parseBlock() {
       break;
     block->statements.push_back(std::move(statement));
   }
-  expect(token::TokenType::RBRACE); // TODO: change to consumeIf
-  readLex();
+  consumeIf(token::TokenType::RBRACE); // TODO: change to consumeIf
+  // readLex();
   return block;
 }
 
