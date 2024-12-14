@@ -52,13 +52,11 @@ private:
 
 public:
   Parser(std::istream &istream) : lexer(istream) {
-    current = lexer.nextLexem();
-    /*
-     */
-    if (current.token.getTokenType() == token::TokenType::ONE_LINE_COMMENT ||
-        current.token.getTokenType() == token::TokenType::MULTILINE_COMMENT) {
-      readLex();
-    }
+    do {
+      current = lexer.nextLexem();
+    } while (
+        current.token.getTokenType() == token::TokenType::ONE_LINE_COMMENT ||
+        current.token.getTokenType() == token::TokenType::MULTILINE_COMMENT);
   };
   void consumeIf(token::TokenType token);
   void expect(token::TokenType token);
