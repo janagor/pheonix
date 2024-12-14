@@ -6,7 +6,7 @@
 
 namespace pheonix::visitor {
 
-std::string TreeGenVisitor::getResult() { return result; }
+std::string TreeGenVisitor::getResult() const { return result; }
 void TreeGenVisitor::visit(node::Program &p) {
   inc();
   result += "(Program:";

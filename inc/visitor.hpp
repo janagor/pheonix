@@ -80,7 +80,7 @@ public:
 class TreeGenVisitor : public Visitor {
 public:
   TreeGenVisitor() : Visitor(), result(), shift_size(0), s("\n") {};
-  std::string getResult();
+  std::string getResult() const;
 
   void visit(node::Program &p) override;
   void visit(node::Parameter &p) override;
