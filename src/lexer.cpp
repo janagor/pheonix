@@ -14,6 +14,12 @@ bool Lexem::operator==(const Lexem &l) const {
   return this->token == l.token && this->line == l.line &&
          this->column == l.column;
 }
+bool Lexem::operator==(const token::TokenType &t) const {
+  return this->token.getTokenType() == t;
+}
+bool Lexem::operator!=(const token::TokenType &t) const {
+  return !((*this) == t);
+}
 
 std::ostream &operator<<(std::ostream &os, const Lexem &l) {
   os << "Lexem(  token: `" << l.token << "`,\n\tline: `" << l.line

@@ -16,6 +16,8 @@ struct Lexem {
   size_t line;
   size_t column;
   bool operator==(const Lexem &l) const;
+  bool operator==(const token::TokenType &t) const;
+  bool operator!=(const token::TokenType &t) const;
 };
 std::ostream &operator<<(std::ostream &os, const Lexem &l);
 
