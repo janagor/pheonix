@@ -30,10 +30,7 @@ void CallArguments::accept(visitor::Visitor &v) { v.visit(*this); }
 void LambdaExpression::accept(visitor::Visitor &v) { v.visit(*this); }
 void Identifier::accept(visitor::Visitor &v) { v.visit(*this); }
 void ParentExpression::accept(visitor::Visitor &v) { v.visit(*this); }
-void IntegerLiteral::accept(visitor::Visitor &v) { v.visit(*this); }
-void FloatLiteral::accept(visitor::Visitor &v) { v.visit(*this); }
-void BoolLiteral::accept(visitor::Visitor &v) { v.visit(*this); }
-void StringLiteral::accept(visitor::Visitor &v) { v.visit(*this); }
+void Literal::accept(visitor::Visitor &v) { v.visit(*this); }
 void TypeSpecifier::accept(visitor::Visitor &v) { v.visit(*this); }
 
 } // namespace pheonix::node

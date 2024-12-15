@@ -617,17 +617,14 @@ std::unique_ptr<node::Node> Parser::parseLambdaExpression() {
  *         | STRING_LITERAL ;
  */
 std::unique_ptr<node::Node> Parser::parseLiteral() {
-  if (current == token::TokenType::INTEGER) {
-    return parseIntegerLiteral();
-  } else if (current == token::TokenType::FLOAT) {
-    return parseFloatLiteral();
-  } else if (current == token::TokenType::STRING) {
-    return parseStringLiteral();
-  } else if (current == token::TokenType::TRUE ||
-             current == token::TokenType::FALSE) {
-    return parseBoolLiteral();
-  }
-  // return nullptr;
+  if (current == token::TokenType::INTEGER ||
+      current == token::TokenType::STRING ||
+      current == token::TokenType::FLOAT ||
+      current == token::TokenType::FALSE || current == token::TokenType::TRUE) {
+    auto node = std::make_unique<node::Literal>(*current.token.getValue());
+    readLex();
+    return node;
+  };
   // TODO: make it return nullptr rather then throw if failed parsing
   if (current == token::TokenType::END_OF_FILE ||
       current == token::TokenType::SEMICOLON)
@@ -635,42 +632,6 @@ std::unique_ptr<node::Node> Parser::parseLiteral() {
                                      current.column);
   throw exception::ParserException("Could not parse.", current.line,
                                    current.column);
-}
-
-/*
- * | INTEGER_LITERAL
- */
-std::unique_ptr<node::Node> Parser::parseIntegerLiteral() {
-  types::Integer val = std::get<types::Integer>(*current.token.getValue());
-  readLex();
-  return std::make_unique<node::IntegerLiteral>(val);
-}
-
-/*
- * | FLOAT_LITERAL
- */
-std::unique_ptr<node::Node> Parser::parseFloatLiteral() {
-  types::Float val = std::get<types::Float>(*current.token.getValue());
-  readLex();
-  return std::make_unique<node::FloatLiteral>(val);
-}
-
-/*
- * BOOL_LITERAL
- */
-std::unique_ptr<node::Node> Parser::parseBoolLiteral() {
-  bool val = current == token::TokenType::TRUE;
-  readLex();
-  return std::make_unique<node::BoolLiteral>(val);
-}
-
-/*
- * | STRING_LITERAL ;
- */
-std::unique_ptr<node::Node> Parser::parseStringLiteral() {
-  std::string val = std::get<std::string>(*current.token.getValue());
-  readLex();
-  return std::make_unique<node::StringLiteral>(val);
 }
 
 /*

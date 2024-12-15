@@ -241,27 +241,10 @@ struct ParentExpression : public Node {
   void accept(visitor::Visitor &v) override;
 };
 
-struct IntegerLiteral : public Node {
-  types::Integer value;
-  IntegerLiteral(types::Integer val) : Node(), value(val) {};
-  void accept(visitor::Visitor &v) override;
-};
-
-struct FloatLiteral : public Node {
-  types::Float value;
-  FloatLiteral(types::Float val) : Node(), value(val) {};
-  void accept(visitor::Visitor &v) override;
-};
-
-struct BoolLiteral : public Node {
-  bool value;
-  BoolLiteral(bool val) : Node(), value(val) {};
-  void accept(visitor::Visitor &v) override;
-};
-
-struct StringLiteral : public Node {
-  std::string value;
-  StringLiteral(const std::string &val) : Node(), value(val) {};
+struct Literal : public Node {
+  std::variant<types::Integer, types::Float, std::string, bool> value;
+  Literal(std::variant<types::Integer, types::Float, std::string, bool> val)
+      : Node(), value(val) {};
   void accept(visitor::Visitor &v) override;
 };
 

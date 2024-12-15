@@ -14,7 +14,9 @@ namespace pheonix::token {
 struct Token {
   Token() : tokenType(token::TokenType::NOT_A_TOKEN), value(std::nullopt) {}
   Token(TokenType t) : tokenType(t), value(std::nullopt) {}
-  Token(TokenType t, std::string val) : tokenType(t), value(val) {}
+  Token(TokenType t, const std::string &val) : tokenType(t), value(val) {}
+  Token(TokenType t, const char *val) : tokenType(t), value(std::string(val)) {}
+  Token(TokenType t, bool val) : tokenType(t), value(val) {}
   Token(TokenType t, char val) : tokenType(t), value(std::string(1, val)) {}
   Token(TokenType t, const types::Integer &val) : tokenType(t), value(val) {}
   Token(TokenType t, int val) : tokenType(t), value(types::Integer(val)) {}
@@ -22,17 +24,18 @@ struct Token {
   Token(TokenType t, const types::Float &val) : tokenType(t), value(val) {}
   bool operator==(const Token &t) const;
   token::TokenType getTokenType() const;
-  std::optional<std::variant<types::Integer, types::Float, std::string>>
+  std::optional<std::variant<types::Integer, types::Float, std::string, bool>>
   getValue() const;
 
 private:
   token::TokenType tokenType;
-  std::optional<std::variant<types::Integer, types::Float, std::string>> value;
+  std::optional<std::variant<types::Integer, types::Float, std::string, bool>>
+      value;
 };
 std::ostream &operator<<(
     std::ostream &os,
-    const std::optional<std::variant<types::Integer, types::Float, std::string>>
-        &opt);
+    const std::optional<
+        std::variant<types::Integer, types::Float, std::string, bool>> &opt);
 std::ostream &operator<<(std::ostream &os, const Token &t);
 
 } // namespace pheonix::token

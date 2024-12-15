@@ -338,9 +338,13 @@ token::Token Lexer::handleIdentifier(size_t row, size_t column) {
   if (buffer.size() > IDENTIFIER_MAX_SIZE)
     throw exception::LexerException("Identifier too long.", row, column);
 
-  std::optional<token::TokenType> result = types::stringToTokenType(buffer);
-  if (result)
+  if (auto result = types::stringToTokenType(buffer)) {
+    if (result == token::TokenType::TRUE)
+      return token::Token(*result, true);
+    if (result == token::TokenType::FALSE)
+      return token::Token(*result, false);
     return token::Token(*result);
+  }
 
   return token::Token(token::TokenType::IDENTIFIER, buffer);
 }

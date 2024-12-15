@@ -41,10 +41,6 @@ private:
   std::unique_ptr<node::Node> parseDebugExpression();
   std::unique_ptr<node::Node> parseLambdaExpression();
   std::unique_ptr<node::Node> parseLiteral();
-  std::unique_ptr<node::Node> parseIntegerLiteral();
-  std::unique_ptr<node::Node> parseFloatLiteral();
-  std::unique_ptr<node::Node> parseBoolLiteral();
-  std::unique_ptr<node::Node> parseStringLiteral();
   std::unique_ptr<node::Node> parseTypeSpecifier();
   void readLex();
 

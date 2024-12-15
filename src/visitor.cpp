@@ -278,31 +278,26 @@ void TreeGenVisitor::visit(node::ParentExpression &pe) {
   dec();
 }
 
-void TreeGenVisitor::visit(node::IntegerLiteral &il) {
+void TreeGenVisitor::visit(node::Literal &il) {
   inc();
-  result += "(IntegerLiteral:" + s +
-            "value=" + std::to_string(il.value.getValue()) + ")";
-  dec();
-}
+  result += "(Literal:" + s;
 
-void TreeGenVisitor::visit(node::FloatLiteral &il) {
-  inc();
-  std::ostringstream dblAsStr;
-  dblAsStr << std::fixed << std::setprecision(3) << il.value;
-  result += "(FloatLiteral:" + s + "value=" + dblAsStr.str() + ")";
-  dec();
-}
+  if (std::holds_alternative<types::Integer>(il.value)) {
+    result += "type=Integer," + s + "value=" +
+              std::to_string(std::get<types::Integer>(il.value).getValue());
+  } else if (std::holds_alternative<types::Float>(il.value)) {
+    std::ostringstream dblAsStr;
+    dblAsStr << std::fixed << std::setprecision(3)
+             << std::get<types::Float>(il.value).getValue();
 
-void TreeGenVisitor::visit(node::BoolLiteral &bl) {
-  inc();
-  result +=
-      "(BoolLiteral:" + s + "value=" + (bl.value ? "true" : "false") + ")";
-  dec();
-}
-
-void TreeGenVisitor::visit(node::StringLiteral &sl) {
-  inc();
-  result += "(StringLiteral:" + s + "value=" + sl.value + ")";
+    result += "type=Float," + s + "value=" + dblAsStr.str();
+  } else if (std::holds_alternative<std::string>(il.value)) {
+    result += "type=String," + s + "value=" + std::get<std::string>(il.value);
+  } else if (std::holds_alternative<bool>(il.value)) {
+    result += "type=Bool," + s +
+              "value=" + (std::get<bool>(il.value) ? "true" : "false");
+  };
+  result += ")";
   dec();
 }
 

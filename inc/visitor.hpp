@@ -30,10 +30,7 @@ struct CallArguments;
 struct LambdaExpression;
 struct Identifier;
 struct ParentExpression;
-struct IntegerLiteral;
-struct FloatLiteral;
-struct BoolLiteral;
-struct StringLiteral;
+struct Literal;
 struct TypeSpecifier;
 
 } // namespace pheonix::node
@@ -69,10 +66,7 @@ public:
   virtual void visit(node::LambdaExpression &) = 0;
   virtual void visit(node::Identifier &) = 0;
   virtual void visit(node::ParentExpression &) = 0;
-  virtual void visit(node::IntegerLiteral &) = 0;
-  virtual void visit(node::FloatLiteral &) = 0;
-  virtual void visit(node::BoolLiteral &) = 0;
-  virtual void visit(node::StringLiteral &) = 0;
+  virtual void visit(node::Literal &) = 0;
   virtual void visit(node::TypeSpecifier &) = 0;
   virtual ~Visitor() = default;
 };
@@ -109,10 +103,7 @@ public:
   void visit(node::LambdaExpression &le) override;
   void visit(node::Identifier &i) override;
   void visit(node::ParentExpression &pe) override;
-  void visit(node::IntegerLiteral &il) override;
-  void visit(node::FloatLiteral &fl) override;
-  void visit(node::BoolLiteral &il) override;
-  void visit(node::StringLiteral &sl) override;
+  void visit(node::Literal &il) override;
   void visit(node::TypeSpecifier &ts) override;
 
 private:
