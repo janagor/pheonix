@@ -257,13 +257,12 @@ std::unique_ptr<node::Node> Parser::parseExpressionStatement() {
 }
 
 /*
- * expression = assignement_expression
- *            | or_expression ;
+ * EXPRESSION = ASSIGNEMENT_EXPRESSION
+ *            | OR_EXPRESSION ;
  */
 std::unique_ptr<node::Node> Parser::parseExpression() {
-  if (current == token::TokenType::DOLAR) {
-    return parseAssignementExpression();
-  }
+  if (auto node = parseAssignementExpression())
+    return node;
   return parseOrExpression();
 }
 
@@ -271,6 +270,8 @@ std::unique_ptr<node::Node> Parser::parseExpression() {
  * ASSIGNEMENT_EXPRESSION = "$" IDENTIFIER "=" OR_EXPRESSION ;
  */
 std::unique_ptr<node::Node> Parser::parseAssignementExpression() {
+  if (current != token::TokenType::DOLAR)
+    return nullptr;
   readLex();
   expect(token::TokenType::IDENTIFIER);
 
