@@ -680,13 +680,14 @@ std::optional<std::unique_ptr<node::Node>> Parser::parse() {
 }
 
 void Parser::readLex() {
+  current = next;
   if (current == token::TokenType::END_OF_FILE) {
     return;
   }
   do {
-    current = lexer.nextLexem();
-  } while (current == token::TokenType::ONE_LINE_COMMENT ||
-           current == token::TokenType::MULTILINE_COMMENT);
+    next = lexer.nextLexem();
+  } while (next == token::TokenType::ONE_LINE_COMMENT ||
+           next == token::TokenType::MULTILINE_COMMENT);
 }
 
 } // namespace pheonix::parser

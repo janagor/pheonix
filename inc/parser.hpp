@@ -47,14 +47,15 @@ private:
 private:
   lexer::Lexer lexer;
   lexer::Lexem current;
+  lexer::Lexem next;
 
 public:
   Parser(std::istream &istream) : lexer(istream) {
     do {
-      current = lexer.nextLexem();
-    } while (
-        current.token.getTokenType() == token::TokenType::ONE_LINE_COMMENT ||
-        current.token.getTokenType() == token::TokenType::MULTILINE_COMMENT);
+      next = lexer.nextLexem();
+    } while (next.token.getTokenType() == token::TokenType::ONE_LINE_COMMENT ||
+             next.token.getTokenType() == token::TokenType::MULTILINE_COMMENT);
+    readLex();
   };
   void consumeIf(token::TokenType token);
   void expect(token::TokenType token);
