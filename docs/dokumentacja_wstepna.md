@@ -74,7 +74,7 @@ innej funkcji, przypisywane do zmiennych itd.,
                             | ( "{" { statement } "}" )
                             ) ;
 
-   assignement_expression = "$" identifier "=" or_expression ;
+   assignement_expression = identifier "=" or_expression ;
 
             or_expression = and_expression
                             { "||" and_expression } ;
@@ -103,19 +103,29 @@ multiplicative_expression = compositive_expression
 
           cast_expression = prefix_expression { "<-" type_name } ;
 
-        prefix_expression = "!" primary_expression
-                          | "-" primary_expression
-                          | primary_expression ;
+        prefix_expression = "!" other_expression
+                          | "-" other_expression
+                          | other_expression ;
 
-       primary_expression = ( 
-                            identifier
-                            | ( "#" enclosed_parameter_list function_body )
-                            )
-                            { "(" expression_list ")" } ;
-                          | "(" expression ")" { "(" expression_list ")" }
-                          | "[" expression "]" "(" expression_list ")" { "(" expression_list ")" }
+         other_expression = maybe_call_expression
                           | literal ;
 
+    maybe_call_expression = ( identifier
+                            | lambda_expression
+                            | parent_expression
+                            | debug_expression
+                            ) { "(" expression_list ")" } ;
+
+        lambda_expression = "#" enclosed_parameter_list function_body ;
+
+        parent_expression = "(" expression ")" ;
+
+         debug_expression = "[" expression "]" "(" expression_list ")" ;
+
+                  literal = bool_literal
+                          | float_literal
+                          | integer_literal
+                          | string_literal ;
 
      function_declaration = "fn" identifier
                             enclosed_parameter_list function_body ;
@@ -132,11 +142,6 @@ multiplicative_expression = compositive_expression
                             "}" ;
 
                identifier = letter { letter | digit | "_" } ;
-
-                  literal = bool_literal
-                          | float_literal
-                          | integer_literal
-                          | string_literal ;
 
                 type_name = "bol" | "flt" | "int" | "str" ;
 
