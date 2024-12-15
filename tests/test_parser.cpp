@@ -70,7 +70,7 @@ const map<string, string> TRIVIAL_CASES{
                 type=Integer,\n\
                 value=1),\n\
             type=(TypeSpecifier:\n\
-                value=int))))"},
+                value=INT))))"},
     {"1<-str;", "(Program:\n\
     (ExpressionStatement:\n\
         expression=(CastExpression:\n\
@@ -78,7 +78,7 @@ const map<string, string> TRIVIAL_CASES{
                 type=Integer,\n\
                 value=1),\n\
             type=(TypeSpecifier:\n\
-                value=str))))"},
+                value=STR))))"},
     {"1<-flt;", "(Program:\n\
     (ExpressionStatement:\n\
         expression=(CastExpression:\n\
@@ -86,7 +86,7 @@ const map<string, string> TRIVIAL_CASES{
                 type=Integer,\n\
                 value=1),\n\
             type=(TypeSpecifier:\n\
-                value=flt))))"},
+                value=FLT))))"},
     {"1<-bol;", "(Program:\n\
     (ExpressionStatement:\n\
         expression=(CastExpression:\n\
@@ -94,7 +94,7 @@ const map<string, string> TRIVIAL_CASES{
                 type=Integer,\n\
                 value=1),\n\
             type=(TypeSpecifier:\n\
-                value=bol))))"},
+                value=BOL))))"},
     // PrefixExpression
     {"-2;", "(Program:\n\
     (ExpressionStatement:\n\

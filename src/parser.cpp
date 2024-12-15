@@ -635,14 +635,12 @@ std::unique_ptr<node::Node> Parser::parseLiteral() {
 }
 
 /*
- * TYPE_NAME = "bol" | "flt" | "int" | "str" ;
+ * TYPE_NAME = "BOL" | "FLT" | "INT" | "STR" ;
  */
 std::unique_ptr<node::Node> Parser::parseTypeSpecifier() {
   std::string type = types::tokenTypeToLiteral(current.token.getTokenType());
 
-  std::transform(type.begin(), type.end(), type.begin(),
-                 [](unsigned char c) { return std::tolower(c); });
-  if (type == "flt" || type == "int" || type == "str" || type == "bol") {
+  if (type == "FLT" || type == "INT" || type == "STR" || type == "BOL") {
     readLex();
     return std::make_unique<node::TypeSpecifier>(type);
   }
