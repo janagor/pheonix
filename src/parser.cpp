@@ -189,7 +189,7 @@ std::unique_ptr<node::Node> Parser::parseWhileLoopStatement() {
 /*
  * IF_STATEMENT = IF_CLAUSE [ ELSE_CLAUSE ] ;
  *    IF_CLAUSE = "IF"
- *                "(" EXPRESSION ")"
+ *                "(" OR_EXPRESSION ")"
  *                "{" { STATEMENT } "}" ;
  *  ELSE_CLAUSE = "ELSE"
  *                (
@@ -206,7 +206,7 @@ std::unique_ptr<node::Node> Parser::parseIfStatement() {
     throw exception::ParserException("Expected predicate in if statement",
                                      current.line, current.column);
 
-  auto predicate = parseExpression();
+  auto predicate = parseOrExpression();
   auto ifStmt = std::make_unique<node::IfStatement>(std::move(predicate));
   consumeIf(token::TokenType::RPARENT);
   auto ifBody = parseBlock();
@@ -267,14 +267,12 @@ std::unique_ptr<node::Node> Parser::parseExpression() {
 }
 
 /*
- * ASSIGNEMENT_EXPRESSION = "$" IDENTIFIER "=" OR_EXPRESSION ;
+ * ASSIGNEMENT_EXPRESSION = IDENTIFIER "=" OR_EXPRESSION ;
  */
 std::unique_ptr<node::Node> Parser::parseAssignementExpression() {
-  if (current != token::TokenType::DOLAR)
+  if (next != token::TokenType::ASSIGN)
     return nullptr;
-  readLex();
   expect(token::TokenType::IDENTIFIER);
-
   std::string identifier = std::get<std::string>(*current.token.getValue());
   readLex();
   consumeIf(token::TokenType::ASSIGN);

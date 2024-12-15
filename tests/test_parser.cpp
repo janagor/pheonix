@@ -248,7 +248,7 @@ const map<string, string> TRIVIAL_CASES{
                 type=Integer,\n\
                 value=123))))"},
     // AssignementExpression
-    {"$a=123;", "(Program:\n\
+    {"a=123;", "(Program:\n\
     (ExpressionStatement:\n\
         expression=(AssignementExpression:\n\
             identifier=a,\n\
@@ -1022,7 +1022,7 @@ TEST(TestParser, LetWithoutLvalue) {
 }
 
 TEST(TestParser, AssignmentWithoutRvalue) {
-  string input = "$kaczka = ;";
+  string input = "kaczka = ;";
 
   istringstream in(input);
   try {
@@ -1034,7 +1034,7 @@ TEST(TestParser, AssignmentWithoutRvalue) {
   } catch (const ParserException &e) {
     EXPECT_STREQ(e.what(), "Expected expression.");
     EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 11);
+    EXPECT_EQ(e.getColumn(), 10);
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
