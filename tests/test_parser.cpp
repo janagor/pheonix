@@ -222,9 +222,8 @@ const map<string, string> TRIVIAL_CASES{
     (VariableDeclaration:\n\
         isMutable=false,\n\
         identifier=a,\n\
-        expression=(ExpressionStatement:\n\
-            expression=(IntegerLiteral:\n\
-                value=123))))"},
+        expression=(IntegerLiteral:\n\
+            value=123)))"},
     // WhileLoopStatement
     {"while(1==1) { 1; }", "(Program:\n\
     (WhileLoopStatement:\n\
@@ -241,12 +240,11 @@ const map<string, string> TRIVIAL_CASES{
     // ReturnStatement
     {"return;", "(Program:\n\
     (ReturnStatement:\n\
-        expression=(NullStatement:)))"},
+        expression=))"},
     {"return 123;", "(Program:\n\
     (ReturnStatement:\n\
-        expression=(ExpressionStatement:\n\
-            expression=(IntegerLiteral:\n\
-                value=123))))"},
+        expression=(IntegerLiteral:\n\
+            value=123)))"},
     // function declaration
     {"fn returnOne() {\n\
     return 123;\n\
@@ -257,9 +255,8 @@ const map<string, string> TRIVIAL_CASES{
         arguments=(DeclarationArguments:),\n\
         statements=(Block:\n\
             (ReturnStatement:\n\
-                expression=(ExpressionStatement:\n\
-                    expression=(IntegerLiteral:\n\
-                        value=123))))))"},
+                expression=(IntegerLiteral:\n\
+                    value=123)))))"},
     {"fn returnOne(mut num) {\n\
     return 123;\n\
 }",
@@ -272,9 +269,8 @@ const map<string, string> TRIVIAL_CASES{
                 identifier=num)),\n\
         statements=(Block:\n\
             (ReturnStatement:\n\
-                expression=(ExpressionStatement:\n\
-                    expression=(IntegerLiteral:\n\
-                        value=123))))))"},
+                expression=(IntegerLiteral:\n\
+                    value=123)))))"},
     // if statement without else
     {"if (1 == 1) {\n\
     return 123;\n\
@@ -289,9 +285,8 @@ const map<string, string> TRIVIAL_CASES{
                 value=1)),\n\
         ifBody=(Block:\n\
             (ReturnStatement:\n\
-                expression=(ExpressionStatement:\n\
-                    expression=(IntegerLiteral:\n\
-                        value=123)))),\n\
+                expression=(IntegerLiteral:\n\
+                    value=123))),\n\
         elseBody=))"},
     // if statement with one else
     {"if (1 == 1) {\n\
@@ -309,14 +304,12 @@ const map<string, string> TRIVIAL_CASES{
                 value=1)),\n\
         ifBody=(Block:\n\
             (ReturnStatement:\n\
-                expression=(ExpressionStatement:\n\
-                    expression=(IntegerLiteral:\n\
-                        value=123)))),\n\
+                expression=(IntegerLiteral:\n\
+                    value=123))),\n\
         elseBody=(Block:\n\
             (ReturnStatement:\n\
-                expression=(ExpressionStatement:\n\
-                    expression=(IntegerLiteral:\n\
-                        value=123))))))"},
+                expression=(IntegerLiteral:\n\
+                    value=123)))))"},
     // if statement with else if
     {"if (1 == 1) {\n\
     return 123;\n\
@@ -333,9 +326,8 @@ const map<string, string> TRIVIAL_CASES{
                 value=1)),\n\
         ifBody=(Block:\n\
             (ReturnStatement:\n\
-                expression=(ExpressionStatement:\n\
-                    expression=(IntegerLiteral:\n\
-                        value=123)))),\n\
+                expression=(IntegerLiteral:\n\
+                    value=123))),\n\
         elseBody=(IfStatement:\n\
             predicate=(ComparisonExpression:\n\
                 left=(IntegerLiteral:\n\
@@ -345,9 +337,8 @@ const map<string, string> TRIVIAL_CASES{
                     value=1)),\n\
             ifBody=(Block:\n\
                 (ReturnStatement:\n\
-                    expression=(ExpressionStatement:\n\
-                        expression=(IntegerLiteral:\n\
-                            value=123)))),\n\
+                    expression=(IntegerLiteral:\n\
+                        value=123))),\n\
             elseBody=)))"},
     // CallExpression
     {"call(1);", "(Program:\n\
@@ -371,9 +362,8 @@ const map<string, string> TRIVIAL_CASES{
             arguments=(DeclarationArguments:),\n\
             statements=(Block:\n\
                 (ReturnStatement:\n\
-                    expression=(ExpressionStatement:\n\
-                        expression=(IntegerLiteral:\n\
-                            value=123)))))))"},
+                    expression=(IntegerLiteral:\n\
+                        value=123))))))"},
     {"#(mut num){ return 123; };", "(Program:\n\
     (ExpressionStatement:\n\
         expression=(LambdaExpression:\n\
@@ -383,9 +373,8 @@ const map<string, string> TRIVIAL_CASES{
                     identifier=num)),\n\
             statements=(Block:\n\
                 (ReturnStatement:\n\
-                    expression=(ExpressionStatement:\n\
-                        expression=(IntegerLiteral:\n\
-                            value=123)))))))"},
+                    expression=(IntegerLiteral:\n\
+                        value=123))))))"},
     // DebugExpression
     {"[call](1);", "(Program:\n\
     (ExpressionStatement:\n\
@@ -525,9 +514,8 @@ const map<string, string> FUNCTION_CALLS{
                 arguments=(DeclarationArguments:),\n\
                 statements=(Block:\n\
                     (ReturnStatement:\n\
-                        expression=(ExpressionStatement:\n\
-                            expression=(IntegerLiteral:\n\
-                                value=123))))),\n\
+                        expression=(IntegerLiteral:\n\
+                            value=123)))),\n\
             arguments=(CallArguments:))))"},
     {"#(mut num){ return 123; }();", "(Program:\n\
     (ExpressionStatement:\n\
@@ -539,9 +527,8 @@ const map<string, string> FUNCTION_CALLS{
                         identifier=num)),\n\
                 statements=(Block:\n\
                     (ReturnStatement:\n\
-                        expression=(ExpressionStatement:\n\
-                            expression=(IntegerLiteral:\n\
-                                value=123))))),\n\
+                        expression=(IntegerLiteral:\n\
+                            value=123)))),\n\
             arguments=(CallArguments:))))"},
 };
 

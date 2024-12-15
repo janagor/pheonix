@@ -142,7 +142,7 @@ std::unique_ptr<node::Node> Parser::parseFunctionDeclaration() {
 }
 
 /*
- * VARIABLE_DECLARATION = "LET" [ "MUT"] IDENTIFIER [ "=" EXPESSION ] ";" ;
+ * VARIABLE_DECLARATION = "LET" [ "MUT"] IDENTIFIER "=" EXPESSION ";" ;
  */
 std::unique_ptr<node::Node> Parser::parseVariableDeclaration() {
   if (current != token::TokenType::LET)
@@ -157,7 +157,8 @@ std::unique_ptr<node::Node> Parser::parseVariableDeclaration() {
   std::string identifier = std::get<std::string>(*current.token.getValue());
   readLex();
   consumeIf(token::TokenType::ASSIGN);
-  auto expression = parseExpressionStatement();
+  auto expression = parseExpression();
+  consumeIf(token::TokenType::SEMICOLON);
   return std::make_unique<node::VariableDeclaration>(isMutable, identifier,
                                                      std::move(expression));
 }
@@ -236,12 +237,13 @@ std::unique_ptr<node::Node> Parser::parseReturnStatement() {
   if (current != token::TokenType::RETURN)
     return nullptr;
   readLex();
+  // TODO: Change it so that parse expression just returns nullptr
   if (current == token::TokenType::SEMICOLON) {
     readLex();
-    auto expression = std::make_unique<node::NullStatement>();
-    return std::make_unique<node::ReturnStatement>(std::move(expression));
+    return std::make_unique<node::ReturnStatement>(nullptr);
   }
-  auto expression = parseExpressionStatement();
+  auto expression = parseExpression();
+  consumeIf(token::TokenType::SEMICOLON);
   return std::make_unique<node::ReturnStatement>(std::move(expression));
 }
 

@@ -102,7 +102,8 @@ void TreeGenVisitor::visit(node::IfStatement &is) {
 void TreeGenVisitor::visit(node::ReturnStatement &rs) {
   inc();
   result += "(ReturnStatement:" + s + "expression=";
-  rs.expression->accept(*this);
+  if (rs.expression)
+    rs.expression->accept(*this);
   result += ")";
   dec();
 }
