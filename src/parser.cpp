@@ -42,7 +42,6 @@ std::unique_ptr<node::Node> Parser::parseBlock() {
  *           | ";" ;
  */
 std::unique_ptr<node::Node> Parser::parseStatement() {
-  // TODO: remove this testing and do it via failing parseExpressionStatement()
   if (current == token::TokenType::END_OF_FILE) {
     return nullptr;
   }
@@ -160,10 +159,14 @@ std::unique_ptr<node::Node> Parser::parseVariableDeclaration() {
   std::string identifier = std::get<std::string>(*current.token.getValue());
   readLex();
   consumeIf(token::TokenType::ASSIGN);
-  auto expression = parseExpression();
-  consumeIf(token::TokenType::SEMICOLON);
-  return std::make_unique<node::VariableDeclaration>(isMutable, identifier,
-                                                     std::move(expression));
+  if (auto expression = parseExpression()) {
+    consumeIf(token::TokenType::SEMICOLON);
+    return std::make_unique<node::VariableDeclaration>(isMutable, identifier,
+                                                       std::move(expression));
+  }
+  throw exception::ParserException(
+      "Failed parsing expression in variable declaration.", current.line,
+      current.column);
 }
 
 /*
@@ -240,23 +243,27 @@ std::unique_ptr<node::Node> Parser::parseReturnStatement() {
   if (current != token::TokenType::RETURN)
     return nullptr;
   readLex();
-  // TODO: Change it so that parse expression just returns nullptr
   if (current == token::TokenType::SEMICOLON) {
     readLex();
     return std::make_unique<node::ReturnStatement>(nullptr);
   }
-  auto expression = parseExpression();
-  consumeIf(token::TokenType::SEMICOLON);
-  return std::make_unique<node::ReturnStatement>(std::move(expression));
+  if (auto expression = parseExpression()) {
+    consumeIf(token::TokenType::SEMICOLON);
+    return std::make_unique<node::ReturnStatement>(std::move(expression));
+  }
+  throw exception::ParserException("Expected expression.", current.line,
+                                   current.column);
 }
 
 /*
  * EXPRESSION_STATEMENT = EXPRESSION ";" ;
  */
 std::unique_ptr<node::Node> Parser::parseExpressionStatement() {
-  auto expression = parseExpression();
-  consumeIf(token::TokenType::SEMICOLON);
-  return std::make_unique<node::ExpressionStatement>(std::move(expression));
+  if (auto expression = parseExpression()) {
+    consumeIf(token::TokenType::SEMICOLON);
+    return std::make_unique<node::ExpressionStatement>(std::move(expression));
+  }
+  return nullptr;
 }
 
 /*
@@ -279,9 +286,12 @@ std::unique_ptr<node::Node> Parser::parseAssignementExpression() {
   std::string identifier = std::get<std::string>(*current.token.getValue());
   readLex();
   consumeIf(token::TokenType::ASSIGN);
-  auto expression = parseOrExpression();
-  return std::make_unique<node::AssignementExpression>(identifier,
-                                                       std::move(expression));
+  if (auto expression = parseOrExpression()) {
+    return std::make_unique<node::AssignementExpression>(identifier,
+                                                         std::move(expression));
+  }
+  throw exception::ParserException("Expected expression.", current.line,
+                                   current.column);
 }
 
 /*
@@ -289,14 +299,16 @@ std::unique_ptr<node::Node> Parser::parseAssignementExpression() {
  *    { "||" AND_EXPRESSION } ;
  */
 std::unique_ptr<node::Node> Parser::parseOrExpression() {
-  auto left = parseAndExpression();
-  while (current == token::TokenType::OR) {
-    readLex();
-    auto right = parseAndExpression();
-    left = std::make_unique<node::OrExpression>(std::move(left),
-                                                std::move(right), "||");
+  if (auto left = parseAndExpression()) {
+    while (current == token::TokenType::OR) {
+      readLex();
+      auto right = parseAndExpression();
+      left = std::make_unique<node::OrExpression>(std::move(left),
+                                                  std::move(right), "||");
+    }
+    return left;
   }
-  return left;
+  return nullptr;
 }
 
 /*
@@ -304,14 +316,16 @@ std::unique_ptr<node::Node> Parser::parseOrExpression() {
  *                  { "&&" COMPARISON_EXPRESSION } ;
  */
 std::unique_ptr<node::Node> Parser::parseAndExpression() {
-  auto left = parseComparisonExpression();
-  while (current == token::TokenType::AND) {
-    readLex();
-    auto right = parseComparisonExpression();
-    left = std::make_unique<node::AndExpression>(std::move(left),
-                                                 std::move(right), "&&");
+  if (auto left = parseComparisonExpression()) {
+    while (current == token::TokenType::AND) {
+      readLex();
+      auto right = parseComparisonExpression();
+      left = std::make_unique<node::AndExpression>(std::move(left),
+                                                   std::move(right), "&&");
+    }
+    return left;
   }
-  return left;
+  return nullptr;
 }
 
 /*
@@ -320,16 +334,18 @@ std::unique_ptr<node::Node> Parser::parseAndExpression() {
  *                         RELATIONAL_EXPRESSION } ;
  */
 std::unique_ptr<node::Node> Parser::parseComparisonExpression() {
-  auto left = parseRelationalExpression();
-  while (current == token::TokenType::EQUALS ||
-         current == token::TokenType::NEQ) {
-    token::TokenType op = current.token.getTokenType();
-    readLex();
-    auto right = parseRelationalExpression();
-    left = std::make_unique<node::ComparisonExpression>(
-        std::move(left), std::move(right), types::opToString(op));
+  if (auto left = parseRelationalExpression()) {
+    while (current == token::TokenType::EQUALS ||
+           current == token::TokenType::NEQ) {
+      token::TokenType op = current.token.getTokenType();
+      readLex();
+      auto right = parseRelationalExpression();
+      left = std::make_unique<node::ComparisonExpression>(
+          std::move(left), std::move(right), types::opToString(op));
+    }
+    return left;
   }
-  return left;
+  return nullptr;
 }
 
 /*
@@ -338,17 +354,20 @@ std::unique_ptr<node::Node> Parser::parseComparisonExpression() {
  *                         ADDITIVE_EXPRESSION } ;
  */
 std::unique_ptr<node::Node> Parser::parseRelationalExpression() {
-  auto left = parseAdditiveExpression();
-  while (current == token::TokenType::LESS ||
-         current == token::TokenType::GREATER ||
-         current == token::TokenType::LEQ || current == token::TokenType::GEQ) {
-    token::TokenType op = current.token.getTokenType();
-    readLex();
-    auto right = parseAdditiveExpression();
-    left = std::make_unique<node::RelationalExpression>(
-        std::move(left), std::move(right), types::opToString(op));
+  if (auto left = parseAdditiveExpression()) {
+    while (current == token::TokenType::LESS ||
+           current == token::TokenType::GREATER ||
+           current == token::TokenType::LEQ ||
+           current == token::TokenType::GEQ) {
+      token::TokenType op = current.token.getTokenType();
+      readLex();
+      auto right = parseAdditiveExpression();
+      left = std::make_unique<node::RelationalExpression>(
+          std::move(left), std::move(right), types::opToString(op));
+    }
+    return left;
   }
-  return left;
+  return nullptr;
 }
 
 /*
@@ -357,16 +376,18 @@ std::unique_ptr<node::Node> Parser::parseRelationalExpression() {
  *                       MULTIPLICATIVE_EXPRESSION } ;
  */
 std::unique_ptr<node::Node> Parser::parseAdditiveExpression() {
-  auto left = parseMultiplicativeExpression();
-  while (current == token::TokenType::PLUS ||
-         current == token::TokenType::MINUS) {
-    token::TokenType op = current.token.getTokenType();
-    readLex();
-    auto right = parseMultiplicativeExpression();
-    left = std::make_unique<node::AdditiveExpression>(
-        std::move(left), std::move(right), types::opToString(op));
+  if (auto left = parseMultiplicativeExpression()) {
+    while (current == token::TokenType::PLUS ||
+           current == token::TokenType::MINUS) {
+      token::TokenType op = current.token.getTokenType();
+      readLex();
+      auto right = parseMultiplicativeExpression();
+      left = std::make_unique<node::AdditiveExpression>(
+          std::move(left), std::move(right), types::opToString(op));
+    }
+    return left;
   }
-  return left;
+  return nullptr;
 }
 
 /*
@@ -375,17 +396,19 @@ std::unique_ptr<node::Node> Parser::parseAdditiveExpression() {
  *                             COMPOSITIVE_EXPRESSION } ;
  */
 std::unique_ptr<node::Node> Parser::parseMultiplicativeExpression() {
-  std::unique_ptr<node::Node> left = parseCompositiveExpression();
-  while (current == token::TokenType::STAR ||
-         current == token::TokenType::SLASH ||
-         current == token::TokenType::PERCENT) {
-    token::TokenType op = current.token.getTokenType();
-    readLex();
-    std::unique_ptr<node::Node> right = parseCompositiveExpression();
-    left = std::make_unique<node::MultiplicativeExpression>(
-        std::move(left), std::move(right), types::opToString(op));
+  if (std::unique_ptr<node::Node> left = parseCompositiveExpression()) {
+    while (current == token::TokenType::STAR ||
+           current == token::TokenType::SLASH ||
+           current == token::TokenType::PERCENT) {
+      token::TokenType op = current.token.getTokenType();
+      readLex();
+      std::unique_ptr<node::Node> right = parseCompositiveExpression();
+      left = std::make_unique<node::MultiplicativeExpression>(
+          std::move(left), std::move(right), types::opToString(op));
+    }
+    return left;
   }
-  return left;
+  return nullptr;
 }
 
 /*
@@ -393,28 +416,32 @@ std::unique_ptr<node::Node> Parser::parseMultiplicativeExpression() {
  *                          { "|" CAST_EXPRESSION } ;
  */
 std::unique_ptr<node::Node> Parser::parseCompositiveExpression() {
-  std::unique_ptr<node::Node> left = parseCastExpression();
-  while (current == token::TokenType::PIPE) {
-    readLex();
-    std::unique_ptr<node::Node> right = parseCastExpression();
-    left = std::make_unique<node::CompositiveExpression>(std::move(left),
-                                                         std::move(right));
+  if (std::unique_ptr<node::Node> left = parseCastExpression()) {
+    while (current == token::TokenType::PIPE) {
+      readLex();
+      std::unique_ptr<node::Node> right = parseCastExpression();
+      left = std::make_unique<node::CompositiveExpression>(std::move(left),
+                                                           std::move(right));
+    }
+    return left;
   }
-  return left;
+  return nullptr;
 }
 
 /*
  * CAST_EXPRESSION = PREFIX_EXPRESSION { "<-" TYPE_NAME } ;
  */
 std::unique_ptr<node::Node> Parser::parseCastExpression() {
-  std::unique_ptr<node::Node> expression = parsePrefixExpression();
-  while (current == token::TokenType::LARROW) {
-    readLex();
-    std::unique_ptr<node::Node> type = parseTypeSpecifier();
-    return std::make_unique<node::CastExpression>(std::move(expression),
-                                                  std::move(type));
+  if (std::unique_ptr<node::Node> expression = parsePrefixExpression()) {
+    while (current == token::TokenType::LARROW) {
+      readLex();
+      std::unique_ptr<node::Node> type = parseTypeSpecifier();
+      return std::make_unique<node::CastExpression>(std::move(expression),
+                                                    std::move(type));
+    }
+    return expression;
   }
-  return expression;
+  return nullptr;
 }
 
 /*
@@ -443,6 +470,7 @@ std::unique_ptr<node::Node> Parser::parseOtherExpression() {
     return node;
   if (auto node = parseLiteral())
     return node;
+  return nullptr;
   throw exception::ParserException("Expected expression.", current.line,
                                    current.column);
 }
@@ -560,6 +588,7 @@ std::unique_ptr<node::Node> Parser::parseParentExpression() {
   }
   return nullptr;
 }
+
 /*
  * DEBUG_EXPRESSION = "[" EXPRESSION "]" "(" EXPRESSION_LIST ")" ;
  */
@@ -575,6 +604,7 @@ std::unique_ptr<node::Node> Parser::parseDebugExpression() {
   }
   return nullptr;
 }
+
 /*
  * EXPRESSION_LIST = [ EXPRESSION { "," EXPRESSION } ] ;
  */
@@ -647,7 +677,7 @@ std::unique_ptr<node::Node> Parser::generateParsingTree() {
   maybeResult = parse();
   if (maybeResult)
     return std::move(*maybeResult);
-  return nullptr; // TODO: add sensible handling of empty
+  return nullptr;
 }
 
 std::optional<std::unique_ptr<node::Node>> Parser::parse() {

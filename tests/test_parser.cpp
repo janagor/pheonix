@@ -788,7 +788,7 @@ TEST(TestParser, testTwoStatements) {
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-const map<string, string> SOME_FROM_DOCUMENTATION{
+const map<string, string> FROM_DOCUMENTATION{
     {"fn returnOne(arg1, arg2) {\n\
     \n\
 }",
@@ -807,7 +807,7 @@ const map<string, string> SOME_FROM_DOCUMENTATION{
 };
 
 TEST(TestParser, some_from_documentation) {
-  for (const auto &[i, e] : SOME_FROM_DOCUMENTATION) {
+  for (const auto &[i, e] : FROM_DOCUMENTATION) {
     compareExpectedAndReceived(i, e);
   }
 }
@@ -895,11 +895,10 @@ TEST(TestParser, NoRValue) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
-    // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected expression.");
+    EXPECT_STREQ(e.what(),
+                 "Failed parsing expression in variable declaration.");
     EXPECT_EQ(e.getLine(), 1);
     EXPECT_EQ(e.getColumn(), 14);
   } catch (...) {
