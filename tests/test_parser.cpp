@@ -914,8 +914,6 @@ TEST(TestParser, wrongUsageOfKeyword) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
-    // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
     EXPECT_STREQ(e.what(), "Expected: SEMICOLON, Got: IDENTIFIER.");
@@ -933,8 +931,6 @@ TEST(TestParser, WrongEQSign) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
-    // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
     EXPECT_STREQ(e.what(), "Expected: RPARENT, Got: ASSIGN.");

@@ -110,11 +110,18 @@ multiplicative_expression = compositive_expression
          other_expression = maybe_call_expression
                           | literal ;
 
-    maybe_call_expression = ( identifier
-                            | lambda_expression
-                            | parent_expression
-                            | debug_expression
-                            ) { "(" expression_list ")" } ;
+    maybe_call_expression = maybe_identifier_call
+                          | maybe_lambda_call
+                          | maybe_parent_call
+                          | maybe_debug_call ;
+
+    maybe_identifier_call = identifier { "(" expression_list ")" } ;
+
+        maybe_lambda_call = lambda_expression { "(" expression_list ")" } ;
+
+        maybe_parent_call = parent_expression { "(" expression_list ")" } ;
+
+         maybe_debug_call = debug_expression { "(" expression_list ")" } ;
 
         lambda_expression = "#" enclosed_parameter_list function_body ;
 

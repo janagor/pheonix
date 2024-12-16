@@ -33,13 +33,17 @@ private:
   std::unique_ptr<node::Node> parseCompositiveExpression();
   std::unique_ptr<node::Node> parseCastExpression();
   std::unique_ptr<node::Node> parsePrefixExpression();
-  std::unique_ptr<node::Node> parseIdentifierLike();
-  std::unique_ptr<node::Node> parseCallArguments();
-  std::unique_ptr<node::Node> parseParentExpression();
-  std::unique_ptr<node::Node>
-  parseCallExpression(std::unique_ptr<node::Node> function);
-  std::unique_ptr<node::Node> parseDebugExpression();
+  std::unique_ptr<node::Node> parseOtherExpression();
+  std::unique_ptr<node::Node> parseMaybeCallExpression();
+  std::unique_ptr<node::Node> parseMaybeIdentifierCall();
+  std::unique_ptr<node::Node> parseMaybeLambdaCall();
+  std::unique_ptr<node::Node> parseMaybeParentCall();
+  std::unique_ptr<node::Node> parseMaybeDebugCall();
+  std::unique_ptr<node::Node> parseIdentifier();
   std::unique_ptr<node::Node> parseLambdaExpression();
+  std::unique_ptr<node::Node> parseParentExpression();
+  std::unique_ptr<node::Node> parseDebugExpression();
+  std::unique_ptr<node::Node> parseCallArguments();
   std::unique_ptr<node::Node> parseLiteral();
   std::unique_ptr<node::Node> parseTypeSpecifier();
   void readLex();

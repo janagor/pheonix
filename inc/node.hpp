@@ -224,6 +224,8 @@ struct LambdaExpression : public Node {
   std::unique_ptr<Node> statements;
 
   LambdaExpression() : Node() {};
+  LambdaExpression(std::unique_ptr<Node> a, std::unique_ptr<Node> s)
+      : Node(), arguments(std::move(a)), statements(std::move(s)) {};
 
   void accept(visitor::Visitor &v) override;
 };

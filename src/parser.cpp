@@ -105,6 +105,9 @@ std::unique_ptr<node::Node> Parser::parseDeclarationArguments() {
   auto args = std::make_unique<node::DeclarationArguments>();
   if (auto param = parseParameter()) {
     args->arguments.push_back(std::move(param));
+  } else {
+    consumeIf(token::TokenType::RPARENT);
+    return args;
   }
 
   while (current == token::TokenType::COMMA) {
@@ -415,73 +418,165 @@ std::unique_ptr<node::Node> Parser::parseCastExpression() {
 }
 
 /*
- * PREFIX_EXPRESSION = "!" PRIMARY_EXPRESSION
- *                   | "-" PRIMARY_EXPRESSION
- *                   | PRIMARY_EXPRESSION ;
+ * PREFIX_EXPRESSION = "!" OTHER_EXPRESSION
+ *                   | "-" OTHER_EXPRESSION
+ *                   | OTHER_EXPRESSION ;
  */
 std::unique_ptr<node::Node> Parser::parsePrefixExpression() {
   std::unique_ptr<node::Node> expression;
   if (current == token::TokenType::BANG || current == token::TokenType::MINUS) {
     token::TokenType op = current.token.getTokenType();
     readLex();
-    if (current == token::TokenType::IDENTIFIER)
-      expression = parseIdentifierLike();
-    else if (current == token::TokenType::LPARENT)
-      expression = parseParentExpression();
-    else if (current == token::TokenType::HASH)
-      expression = parseLambdaExpression();
-    else if (current == token::TokenType::LBRACKET)
-      expression = parseDebugExpression();
-    else
-      expression = parseLiteral();
+    auto node = parseOtherExpression();
     return std::make_unique<node::PrefixExpression>(types::opToString(op),
-                                                    std::move(expression));
+                                                    std::move(node));
   }
-  if (current == token::TokenType::IDENTIFIER)
-    expression = parseIdentifierLike();
-  else if (current == token::TokenType::LPARENT)
-    expression = parseParentExpression();
-  else if (current == token::TokenType::HASH)
-    expression = parseLambdaExpression();
-  else if (current == token::TokenType::LBRACKET)
-    expression = parseDebugExpression();
-  else
-    expression = parseLiteral();
-  return expression;
+  return parseOtherExpression();
 }
 
 /*
- * PRIMARY_EXPRESSION = (
- *                      IDENTIFIER
- *                      | ( "#" ENCLOSED_PARAMETER_LIST FUNCTION_BODY )
- *                      )
- *                      { "(" EXPRESSION_LIST ")" }
- *                    | ...
+ * OTHER_EXPRESSION = MAYBE_CALL_EXPRESSION
+ *                  | LITERAL ;
  */
-std::unique_ptr<node::Node> Parser::parseIdentifierLike() {
-  std::string val = std::get<std::string>(*current.token.getValue());
-  readLex();
-  auto ident = std::make_unique<node::Identifier>(val);
-  if (current == token::TokenType::LPARENT)
-    return parseCallExpression(std::move(ident));
-  return ident;
+std::unique_ptr<node::Node> Parser::parseOtherExpression() {
+  if (auto node = parseMaybeCallExpression())
+    return node;
+  if (auto node = parseLiteral())
+    return node;
+  throw exception::ParserException("Expected expression.", current.line,
+                                   current.column);
 }
 
 /*
- * PRIMARY_EXPRESSION = (
- *                      IDENTIFIER
- *                      | ( "#" ENCLOSED_PARAMETER_LIST FUNCTION_BODY )
- *                      )
- *                      { "(" EXPRESSION_LIST ")" }
- *                    | "(" EXPRESSION ")" { "(" EXPRESSION_LIST ")" }
- *                    | "[" EXPRESSION "]" "(" EXPRESSION_LIST ")" { "("
- *                      EXPRESSION_LIST ")" }
- *                    | LITERAL ;
- *
- *    EXPRESSION_LIST = [ EXPRESSION { "," EXPRESSION } ] ;
- *
- * NOTE: in my EBNF notation parenthesis expression is one variant of the
- * `primary_expression`.
+ * MAYBE_CALL_EXPRESSION = MAYBE_IDENTIFIER_CALL
+ *                       | MAYBE_LAMBDA_CALL
+ *                       | MAYBE_PARENT_CALL
+ *                       | MAYBE_DEBUG_CALL ;
+ */
+std::unique_ptr<node::Node> Parser::parseMaybeCallExpression() {
+  if (auto node = parseMaybeIdentifierCall())
+    return node;
+  if (auto node = parseMaybeLambdaCall())
+    return node;
+  if (auto node = parseMaybeParentCall())
+    return node;
+  if (auto node = parseMaybeDebugCall())
+    return node;
+  return nullptr;
+}
+
+/*
+ * MAYBE_IDENTIFIER_CALL = IDENTIFIER { "(" EXPRESSION_LIST ")" } ;
+ */
+std::unique_ptr<node::Node> Parser::parseMaybeIdentifierCall() {
+  if (auto node = parseIdentifier()) {
+    while (current == token::TokenType::LPARENT) {
+      std::unique_ptr<node::Node> callArguments = parseCallArguments();
+      node = std::make_unique<node::CallExpression>(std::move(node),
+                                                    std::move(callArguments));
+    }
+    return node;
+  }
+  return nullptr;
+}
+/*
+ * MAYBE_LAMBDA_CALL = LAMBDA_EXPRESSION { "(" EXPRESSION_LIST ")" } ;
+ */
+std::unique_ptr<node::Node> Parser::parseMaybeLambdaCall() {
+  if (auto node = parseLambdaExpression()) {
+    while (current == token::TokenType::LPARENT) {
+      std::unique_ptr<node::Node> callArguments = parseCallArguments();
+      node = std::make_unique<node::CallExpression>(std::move(node),
+                                                    std::move(callArguments));
+    }
+    return node;
+  }
+  return nullptr;
+}
+
+/*
+ * MAYBE_PARENT_CALL = PARENT_EXPRESSION { "(" EXPRESSION_LIST ")" } ;
+ */
+std::unique_ptr<node::Node> Parser::parseMaybeParentCall() {
+  if (auto node = parseParentExpression()) {
+    while (current == token::TokenType::LPARENT) {
+      std::unique_ptr<node::Node> callArguments = parseCallArguments();
+      node = std::make_unique<node::CallExpression>(std::move(node),
+                                                    std::move(callArguments));
+    }
+    return node;
+  }
+  return nullptr;
+}
+/*
+ * MAYBE_DEBUG_CALL = DEBUG_EXPRESSION { "(" EXPRESSION_LIST ")" } ;
+ */
+std::unique_ptr<node::Node> Parser::parseMaybeDebugCall() {
+  if (auto node = parseDebugExpression()) {
+    while (current == token::TokenType::LPARENT) {
+      std::unique_ptr<node::Node> callArguments = parseCallArguments();
+      node = std::make_unique<node::CallExpression>(std::move(node),
+                                                    std::move(callArguments));
+    }
+    return node;
+  }
+  return nullptr;
+}
+
+std::unique_ptr<node::Node> Parser::parseIdentifier() {
+  if (current == token::TokenType::IDENTIFIER) {
+    std::string val = std::get<std::string>(*current.token.getValue());
+    readLex();
+    return std::make_unique<node::Identifier>(val);
+  }
+  return nullptr;
+}
+/*
+ * LAMBDA_EXPRESSION = "#" ENCLOSED_PARAMETER_LIST FUNCTION_BODY ;
+ */
+std::unique_ptr<node::Node> Parser::parseLambdaExpression() {
+  if (current == token::TokenType::HASH) {
+    readLex();
+    expect(token::TokenType::LPARENT);
+    auto arguments = parseDeclarationArguments();
+    expect(token::TokenType::LBRACE);
+    auto statements = parseBlock();
+    return std::make_unique<node::LambdaExpression>(std::move(arguments),
+                                                    std::move(statements));
+  }
+  return nullptr;
+}
+
+/*
+ * PARENT_EXPRESSION = "(" EXPRESSION ")" ;
+ */
+std::unique_ptr<node::Node> Parser::parseParentExpression() {
+  if (current == token::TokenType::LPARENT) {
+    readLex();
+    auto pExpression =
+        std::make_unique<node::ParentExpression>(parseExpression());
+    consumeIf(token::TokenType::RPARENT);
+    return pExpression;
+  }
+  return nullptr;
+}
+/*
+ * DEBUG_EXPRESSION = "[" EXPRESSION "]" "(" EXPRESSION_LIST ")" ;
+ */
+std::unique_ptr<node::Node> Parser::parseDebugExpression() {
+  if (current == token::TokenType::LBRACKET) {
+    readLex();
+    auto function = parseExpression();
+    consumeIf(token::TokenType::RBRACKET);
+    expect(token::TokenType::LPARENT);
+    auto callArguments = parseCallArguments();
+    return std::make_unique<node::DebugExpression>(std::move(function),
+                                                   std::move(callArguments));
+  }
+  return nullptr;
+}
+/*
+ * EXPRESSION_LIST = [ EXPRESSION { "," EXPRESSION } ] ;
  */
 std::unique_ptr<node::Node> Parser::parseCallArguments() {
   auto arguments = std::make_unique<node::CallArguments>();
@@ -494,118 +589,6 @@ std::unique_ptr<node::Node> Parser::parseCallArguments() {
   }
   consumeIf(token::TokenType::RPARENT);
   return arguments;
-}
-
-/*
- * PRIMARY_EXPRESSION = (
- *                      IDENTIFIER
- *                      | ( "#" ENCLOSED_PARAMETER_LIST FUNCTION_BODY )
- *                      )
- *                      { "(" EXPRESSION_LIST ")" } ;
- *                    | "(" EXPRESSION ")" { "(" EXPRESSION_LIST ")" }
- *                    | "[" EXPRESSION "]" "(" EXPRESSION_LIST ")" { "("
- *                      EXPRESSION_LIST ")" }
- *                    | LITERAL ;
- *
- * NOTE: in my EBNF notation parenthesis expression is one variant of the
- * `primary_expression`.
- */
-std::unique_ptr<node::Node> Parser::parseParentExpression() {
-  consumeIf(token::TokenType::LPARENT);
-  auto pExpression =
-      std::make_unique<node::ParentExpression>(parseExpression());
-  consumeIf(token::TokenType::RPARENT);
-  if (current == token::TokenType::LPARENT)
-    return parseCallExpression(std::move(pExpression));
-  return pExpression;
-}
-
-/*
- * PRIMARY_EXPRESSION = (
- *                      IDENTIFIER
- *                      | ( "#" ENCLOSED_PARAMETER_LIST FUNCTION_BODY )
- *                      )
- *                      { "(" EXPRESSION_LIST ")" } ;
- *                    | "(" EXPRESSION ")" { "(" EXPRESSION_LIST ")" }
- *                    | "[" EXPRESSION "]" "(" EXPRESSION_LIST ")" { "("
- *                      EXPRESSION_LIST ")" }
- *                    | LITERAL ;
- *
- * NOTE: in my EBNF notation call expression is one variant of the
- * `primary_expression`.
- */
-std::unique_ptr<node::Node>
-Parser::parseCallExpression(std::unique_ptr<node::Node> function) {
-  std::unique_ptr<node::Node> result = std::move(function);
-  expect(token::TokenType::LPARENT);
-  do {
-    std::unique_ptr<node::Node> callArguments = parseCallArguments();
-    result = std::make_unique<node::CallExpression>(std::move(result),
-                                                    std::move(callArguments));
-  } while (current == token::TokenType::LPARENT);
-  return result;
-}
-
-/*
- * PRIMARY_EXPRESSION = (
- *                      IDENTIFIER
- *                      | ( "#" ENCLOSED_PARAMETER_LIST FUNCTION_BODY )
- *                      )
- *                      { "(" EXPRESSION_LIST ")" } ;
- *                    | "(" EXPRESSION ")" { "(" EXPRESSION_LIST ")" }
- *                    | "[" EXPRESSION "]" "(" EXPRESSION_LIST ")" { "("
- *                      EXPRESSION_LIST ")" }
- *                    | LITERAL ;
- *
- * NOTE: in my EBNF notation debug expression is one variant of the
- * `primary_expression`.
- */
-std::unique_ptr<node::Node> Parser::parseDebugExpression() {
-  consumeIf(token::TokenType::LBRACKET);
-  auto function = parseExpression();
-  consumeIf(token::TokenType::RBRACKET);
-
-  std::unique_ptr<node::Node> result = std::move(function);
-  expect(token::TokenType::LPARENT);
-  std::unique_ptr<node::Node> callArguments = parseCallArguments();
-  result = std::make_unique<node::DebugExpression>(std::move(result),
-                                                   std::move(callArguments));
-
-  while (current == token::TokenType::LPARENT) {
-    std::unique_ptr<node::Node> callArguments = parseCallArguments();
-    result = std::make_unique<node::CallExpression>(std::move(result),
-                                                    std::move(callArguments));
-  }
-  return result;
-}
-
-/*
- * PRIMARY_EXPRESSION = (
- *                      IDENTIFIER
- *                      | ( "#" ENCLOSED_PARAMETER_LIST FUNCTION_BODY )
- *                      )
- *                      { "(" EXPRESSION_LIST ")" } ;
- *                    | "(" EXPRESSION ")" { "(" EXPRESSION_LIST ")" }
- *                    | "[" EXPRESSION "]" "(" EXPRESSION_LIST ")" { "("
- *                      EXPRESSION_LIST ")" }
- *                    | LITERAL ;
- *
- * NOTE: in my EBNF notation lambda expression is one variant of the
- * `primary_expression`.
- */
-std::unique_ptr<node::Node> Parser::parseLambdaExpression() {
-  auto lambda = std::make_unique<node::LambdaExpression>();
-  consumeIf(token::TokenType::HASH);
-  expect(token::TokenType::LPARENT);
-
-  auto declarationArguments = parseDeclarationArguments();
-  lambda->arguments = std::move(declarationArguments);
-  expect(token::TokenType::LBRACE);
-  auto block = parseBlock();
-  lambda->statements = std::move(block);
-  if (current == token::TokenType::LPARENT)
-    return parseCallExpression(std::move(lambda));
-  return lambda;
 }
 
 /*
@@ -623,13 +606,7 @@ std::unique_ptr<node::Node> Parser::parseLiteral() {
     readLex();
     return node;
   };
-  // TODO: make it return nullptr rather then throw if failed parsing
-  if (current == token::TokenType::END_OF_FILE ||
-      current == token::TokenType::SEMICOLON)
-    throw exception::ParserException("Expected expression.", current.line,
-                                     current.column);
-  throw exception::ParserException("Could not parse.", current.line,
-                                   current.column);
+  return nullptr;
 }
 
 /*
