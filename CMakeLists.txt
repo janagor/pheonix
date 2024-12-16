@@ -59,8 +59,8 @@ set(SOURCE_FILES
 # target_link_libraries(my-language Boost::program_options)
 
 add_executable(
-lexer_example
-    app/lexer_example.cpp
+example
+    app/example.cpp
     ${SOURCE_FILES} ${HEADER_FILES}
 )
 
