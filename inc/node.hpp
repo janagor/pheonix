@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast_view.hpp"
 #include "token.hpp"
 #include "types.hpp"
 #include "visitor.hpp"

@@ -1,6 +1,6 @@
+#include "ast_view.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
-#include "visitor.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
     pheonix::parser::Parser p(in);
 
     std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
-    pheonix::visitor::TreeGenVisitor visitor;
+    pheonix::ast_view::ASTView visitor;
     output->accept(visitor);
     std::string received = visitor.getResult();
 
@@ -332,7 +332,7 @@ int main(int argc, char **argv) {
       pheonix::parser::Parser p(in);
 
       std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
-      pheonix::visitor::TreeGenVisitor visitor;
+      pheonix::ast_view::ASTView visitor;
       output->accept(visitor);
       std::string received = visitor.getResult();
 

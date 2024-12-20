@@ -1,3 +1,4 @@
+#include "ast_view.hpp"
 #include "parser.hpp"
 
 #include <gtest/gtest.h>
@@ -7,6 +8,7 @@ using namespace std;
 using namespace pheonix::token;
 using namespace pheonix::exception;
 using namespace pheonix::node;
+using namespace pheonix::ast_view;
 using namespace pheonix::visitor;
 using namespace pheonix::lexer;
 using namespace pheonix::parser;
@@ -16,7 +18,7 @@ void compareExpectedAndReceived(const string &input, const string &expected) {
   istringstream in(input);
   Parser p(in);
   unique_ptr<Node> output = p.generateParsingTree();
-  TreeGenVisitor visitor;
+  ASTView visitor;
   output->accept(visitor);
   string received = visitor.getResult();
   EXPECT_EQ(expected, received);
@@ -821,7 +823,7 @@ TEST(TestParser, testErrorsNoSemicolon) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
@@ -840,7 +842,7 @@ TEST(TestParser, testErrorsNoSemicolon2) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
@@ -858,7 +860,7 @@ TEST(TestParser, notFinishedParenthesis1) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
@@ -876,7 +878,7 @@ TEST(TestParser, notFinishedParenthesis2) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
@@ -947,7 +949,7 @@ TEST(TestParser, NoPredicate) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
@@ -966,7 +968,7 @@ TEST(TestParser, NoPredicate2) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
@@ -985,7 +987,7 @@ TEST(TestParser, ArgumentsListWithCommaAtTheEnd) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
@@ -1004,7 +1006,7 @@ TEST(TestParser, LetWithoutLvalue) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
@@ -1023,7 +1025,7 @@ TEST(TestParser, AssignmentWithoutRvalue) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
