@@ -8,6 +8,7 @@ namespace pheonix::eval {
 class Evaluator : public visitor::Visitor {
 public:
   Evaluator() : visitor::Visitor() {};
+  std::variant<types::Integer, types::Float, std::string, bool> getResult();
 
   void visit(node::Program &p) override;
   void visit(node::Parameter &p) override;
@@ -38,6 +39,9 @@ public:
   void visit(node::ParentExpression &pe) override;
   void visit(node::Literal &il) override;
   void visit(node::TypeSpecifier &ts) override;
+
+private:
+  std::variant<types::Integer, types::Float, std::string, bool> result;
 };
 
 } // namespace pheonix::eval

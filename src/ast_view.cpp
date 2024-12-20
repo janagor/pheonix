@@ -6,6 +6,7 @@
 namespace pheonix::ast_view {
 
 std::string ASTView::getResult() const { return result; }
+
 void ASTView::visit(node::Program &p) {
   inc();
   result += "(Program:";
