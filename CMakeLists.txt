@@ -34,6 +34,7 @@ set(HEADER_FILES
     inc/parser.hpp
     inc/visitor.hpp
     inc/ast_view.hpp
+    inc/evaluator.hpp
     inc/types.hpp
     inc/exception.hpp
     inc/helpers.hpp
@@ -48,6 +49,7 @@ set(SOURCE_FILES
     src/parser.cpp
     src/visitor.cpp
     src/ast_view.cpp
+    src/evaluator.cpp
     src/types.cpp
     src/exception.cpp
     src/helpers.cpp
