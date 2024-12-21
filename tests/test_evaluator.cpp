@@ -11,36 +11,25 @@ using namespace pheonix::types;
 using namespace pheonix::lexer;
 using namespace pheonix::parser;
 
-TEST(TestEvaluator, Literal) {
-  string input = "1;";
+// helper
+void compareExpectedAndReceived(const string &input,
+                                const Primitive &expected) {
   istringstream in(input);
   Parser p(in);
   unique_ptr<Node> output = p.generateParsingTree();
   Evaluator visitor;
   output->accept(visitor);
   auto received = visitor.getResult();
-  int res = std::get<Integer>(received).getValue();
-  EXPECT_EQ(1, res);
+  EXPECT_EQ(expected, received);
 }
-TEST(TestEvaluator, Sum) {
-  string input = "1 + 2;";
-  istringstream in(input);
-  Parser p(in);
-  unique_ptr<Node> output = p.generateParsingTree();
-  Evaluator visitor;
-  output->accept(visitor);
-  auto received = visitor.getResult();
-  int res = std::get<Integer>(received).getValue();
-  EXPECT_EQ(3, res);
-}
-TEST(TestEvaluator, Subtraction) {
-  string input = "1 - 2;";
-  istringstream in(input);
-  Parser p(in);
-  unique_ptr<Node> output = p.generateParsingTree();
-  Evaluator visitor;
-  output->accept(visitor);
-  auto received = visitor.getResult();
-  int res = std::get<Integer>(received).getValue();
-  EXPECT_EQ(-1, res);
+
+const map<string, Primitive> ARITHMETIC{
+    {"1;", Integer(1)},      {"1 + 2;", Integer(3)}, {"1 - 2;", Integer(-1)},
+    {"3 * 4;", Integer(12)}, {"5 / 3;", Integer(1)}, {"5 % 3;", Integer(2)},
+    {"-3;", Integer(-3)},
+};
+TEST(TestEvaluator, testArithmetic) {
+  for (const auto &[i, p] : ARITHMETIC) {
+    compareExpectedAndReceived(i, p);
+  }
 }

@@ -57,6 +57,11 @@ void Evaluator::visit(node::RelationalExpression &re) {
 
 void Evaluator::visit(node::MultiplicativeExpression &me) {
   me.left->accept(*this);
+  auto left = result;
+  me.right->accept(*this);
+  auto right = result;
+  result = std::visit(AritheticVisitor{}, left, right,
+                      std::variant<std::string>(me.op));
 }
 
 void Evaluator::visit(node::CompositiveExpression &me) {
@@ -68,10 +73,8 @@ void Evaluator::visit(node::AdditiveExpression &ae) {
   auto left = result;
   ae.right->accept(*this);
   auto right = result;
-  if (ae.op == "+")
-    result = std::visit(AddVisitor{}, left, right);
-  else // if (ae.op == "-")
-    result = std::visit(SubtractVisitor{}, left, right);
+  result = std::visit(AritheticVisitor{}, left, right,
+                      std::variant<std::string>(ae.op));
 }
 
 void Evaluator::visit(node::CastExpression &ce) {
@@ -80,6 +83,9 @@ void Evaluator::visit(node::CastExpression &ce) {
 
 void Evaluator::visit(node::PrefixExpression &pe) {
   pe.expression->accept(*this);
+  auto expression = result;
+  result = std::visit(AritheticVisitor{}, expression,
+                      std::variant<std::string>(pe.op));
 }
 
 void Evaluator::visit(node::CallExpression &ce) { UNUSED(ce); }

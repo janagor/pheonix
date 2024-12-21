@@ -44,6 +44,8 @@ struct Integer {
   bool operator>(const Integer &other) const;
   bool operator>=(const Integer &other) const;
 
+  Integer operator-() const;
+
   int getValue() const;
   void setValue(long val);
 

@@ -114,6 +114,8 @@ bool Integer::operator>=(const Integer &other) const {
   return value >= other.value;
 }
 
+Integer Integer::operator-() const { return Integer(-value); }
+
 int Integer::getValue() const { return value; }
 
 void Integer::setValue(long val) {
