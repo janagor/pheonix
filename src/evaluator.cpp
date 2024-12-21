@@ -1,4 +1,7 @@
 #include "evaluator.hpp"
+#include "token.hpp"
+#include "types.hpp"
+#include <iostream>
 #include <variant>
 
 #include <iomanip>
@@ -32,7 +35,7 @@ void Evaluator::visit(node::WhileLoopStatement &wls) {
   while (true) {
     wls.expression->accept(*this);
     if (auto *predicate = std::get_if<bool>(&result)) {
-      if (predicate) {
+      if (*predicate) {
         wls.statements->accept(*this);
         result = std::monostate();
         continue;
@@ -79,7 +82,7 @@ void Evaluator::visit(node::NullStatement &) {}
 
 void Evaluator::visit(node::AssignementExpression &ae) {
   ae.expression->accept(*this);
-  context.context[ae.identifier] = result;
+  context[ae.identifier] = result;
 }
 
 void Evaluator::visit(node::OrExpression &oe) {
@@ -159,9 +162,7 @@ void Evaluator::visit(node::CallArguments &ca) { UNUSED(ca); }
 
 void Evaluator::visit(node::LambdaExpression &le) { UNUSED(le); }
 
-void Evaluator::visit(node::Identifier &i) {
-  result = context.context.at(i.value);
-}
+void Evaluator::visit(node::Identifier &i) { result = context.at(i.value); }
 
 void Evaluator::visit(node::ParentExpression &pe) {
   pe.expression->accept(*this);

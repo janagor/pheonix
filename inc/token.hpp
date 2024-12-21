@@ -10,11 +10,15 @@
 #include <variant>
 
 namespace pheonix {
+
 using Primitive = std::variant<std::monostate, types::Integer, types::Float,
                                std::string, bool>;
-}
+std::ostream &operator<<(std::ostream &os, const Primitive &opt);
+
+} // namespace pheonix
 
 namespace pheonix::token {
+using namespace pheonix;
 
 struct Token {
   Token() : tokenType(token::TokenType::NOT_A_TOKEN), value() {}
@@ -35,7 +39,6 @@ private:
   token::TokenType tokenType;
   Primitive value;
 };
-std::ostream &operator<<(std::ostream &os, Primitive &opt);
 std::ostream &operator<<(std::ostream &os, const Token &t);
 
 } // namespace pheonix::token

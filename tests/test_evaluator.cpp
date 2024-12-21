@@ -35,6 +35,7 @@ const map<string, Primitive> ARITHMETIC{
     {"5 % 3;", Integer(2)},
     {"1 > 2;", false},
     {"1 < 2;", true},
+    {"2 < 1;", false},
     {"1 >= 2;", false},
     {"1 <= 2;", true},
     {"1 == 2;", false},
@@ -61,6 +62,7 @@ const map<string, Primitive> ARITHMETIC{
     {"true || false;", true},
     // assignement
     {"b = 1;c = 2;d = b;", Integer(1)},
+    {"b = 1;while(b<12){b = b+1;}b = b;", Integer(12)},
 };
 TEST(TestEvaluator, testArithmetic) {
   for (const auto &[i, p] : ARITHMETIC) {

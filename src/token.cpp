@@ -1,14 +1,6 @@
 #include "token.hpp"
 
-namespace pheonix::token {
-
-token::TokenType Token::getTokenType() const { return tokenType; }
-
-Primitive Token::getValue() const { return value; }
-
-bool Token::operator==(const Token &t) const {
-  return this->tokenType == t.tokenType && this->value == t.value;
-}
+namespace pheonix {
 
 std::ostream &operator<<(std::ostream &os, const Primitive &value) {
   if (std::holds_alternative<types::Integer>(value)) {
@@ -25,7 +17,20 @@ std::ostream &operator<<(std::ostream &os, const Primitive &value) {
   return os;
 }
 
+} // namespace pheonix
+
+namespace pheonix::token {
+
+TokenType Token::getTokenType() const { return tokenType; }
+
+Primitive Token::getValue() const { return value; }
+
+bool Token::operator==(const Token &t) const {
+  return this->tokenType == t.tokenType && this->value == t.value;
+}
+
 std::ostream &operator<<(std::ostream &os, const Token &t) {
+  using pheonix::operator<<; // NOTE: Why do I need it explicitely?
   os << "Token(\n\t\ttokenType:``"
      << types::tokenTypeToLiteral(t.getTokenType()) << "``, \n\t\tvalue:``"
      << t.getValue() << "``,\n\t)";
