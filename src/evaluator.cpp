@@ -1,4 +1,5 @@
 #include "evaluator.hpp"
+#include <variant>
 
 #include <iomanip>
 #include <sstream>
@@ -62,7 +63,16 @@ void Evaluator::visit(node::CompositiveExpression &me) {
   me.left->accept(*this);
 }
 
-void Evaluator::visit(node::AdditiveExpression &ae) { ae.left->accept(*this); }
+void Evaluator::visit(node::AdditiveExpression &ae) {
+  ae.left->accept(*this);
+  auto left = result;
+  ae.right->accept(*this);
+  auto right = result;
+  if (ae.op == "+")
+    result = std::visit(AddVisitor{}, left, right);
+  else // if (ae.op == "-")
+    result = std::visit(SubtractVisitor{}, left, right);
+}
 
 void Evaluator::visit(node::CastExpression &ce) {
   ce.expression->accept(*this);

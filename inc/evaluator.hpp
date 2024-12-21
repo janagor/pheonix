@@ -1,13 +1,42 @@
 #pragma once
 #include "node.hpp"
 #include "visitor.hpp"
+#include <fmt/core.h>
 #include <string>
+#include <variant>
 
 namespace pheonix::eval {
 
+struct AddVisitor {
+  std::variant<types::Integer, types::Float, std::string, bool>
+  operator()(const types::Integer &lhs, const types::Integer &rhs) const {
+    return lhs + rhs;
+  }
+
+  std::variant<types::Integer, types::Float, std::string, bool>
+  operator()(const auto &, const auto &) const {
+    throw std::runtime_error("Invalid transition");
+  }
+};
+
+struct SubtractVisitor {
+  std::variant<types::Integer, types::Float, std::string, bool>
+  operator()(const types::Integer &lhs, const types::Integer &rhs) const {
+    return lhs - rhs;
+  }
+
+  std::variant<types::Integer, types::Float, std::string, bool>
+  operator()(const auto &, const auto &) const {
+    throw std::runtime_error("Invalid transition");
+  }
+};
+
 class Evaluator : public visitor::Visitor {
 public:
-  Evaluator() : visitor::Visitor() {};
+  // using Object = std::variant<types::Integer, types::Float, std::string,
+  // bool>;
+  Evaluator() : visitor::Visitor(), result(types::Integer(999)) {};
+  // Object getResult();
   std::variant<types::Integer, types::Float, std::string, bool> getResult();
 
   void visit(node::Program &p) override;
