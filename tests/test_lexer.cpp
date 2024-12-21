@@ -371,7 +371,6 @@ TEST(TestLexer, testIntegersFrom0to1000) {
         {Token(TokenType::INTEGER, i), 1, 1},
         {Token(TokenType::END_OF_FILE), 1, shift},
     };
-    assert(get<Integer>(expected[0].token.getValue().value()).getValue() == i);
     istringstream in(input);
     Lexer l(in);
     vector<Lexem> result = lexerize(l);

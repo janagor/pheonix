@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <sstream>
 
-// NOTE: remove this until it is done
+// NOTE: remove this after it is done
 #define UNUSED(x) (void)(x)
 
 namespace pheonix::eval {

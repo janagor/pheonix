@@ -85,8 +85,7 @@ std::unique_ptr<node::Node> Parser::parseParameter() {
                                        current.column);
     return nullptr;
   }
-  std::string paramIdentifier =
-      std::get<std::string>(*current.token.getValue());
+  std::string paramIdentifier = std::get<std::string>(current.token.getValue());
   readLex();
 
   return std::make_unique<node::Parameter>(isMutable, paramIdentifier);
@@ -130,7 +129,7 @@ std::unique_ptr<node::Node> Parser::parseFunctionDeclaration() {
     return nullptr;
   readLex();
   expect(token::TokenType::IDENTIFIER);
-  std::string identifier = std::get<std::string>(*current.token.getValue());
+  std::string identifier = std::get<std::string>(current.token.getValue());
   auto functionDeclaration =
       std::make_unique<node::FunctionDeclaration>(identifier);
   readLex();
@@ -156,7 +155,7 @@ std::unique_ptr<node::Node> Parser::parseVariableDeclaration() {
     readLex();
   }
   expect(token::TokenType::IDENTIFIER);
-  std::string identifier = std::get<std::string>(*current.token.getValue());
+  std::string identifier = std::get<std::string>(current.token.getValue());
   readLex();
   consumeIf(token::TokenType::ASSIGN);
   if (auto expression = parseExpression()) {
@@ -283,7 +282,7 @@ std::unique_ptr<node::Node> Parser::parseAssignementExpression() {
   if (next != token::TokenType::ASSIGN)
     return nullptr;
   expect(token::TokenType::IDENTIFIER);
-  std::string identifier = std::get<std::string>(*current.token.getValue());
+  std::string identifier = std::get<std::string>(current.token.getValue());
   readLex();
   consumeIf(token::TokenType::ASSIGN);
   if (auto expression = parseOrExpression()) {
@@ -553,7 +552,7 @@ std::unique_ptr<node::Node> Parser::parseMaybeDebugCall() {
 
 std::unique_ptr<node::Node> Parser::parseIdentifier() {
   if (current == token::TokenType::IDENTIFIER) {
-    std::string val = std::get<std::string>(*current.token.getValue());
+    std::string val = std::get<std::string>(current.token.getValue());
     readLex();
     return std::make_unique<node::Identifier>(val);
   }
@@ -632,7 +631,7 @@ std::unique_ptr<node::Node> Parser::parseLiteral() {
       current == token::TokenType::STRING ||
       current == token::TokenType::FLOAT ||
       current == token::TokenType::FALSE || current == token::TokenType::TRUE) {
-    auto node = std::make_unique<node::Literal>(*current.token.getValue());
+    auto node = std::make_unique<node::Literal>(current.token.getValue());
     readLex();
     return node;
   };

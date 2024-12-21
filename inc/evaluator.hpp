@@ -6,10 +6,6 @@
 #include <string>
 #include <variant>
 
-namespace pheonix {
-using Primitive = std::variant<bool, types::Integer, types::Float, std::string>;
-}
-
 namespace pheonix::eval {
 
 inline bool operator==(const Primitive &lhs, const Primitive &rhs) {

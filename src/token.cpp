@@ -4,30 +4,21 @@ namespace pheonix::token {
 
 token::TokenType Token::getTokenType() const { return tokenType; }
 
-std::optional<std::variant<bool, types::Integer, types::Float, std::string>>
-Token::getValue() const {
-  return value;
-}
+Primitive Token::getValue() const { return value; }
 
 bool Token::operator==(const Token &t) const {
   return this->tokenType == t.tokenType && this->value == t.value;
 }
 
-std::ostream &operator<<(
-    std::ostream &os,
-    const std::optional<
-        std::variant<bool, types::Integer, types::Float, std::string>> &opt) {
-  if (opt) {
-    const auto &value = *opt;
-    if (std::holds_alternative<types::Integer>(value)) {
-      os << std::get<types::Integer>(value).getValue();
-    } else if (std::holds_alternative<types::Float>(value)) {
-      os << std::get<types::Float>(value).getValue();
-    } else if (std::holds_alternative<std::string>(value)) {
-      os << std::get<std::string>(value);
-    } else if (std::holds_alternative<bool>(value)) {
-      os << (std::get<bool>(value) ? "true" : "false");
-    }
+std::ostream &operator<<(std::ostream &os, const Primitive &value) {
+  if (std::holds_alternative<types::Integer>(value)) {
+    os << std::get<types::Integer>(value).getValue();
+  } else if (std::holds_alternative<types::Float>(value)) {
+    os << std::get<types::Float>(value).getValue();
+  } else if (std::holds_alternative<std::string>(value)) {
+    os << std::get<std::string>(value);
+  } else if (std::holds_alternative<bool>(value)) {
+    os << (std::get<bool>(value) ? "true" : "false");
   } else {
     os << "[]";
   }

@@ -5,9 +5,6 @@
 #include <string>
 #include <vector>
 
-namespace pheonix {
-using Primitive = std::variant<bool, types::Integer, types::Float, std::string>;
-}
 namespace pheonix::context {
 
 struct Context {
