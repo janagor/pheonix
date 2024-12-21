@@ -90,6 +90,8 @@ struct Float {
   bool operator>(const Float &other) const;
   bool operator>=(const Float &other) const;
 
+  Float operator-() const;
+
   friend std::ostream &operator<<(std::ostream &os, const Float &obj);
 
   double getValue() const;

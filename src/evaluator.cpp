@@ -9,10 +9,7 @@
 
 namespace pheonix::eval {
 
-std::variant<types::Integer, types::Float, std::string, bool>
-Evaluator::getResult() {
-  return result;
-};
+Primitive Evaluator::getResult() { return result; };
 
 void Evaluator::visit(node::Program &p) {
   for (size_t i = 0; i < p.statements.size(); ++i) {
@@ -41,18 +38,45 @@ void Evaluator::visit(node::ExpressionStatement &es) {
 
 void Evaluator::visit(node::NullStatement &) {}
 
-void Evaluator::visit(node::AssignementExpression &ae) { UNUSED(ae); }
+void Evaluator::visit(node::AssignementExpression &ae) {
+  ae.expression->accept(*this);
+  context.context[ae.identifier] = result;
+}
 
-void Evaluator::visit(node::OrExpression &oe) { oe.left->accept(*this); }
+void Evaluator::visit(node::OrExpression &oe) {
+  oe.left->accept(*this);
+  auto left = result;
+  oe.right->accept(*this);
+  auto right = result;
+  result = std::visit(OperatorVisitor{}, left, right,
+                      std::variant<std::string>(oe.op));
+}
 
-void Evaluator::visit(node::AndExpression &ae) { ae.left->accept(*this); }
+void Evaluator::visit(node::AndExpression &ae) {
+  ae.left->accept(*this);
+  auto left = result;
+  ae.right->accept(*this);
+  auto right = result;
+  result = std::visit(OperatorVisitor{}, left, right,
+                      std::variant<std::string>(ae.op));
+}
 
 void Evaluator::visit(node::ComparisonExpression &ce) {
   ce.left->accept(*this);
+  auto left = result;
+  ce.right->accept(*this);
+  auto right = result;
+  result = std::visit(OperatorVisitor{}, left, right,
+                      std::variant<std::string>(ce.op));
 }
 
 void Evaluator::visit(node::RelationalExpression &re) {
   re.left->accept(*this);
+  auto left = result;
+  re.right->accept(*this);
+  auto right = result;
+  result = std::visit(OperatorVisitor{}, left, right,
+                      std::variant<std::string>(re.op));
 }
 
 void Evaluator::visit(node::MultiplicativeExpression &me) {
@@ -60,7 +84,7 @@ void Evaluator::visit(node::MultiplicativeExpression &me) {
   auto left = result;
   me.right->accept(*this);
   auto right = result;
-  result = std::visit(AritheticVisitor{}, left, right,
+  result = std::visit(OperatorVisitor{}, left, right,
                       std::variant<std::string>(me.op));
 }
 
@@ -73,7 +97,7 @@ void Evaluator::visit(node::AdditiveExpression &ae) {
   auto left = result;
   ae.right->accept(*this);
   auto right = result;
-  result = std::visit(AritheticVisitor{}, left, right,
+  result = std::visit(OperatorVisitor{}, left, right,
                       std::variant<std::string>(ae.op));
 }
 
@@ -84,7 +108,7 @@ void Evaluator::visit(node::CastExpression &ce) {
 void Evaluator::visit(node::PrefixExpression &pe) {
   pe.expression->accept(*this);
   auto expression = result;
-  result = std::visit(AritheticVisitor{}, expression,
+  result = std::visit(OperatorVisitor{}, expression,
                       std::variant<std::string>(pe.op));
 }
 
@@ -96,7 +120,9 @@ void Evaluator::visit(node::CallArguments &ca) { UNUSED(ca); }
 
 void Evaluator::visit(node::LambdaExpression &le) { UNUSED(le); }
 
-void Evaluator::visit(node::Identifier &i) { UNUSED(i); }
+void Evaluator::visit(node::Identifier &i) {
+  result = context.context.at(i.value);
+}
 
 void Evaluator::visit(node::ParentExpression &pe) { UNUSED(pe); }
 

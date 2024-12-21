@@ -4,7 +4,7 @@ namespace pheonix::token {
 
 token::TokenType Token::getTokenType() const { return tokenType; }
 
-std::optional<std::variant<types::Integer, types::Float, std::string, bool>>
+std::optional<std::variant<bool, types::Integer, types::Float, std::string>>
 Token::getValue() const {
   return value;
 }
@@ -16,7 +16,7 @@ bool Token::operator==(const Token &t) const {
 std::ostream &operator<<(
     std::ostream &os,
     const std::optional<
-        std::variant<types::Integer, types::Float, std::string, bool>> &opt) {
+        std::variant<bool, types::Integer, types::Float, std::string>> &opt) {
   if (opt) {
     const auto &value = *opt;
     if (std::holds_alternative<types::Integer>(value)) {

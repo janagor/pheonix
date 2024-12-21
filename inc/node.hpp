@@ -245,8 +245,8 @@ struct ParentExpression : public Node {
 };
 
 struct Literal : public Node {
-  std::variant<types::Integer, types::Float, std::string, bool> value;
-  Literal(std::variant<types::Integer, types::Float, std::string, bool> val)
+  std::variant<bool, types::Integer, types::Float, std::string> value;
+  Literal(std::variant<bool, types::Integer, types::Float, std::string> val)
       : Node(), value(val) {};
   void accept(visitor::Visitor &v) override;
 };

@@ -24,18 +24,18 @@ struct Token {
   Token(TokenType t, const types::Float &val) : tokenType(t), value(val) {}
   bool operator==(const Token &t) const;
   token::TokenType getTokenType() const;
-  std::optional<std::variant<types::Integer, types::Float, std::string, bool>>
+  std::optional<std::variant<bool, types::Integer, types::Float, std::string>>
   getValue() const;
 
 private:
   token::TokenType tokenType;
-  std::optional<std::variant<types::Integer, types::Float, std::string, bool>>
+  std::optional<std::variant<bool, types::Integer, types::Float, std::string>>
       value;
 };
 std::ostream &operator<<(
     std::ostream &os,
     const std::optional<
-        std::variant<types::Integer, types::Float, std::string, bool>> &opt);
+        std::variant<bool, types::Integer, types::Float, std::string>> &opt);
 std::ostream &operator<<(std::ostream &os, const Token &t);
 
 } // namespace pheonix::token

@@ -1,12 +1,16 @@
 #pragma once
+#include "context.hpp"
 #include "node.hpp"
 #include "visitor.hpp"
 #include <fmt/core.h>
 #include <string>
 #include <variant>
 
+namespace pheonix {
+using Primitive = std::variant<bool, types::Integer, types::Float, std::string>;
+}
+
 namespace pheonix::eval {
-using Primitive = std::variant<types::Integer, types::Float, std::string, bool>;
 
 inline bool operator==(const Primitive &lhs, const Primitive &rhs) {
   return std::visit([](const auto &lhs_val,
@@ -14,10 +18,11 @@ inline bool operator==(const Primitive &lhs, const Primitive &rhs) {
                     lhs, rhs);
 }
 
-struct AritheticVisitor {
+struct OperatorVisitor {
   // infix operators
   Primitive operator()(const types::Integer &lhs, const types::Integer &rhs,
                        const std::string &op) const {
+    // arithmetic
     if (op == "+")
       return lhs + rhs;
     else if (op == "-")
@@ -28,8 +33,66 @@ struct AritheticVisitor {
       return lhs / rhs;
     else if (op == "%")
       return lhs % rhs;
+    // comparison
+    else if (op == "==")
+      return bool(lhs == rhs);
+    else if (op == "!=")
+      return bool(lhs != rhs);
+    else if (op == "<")
+      return lhs < rhs;
+    else if (op == ">")
+      return (lhs > rhs);
+    else if (op == "<=")
+      return (lhs <= rhs);
+    else if (op == ">=")
+      return bool(lhs >= rhs);
     else
-      return types::Integer(0);
+      return false;
+  }
+
+  Primitive operator()(const types::Float &lhs, const types::Float &rhs,
+                       const std::string &op) const {
+    // arithmetic
+    if (op == "+")
+      return lhs + rhs;
+    else if (op == "-")
+      return lhs - rhs;
+    else if (op == "*")
+      return lhs * rhs;
+    else if (op == "/")
+      return lhs / rhs;
+    // comparison
+    else if (op == "==")
+      return Primitive(bool(lhs == rhs));
+    else if (op == "!=")
+      return Primitive(bool(lhs != rhs));
+    else if (op == "<")
+      return Primitive(bool(lhs < rhs));
+    else if (op == ">")
+      return Primitive(bool(lhs > rhs));
+    else if (op == "<=")
+      return Primitive(bool(lhs <= rhs));
+    else if (op == ">=")
+      return Primitive(bool(lhs >= rhs));
+    else
+      return false;
+  }
+
+  Primitive operator()(const std::string &lhs, const std::string &rhs,
+                       const std::string &op) const {
+    if (op == "+")
+      return lhs + rhs;
+    else
+      return types::Float(0);
+  }
+
+  Primitive operator()(bool lhs, bool rhs, const std::string &op) const {
+    if (op == "&&")
+      return lhs && rhs;
+    else if (op == "||")
+      return lhs || rhs;
+    else
+      return types::Float(0);
   }
 
   Primitive operator()(const auto &, const auto &, const auto &) const {
@@ -43,6 +106,21 @@ struct AritheticVisitor {
     else
       return types::Integer(0);
   }
+
+  Primitive operator()(const types::Float &exp, const std::string &op) const {
+    if (op == "-")
+      return -exp;
+    else
+      return types::Integer(0);
+  }
+
+  Primitive operator()(bool exp, const std::string &op) const {
+    if (op == "!")
+      return !exp;
+    else
+      return types::Integer(0);
+  }
+
   Primitive operator()(const auto &, const auto &) const {
     throw std::runtime_error("Invalid transition");
   }
@@ -50,7 +128,7 @@ struct AritheticVisitor {
 
 class Evaluator : public visitor::Visitor {
 public:
-  Evaluator() : visitor::Visitor(), result(types::Integer(999)) {};
+  Evaluator() : visitor::Visitor(), result(), context() {};
   Primitive getResult();
 
   void visit(node::Program &p) override;
@@ -85,6 +163,7 @@ public:
 
 private:
   Primitive result;
+  context::Context context;
 };
 
 } // namespace pheonix::eval

@@ -207,6 +207,8 @@ bool Float::operator>=(const Float &other) const {
   return value >= other.value;
 }
 
+Float Float::operator-() const { return Float(-value); }
+
 double Float::getValue() const { return value; }
 
 void Float::setValue(double val) { value = val; }
