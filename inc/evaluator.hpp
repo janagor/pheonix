@@ -14,6 +14,7 @@ inline bool operator==(const Primitive &lhs, const Primitive &rhs) {
                     lhs, rhs);
 }
 
+// struct ObjectVisitor {
 struct OperatorVisitor {
   // infix operators
   Primitive operator()(const types::Integer &lhs, const types::Integer &rhs,

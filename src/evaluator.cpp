@@ -2,6 +2,7 @@
 #include "token.hpp"
 #include "types.hpp"
 #include <iostream>
+#include <stdexcept>
 #include <variant>
 
 #include <iomanip>
@@ -49,18 +50,25 @@ void Evaluator::visit(node::WhileLoopStatement &wls) {
   }
 }
 
-void Evaluator::visit(node::VariableDeclaration &vd) { UNUSED(vd); }
+void Evaluator::visit(node::VariableDeclaration &vd) {
+  vd.expression->accept(*this);
+  if (context.find_in_current_scope(vd.identifier) == context.end()) {
+    context[vd.identifier] = result;
+    return;
+  }
+  throw std::runtime_error("Redeclaration of variable");
+}
 
 void Evaluator::visit(node::IfStatement &is) {
   is.predicate->accept(*this);
   if (auto *predicate = std::get_if<bool>(&result)) {
-    if (predicate) {
+    if (*predicate) {
       is.ifBody->accept(*this);
       result = std::monostate();
       return;
     }
-    if (is.ifBody) {
-      is.ifBody->accept(*this);
+    if (is.elseBody) {
+      is.elseBody->accept(*this);
       result = std::monostate();
       return;
     }
@@ -72,17 +80,23 @@ void Evaluator::visit(node::IfStatement &is) {
   result = std::monostate();
 }
 
-void Evaluator::visit(node::ReturnStatement &rs) { UNUSED(rs); }
+void Evaluator::visit(node::ReturnStatement &rs) {
+  rs.expression->accept(*this);
+}
 
 void Evaluator::visit(node::ExpressionStatement &es) {
   es.expression->accept(*this);
 }
 
-void Evaluator::visit(node::NullStatement &) {}
+void Evaluator::visit(node::NullStatement &) { result = std::monostate(); }
 
 void Evaluator::visit(node::AssignementExpression &ae) {
-  ae.expression->accept(*this);
-  context[ae.identifier] = result;
+  if (context.find(ae.identifier) != context.end()) {
+    ae.expression->accept(*this);
+    context[ae.identifier] = result;
+    return;
+  }
+  throw std::runtime_error("variable was not declared");
 }
 
 void Evaluator::visit(node::OrExpression &oe) {
@@ -144,6 +158,7 @@ void Evaluator::visit(node::AdditiveExpression &ae) {
 }
 
 void Evaluator::visit(node::CastExpression &ce) {
+  // TODO: implement casting
   ce.expression->accept(*this);
 }
 
@@ -170,6 +185,6 @@ void Evaluator::visit(node::ParentExpression &pe) {
 
 void Evaluator::visit(node::Literal &l) { result = l.value; }
 
-void Evaluator::visit(node::TypeSpecifier &ts) { UNUSED(ts); }
+void Evaluator::visit(node::TypeSpecifier &ts) { result = ts.typeName; }
 
 } // namespace pheonix::eval

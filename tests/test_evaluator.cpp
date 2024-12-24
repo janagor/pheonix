@@ -61,8 +61,10 @@ const map<string, Primitive> ARITHMETIC{
     {"true && false;", false},
     {"true || false;", true},
     // assignement
-    {"b = 1;c = 2;d = b;", Integer(1)},
-    {"b = 1;while(b<12){b = b+1;}b = b;", Integer(12)},
+    {"let b = 1;let c = 2;let d = b;", Integer(1)},
+    {"let b = 1;while(b<12){b = b+1;}b;", Integer(12)},
+    {"let b = 1;if(true){b=12;}else{b=113;}b;", Integer(12)},
+    {"let b = 1;if(false){b=12;}else{b=113;}b;", Integer(113)},
 };
 TEST(TestEvaluator, testArithmetic) {
   for (const auto &[i, p] : ARITHMETIC) {

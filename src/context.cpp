@@ -2,21 +2,51 @@
 
 namespace pheonix::context {
 
-void Context::push_scope() { context.push_back({}); }
-void Context::pop_scope() {
-  if (!context.empty()) {
-    context.pop_back();
-  }
-}
-Primitive Context::find(const std::string &ident) {
+Primitive &Context::operator[](const std::string &ident) {
   for (auto &scope : context) {
     auto it = scope.find(ident);
     if (it != scope.end()) {
       return it->second;
     }
   }
-  return std::monostate();
+
+  if (!context.empty()) {
+    auto &current_scope = context.back();
+    return current_scope[ident];
+  }
+
+  static Primitive default_value = std::monostate();
+  return default_value;
 }
+
+void Context::push_scope() { context.push_back({}); }
+
+void Context::pop_scope() {
+  if (!context.empty()) {
+    context.pop_back();
+  }
+}
+
+ContextIterator Context::end() { return context.back().end(); }
+
+ContextIterator Context::find(const std::string &ident) {
+  for (auto &scope : context) {
+    auto it = scope.find(ident);
+    if (it != scope.end()) {
+      return it;
+    }
+  }
+  return context.back().end();
+}
+
+ContextIterator Context::find_in_current_scope(const std::string &ident) {
+  auto it = context.back().find(ident);
+  if (it != context.back().end()) {
+    return it;
+  }
+  return context.back().end();
+}
+
 void Context::insert_unique(const std::string &ident, const Primitive &value) {
   if (!context.empty()) {
     auto &current_scope = context.back();
@@ -27,11 +57,22 @@ void Context::insert_unique(const std::string &ident, const Primitive &value) {
     }
   }
 }
+
 void Context::insert(const std::string &ident, const Primitive &value) {
   if (!context.empty()) {
     auto &current_scope = context.back();
     current_scope[ident] = value;
   }
+}
+
+Primitive &Context::at(const std::string &ident) {
+  for (auto &scope : context) {
+    auto it = scope.find(ident);
+    if (it != scope.end()) {
+      return it->second;
+    }
+  }
+  throw std::out_of_range("Identifier not found: " + ident);
 }
 
 } // namespace pheonix::context
