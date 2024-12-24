@@ -186,9 +186,8 @@ std::unique_ptr<node::Node> Parser::parseWhileLoopStatement() {
   consumeIf(token::TokenType::RPARENT);
   auto block = parseBlock();
 
-  auto whileLoopStmt = std::make_unique<node::WhileLoopStatement>(
-      std::move(expression), std::move(block));
-  return whileLoopStmt;
+  return std::make_unique<node::WhileLoopStatement>(std::move(expression),
+                                                    std::move(block));
 }
 
 /*
