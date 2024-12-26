@@ -2,8 +2,9 @@
 #include "context.hpp"
 #include "node.hpp"
 #include "object.hpp"
+#include "types.hpp"
 #include "visitor.hpp"
-#include <fmt/core.h>
+#include <stdexcept>
 #include <string>
 #include <variant>
 #include <vector>
@@ -129,8 +130,8 @@ struct OperatorVisitor {
 class Evaluator : public visitor::Visitor {
 public:
   Evaluator()
-      : visitor::Visitor(), isReturning(false), result(), resultVec(),
-        context() {};
+      : visitor::Visitor(), lastName(), lastNames(), isReturning(false),
+        result(), resultVec(), context() {};
   Object getResult();
   inline std::vector<Object> getResultVec() { return resultVec; };
 
@@ -163,6 +164,9 @@ public:
   void visit(node::ParentExpression &pe) override;
   void visit(node::Literal &il) override;
   void visit(node::TypeSpecifier &ts) override;
+
+  std::string lastName;
+  std::vector<std::string> lastNames;
 
 private:
   bool isReturning;

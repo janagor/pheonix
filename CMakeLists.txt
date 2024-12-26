@@ -4,7 +4,7 @@ project(my-language VERSION 1.0)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(COMPILER_FLAGS "-Werror -Wextra -Wall")
+set(COMPILER_FLAGS "-Werror -Wextra -Wall -g")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

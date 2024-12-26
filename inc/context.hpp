@@ -4,16 +4,19 @@
 #include "object.hpp"
 
 #include <cassert>
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
 
 namespace pheonix::context {
-using ContextIterator = std::map<std::string, eval::Object>::iterator;
+using ContextObject =
+    std::variant<eval::Object, std::reference_wrapper<eval::Object>>;
+using ContextIterator = std::map<std::string, ContextObject>::iterator;
 
 struct Context {
 public:
-  Context() : context() { push_scope(); }
+  Context() : inCall(false), references({}), context() { push_scope(); }
 
   eval::Object &operator[](const std::string &ident);
 
@@ -27,8 +30,19 @@ public:
   void insert(const std::string &ident, const eval::Object &value);
   eval::Object &at(const std::string &ident);
 
+  inline void insertRef(const std::string &ident,
+                        const std::string &referenced) {
+    if (!context.empty()) {
+      auto &current_scope = context.back();
+      current_scope[ident] = std::ref((*this)[referenced]);
+    }
+  }
+
+  bool inCall;
+  std::map<std::string, std::string> references;
+
 private:
-  std::vector<std::map<std::string, eval::Object>> context;
+  std::vector<std::map<std::string, ContextObject>> context;
 };
 
 } // namespace pheonix::context

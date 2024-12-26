@@ -18,6 +18,7 @@ struct Function {
   }
 
   Function(const Function &other) {
+    args = other.args;
     if (other.body) {
       body =
           other.body->clone(); // Clone the body using the clone method of Node
@@ -35,12 +36,12 @@ struct Function {
   // // public
   // size_t argNum;
   // Primitive returnValue;
-  std::vector<std::string> args;
   // reference
   //
   // // private?
   // // NOTE: function declaration | lambda expression
   Function &operator=(const Function &other) {
+    args = other.args;
     if (this != &other) {
       if (other.body) {
         body = other.body->clone();
@@ -50,6 +51,8 @@ struct Function {
     }
     return *this;
   }
+
+  std::vector<std::string> args;
   std::unique_ptr<node::Node> body;
 };
 

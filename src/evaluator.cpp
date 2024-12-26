@@ -43,7 +43,8 @@ void Evaluator::visit(node::Block &b) {
 
 void Evaluator::visit(node::FunctionDeclaration &fd) {
   fd.arguments->accept(*this);
-  context[fd.identifier] = Object(Function(resultVec, fd.statements->clone()));
+  context.insert(fd.identifier,
+                 Object(Function(resultVec, fd.statements->clone())));
   result = Object(Function());
 }
 
@@ -68,7 +69,7 @@ void Evaluator::visit(node::WhileLoopStatement &wls) {
 void Evaluator::visit(node::VariableDeclaration &vd) {
   vd.expression->accept(*this);
   if (context.find_in_current_scope(vd.identifier) == context.end()) {
-    context[vd.identifier] = result;
+    context.insert(vd.identifier, result);
     return;
   }
   throw std::runtime_error("Redeclaration of variable");
@@ -187,19 +188,38 @@ void Evaluator::visit(node::PrefixExpression &pe) {
 void Evaluator::visit(node::CallExpression &ce) {
   bool curIsReturning = isReturning;
   context.push_scope();
-
-  UNUSED(ce);
+  // ce.function->accept(*this);
+  auto function = std::get<Function>(context.at("a").value);
+  ce.arguments->accept(*this);
+  for (size_t i = 0; i < resultVec.size(); ++i) {
+    if (lastNames[i] != "")
+      context.insertRef(function.args[i], lastNames[i]);
+    else
+      context.insert(function.args[i], resultVec[i]);
+  }
+  function.body->accept(*this);
   context.pop_scope();
   isReturning = curIsReturning;
 }
 
 void Evaluator::visit(node::DebugExpression &de) { UNUSED(de); }
 
-void Evaluator::visit(node::CallArguments &ca) { UNUSED(ca); }
+void Evaluator::visit(node::CallArguments &ca) {
+  resultVec = {};
+  for (size_t i = 0; i < ca.arguments.size(); ++i) {
+    lastNames = {};
+    ca.arguments[i]->accept(*this);
+    resultVec.push_back(result);
+    lastNames.push_back(lastName);
+  }
+}
 
 void Evaluator::visit(node::LambdaExpression &le) { UNUSED(le); }
 
-void Evaluator::visit(node::Identifier &i) { result = context.at(i.value); }
+void Evaluator::visit(node::Identifier &i) {
+  result = context.at(i.value);
+  lastName = i.value;
+}
 
 void Evaluator::visit(node::ParentExpression &pe) {
   pe.expression->accept(*this);

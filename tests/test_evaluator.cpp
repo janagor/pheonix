@@ -9,6 +9,7 @@ using namespace pheonix::exception;
 using namespace pheonix::node;
 using namespace pheonix::eval;
 using namespace pheonix::types;
+using namespace pheonix::context;
 using namespace pheonix::lexer;
 using namespace pheonix::parser;
 
@@ -76,9 +77,20 @@ const map<string, ObjectValue> ARITHMETIC{
     {"let b = 1;while(b<12){b = b+1;}b;", Integer(12)},
     {"let b = 1;if(true){b=12;}else{b=113;}b;", Integer(12)},
     {"let b = 1;if(false){b=12;}else{b=113;}b;", Integer(113)},
+    {"let b = 1;fn a(c) {c = 2;}a(b);; b;", Integer(2)},
+    {"let b = 1;fn a(c) {2;};12;a(b);", Integer(2)},
+    {"let b = 1;fn a(c) {c+1;};12;a(b);", Integer(2)},
 };
 TEST(TestEvaluator, testArithmetic) {
   for (const auto &[i, p] : ARITHMETIC) {
+    compareExpectedAndReceived(i, p);
+  }
+}
+const map<string, ObjectValue> A{
+    {"let b = 1;fn a(c) {c = 2;}a(b);12;; b;", Integer(2)},
+};
+TEST(TestEvaluator, Aaaa) {
+  for (const auto &[i, p] : A) {
     compareExpectedAndReceived(i, p);
   }
 }
@@ -92,4 +104,15 @@ TEST(TestEvaluator, testFunctions) {
   for (const auto &[i, p, n] : FUNCTIONS) {
     compareFunctions(i, p, n);
   }
+}
+
+TEST(TestEvaluator, Shit) {
+  Context context;
+  Function function(std::vector<string>{"a", "b"}, nullptr);
+  Object ff = Object(function);
+  context.insert("c", ff);
+  context.insertRef("b", "c");
+  std::get<Function>(context.at("c").value).args.push_back("aaaaa");
+  EXPECT_EQ(std::get<Function>(context.at("c").value).args.size(), 3);
+  EXPECT_EQ(std::get<Function>(context.at("b").value).args.size(), 3);
 }
