@@ -2,25 +2,6 @@
 
 namespace pheonix::context {
 
-eval::Object &Context::operator[](const std::string &ident) {
-  for (auto rit = context.rbegin(); rit != context.rend(); ++rit) {
-    auto &scope = *rit;
-    auto it = scope.find(ident);
-
-    if (it != scope.end()) {
-      if (std::holds_alternative<eval::Object>(it->second)) {
-        return std::get<eval::Object>(it->second);
-      }
-      if (std::holds_alternative<std::reference_wrapper<eval::Object>>(
-              it->second)) {
-        return std::get<std::reference_wrapper<eval::Object>>(it->second).get();
-      }
-    }
-  }
-  static eval::Object default_value = eval::Object();
-  return default_value;
-}
-
 void Context::push_scope() { context.push_back({}); }
 
 void Context::pop_scope() {

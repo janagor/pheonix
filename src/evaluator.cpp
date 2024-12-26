@@ -33,9 +33,6 @@ void Evaluator::visit(node::DeclarationArguments &da) {
 
 void Evaluator::visit(node::Block &b) {
   for (size_t i = 0; i < b.statements.size(); ++i) {
-    // if (isReturning) {
-    //   return;
-    // }
     if (!isReturning)
       b.statements[i]->accept(*this);
   }
@@ -106,7 +103,7 @@ void Evaluator::visit(node::NullStatement &) { result = Primitive(); }
 void Evaluator::visit(node::AssignementExpression &ae) {
   if (context.find(ae.identifier) != context.end()) {
     ae.expression->accept(*this);
-    context[ae.identifier] = result;
+    context.at(ae.identifier) = result;
     return;
   }
   throw std::runtime_error("variable was not declared");

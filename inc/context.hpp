@@ -18,8 +18,6 @@ struct Context {
 public:
   Context() : inCall(false), references({}), context() { push_scope(); }
 
-  eval::Object &operator[](const std::string &ident);
-
   void pop_scope();
   void push_scope();
 
@@ -34,7 +32,7 @@ public:
                         const std::string &referenced) {
     if (!context.empty()) {
       auto &current_scope = context.back();
-      current_scope[ident] = std::ref((*this)[referenced]);
+      current_scope[ident] = std::ref((*this).at(referenced));
     }
   }
 
