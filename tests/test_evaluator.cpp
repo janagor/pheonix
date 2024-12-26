@@ -12,19 +12,30 @@ using namespace pheonix::types;
 using namespace pheonix::lexer;
 using namespace pheonix::parser;
 
-// helper
 void compareExpectedAndReceived(const string &input,
-                                const Primitive &expected) {
+                                const ObjectValue &expected) {
   istringstream in(input);
   Parser p(in);
   unique_ptr<Node> output = p.generateParsingTree();
   Evaluator visitor;
   output->accept(visitor);
-  auto received = visitor.getResult();
+  ObjectValue received = visitor.getResult().value;
   EXPECT_EQ(expected, received);
 }
 
-const map<string, Primitive> ARITHMETIC{
+void compareFunctions(const string &input, const ObjectValue &expected,
+                      int size) {
+  istringstream in(input);
+  Parser p(in);
+  unique_ptr<Node> output = p.generateParsingTree();
+  Evaluator visitor;
+  output->accept(visitor);
+  auto received = visitor.getResult().value;
+  EXPECT_EQ(expected, received);
+  EXPECT_EQ(visitor.getResultVec().size(), size);
+}
+
+const map<string, ObjectValue> ARITHMETIC{
     // only integers
     {"2147483647;", Integer(2147483647)},
     {"-3;", Integer(-3)},
@@ -69,5 +80,16 @@ const map<string, Primitive> ARITHMETIC{
 TEST(TestEvaluator, testArithmetic) {
   for (const auto &[i, p] : ARITHMETIC) {
     compareExpectedAndReceived(i, p);
+  }
+}
+
+const vector<std::tuple<string, ObjectValue, int>> FUNCTIONS{
+    {"fn a(){}", Function(), 0},
+    {"fn a(a,b,c,d){}", Function(), 4},
+};
+
+TEST(TestEvaluator, testFunctions) {
+  for (const auto &[i, p, n] : FUNCTIONS) {
+    compareFunctions(i, p, n);
   }
 }

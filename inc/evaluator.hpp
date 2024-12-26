@@ -1,14 +1,16 @@
 #pragma once
 #include "context.hpp"
 #include "node.hpp"
+#include "object.hpp"
 #include "visitor.hpp"
 #include <fmt/core.h>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace pheonix::eval {
 
-inline bool operator==(const Primitive &lhs, const Primitive &rhs) {
+inline bool operator==(const ObjectValue &lhs, const ObjectValue &rhs) {
   return std::visit([](const auto &lhs_val,
                        const auto &rhs_val) { return lhs_val == rhs_val; },
                     lhs, rhs);
@@ -17,8 +19,8 @@ inline bool operator==(const Primitive &lhs, const Primitive &rhs) {
 // struct ObjectVisitor {
 struct OperatorVisitor {
   // infix operators
-  Primitive operator()(const types::Integer &lhs, const types::Integer &rhs,
-                       const std::string &op) const {
+  ObjectValue operator()(const types::Integer &lhs, const types::Integer &rhs,
+                         const std::string &op) const {
     // arithmetic
     if (op == "+")
       return lhs + rhs;
@@ -47,8 +49,8 @@ struct OperatorVisitor {
       return false;
   }
 
-  Primitive operator()(const types::Float &lhs, const types::Float &rhs,
-                       const std::string &op) const {
+  ObjectValue operator()(const types::Float &lhs, const types::Float &rhs,
+                         const std::string &op) const {
     // arithmetic
     if (op == "+")
       return lhs + rhs;
@@ -60,30 +62,30 @@ struct OperatorVisitor {
       return lhs / rhs;
     // comparison
     else if (op == "==")
-      return Primitive(bool(lhs == rhs));
+      return lhs == rhs;
     else if (op == "!=")
-      return Primitive(bool(lhs != rhs));
+      return lhs != rhs;
     else if (op == "<")
-      return Primitive(bool(lhs < rhs));
+      return lhs < rhs;
     else if (op == ">")
-      return Primitive(bool(lhs > rhs));
+      return lhs > rhs;
     else if (op == "<=")
-      return Primitive(bool(lhs <= rhs));
+      return lhs <= rhs;
     else if (op == ">=")
-      return Primitive(bool(lhs >= rhs));
+      return lhs >= rhs;
     else
       return false;
   }
 
-  Primitive operator()(const std::string &lhs, const std::string &rhs,
-                       const std::string &op) const {
+  ObjectValue operator()(const std::string &lhs, const std::string &rhs,
+                         const std::string &op) const {
     if (op == "+")
       return lhs + rhs;
     else
       return types::Float(0);
   }
 
-  Primitive operator()(bool lhs, bool rhs, const std::string &op) const {
+  ObjectValue operator()(bool lhs, bool rhs, const std::string &op) const {
     if (op == "&&")
       return lhs && rhs;
     else if (op == "||")
@@ -92,41 +94,45 @@ struct OperatorVisitor {
       return types::Float(0);
   }
 
-  Primitive operator()(const auto &, const auto &, const auto &) const {
+  ObjectValue operator()(const auto &, const auto &, const auto &) const {
     throw std::runtime_error("Invalid transition");
   }
 
   // prefix operators
-  Primitive operator()(const types::Integer &exp, const std::string &op) const {
+  ObjectValue operator()(const types::Integer &exp,
+                         const std::string &op) const {
     if (op == "-")
       return -exp;
     else
       return types::Integer(0);
   }
 
-  Primitive operator()(const types::Float &exp, const std::string &op) const {
+  ObjectValue operator()(const types::Float &exp, const std::string &op) const {
     if (op == "-")
       return -exp;
     else
       return types::Integer(0);
   }
 
-  Primitive operator()(bool exp, const std::string &op) const {
+  ObjectValue operator()(bool exp, const std::string &op) const {
     if (op == "!")
       return !exp;
     else
       return types::Integer(0);
   }
 
-  Primitive operator()(const auto &, const auto &) const {
+  ObjectValue operator()(const auto &, const auto &) const {
     throw std::runtime_error("Invalid transition");
   }
 };
 
 class Evaluator : public visitor::Visitor {
 public:
-  Evaluator() : visitor::Visitor(), result(), context() {};
-  Primitive getResult();
+  Evaluator()
+      : visitor::Visitor(), isReturning(false), result(), resultVec(),
+        context() {};
+  Object getResult();
+  inline std::vector<Object> getResultVec() { return resultVec; };
 
   void visit(node::Program &p) override;
   void visit(node::Parameter &p) override;
@@ -159,7 +165,9 @@ public:
   void visit(node::TypeSpecifier &ts) override;
 
 private:
-  Primitive result;
+  bool isReturning;
+  Object result;
+  std::vector<Object> resultVec;
   context::Context context;
 };
 

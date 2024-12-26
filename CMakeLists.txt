@@ -36,6 +36,7 @@ set(HEADER_FILES
     inc/ast_view.hpp
     inc/evaluator.hpp
     inc/context.hpp
+    inc/object.hpp
     inc/types.hpp
     inc/exception.hpp
     inc/helpers.hpp
@@ -52,6 +53,7 @@ set(SOURCE_FILES
     src/ast_view.cpp
     src/evaluator.cpp
     src/context.cpp
+    src/object.cpp
     src/types.cpp
     src/exception.cpp
     src/helpers.cpp

@@ -2,7 +2,7 @@
 
 namespace pheonix::context {
 
-Primitive &Context::operator[](const std::string &ident) {
+eval::Object &Context::operator[](const std::string &ident) {
   for (auto &scope : context) {
     auto it = scope.find(ident);
     if (it != scope.end()) {
@@ -15,7 +15,7 @@ Primitive &Context::operator[](const std::string &ident) {
     return current_scope[ident];
   }
 
-  static Primitive default_value = std::monostate();
+  static eval::Object default_value = eval::Object();
   return default_value;
 }
 
@@ -47,7 +47,8 @@ ContextIterator Context::find_in_current_scope(const std::string &ident) {
   return context.back().end();
 }
 
-void Context::insert_unique(const std::string &ident, const Primitive &value) {
+void Context::insert_unique(const std::string &ident,
+                            const eval::Object &value) {
   if (!context.empty()) {
     auto &current_scope = context.back();
     if (current_scope.find(ident) == current_scope.end()) {
@@ -58,14 +59,14 @@ void Context::insert_unique(const std::string &ident, const Primitive &value) {
   }
 }
 
-void Context::insert(const std::string &ident, const Primitive &value) {
+void Context::insert(const std::string &ident, const eval::Object &value) {
   if (!context.empty()) {
     auto &current_scope = context.back();
     current_scope[ident] = value;
   }
 }
 
-Primitive &Context::at(const std::string &ident) {
+eval::Object &Context::at(const std::string &ident) {
   for (auto &scope : context) {
     auto it = scope.find(ident);
     if (it != scope.end()) {
