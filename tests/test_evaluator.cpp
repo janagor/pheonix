@@ -77,9 +77,10 @@ const map<string, ObjectValue> ARITHMETIC{
     {"let b = 1;while(b<12){b = b+1;}b;", Integer(12)},
     {"let b = 1;if(true){b=12;}else{b=113;}b;", Integer(12)},
     {"let b = 1;if(false){b=12;}else{b=113;}b;", Integer(113)},
-    {"let b = 1;fn a(c) {c = 2;}a(b);; b;", Integer(2)},
+    {"let b = 1;fn v(c) {c = 2;} v(b);; b;", Integer(2)},
     {"let b = 1;fn a(c) {2;};12;a(b);", Integer(2)},
     {"let b = 1;fn a(c) {c+1;};12;a(b);", Integer(2)},
+    {"let b = 1;fn a(c) {return c+1;};12;let g = a(b);;;;g;", Integer(2)},
 };
 TEST(TestEvaluator, testArithmetic) {
   for (const auto &[i, p] : ARITHMETIC) {
@@ -87,7 +88,18 @@ TEST(TestEvaluator, testArithmetic) {
   }
 }
 const map<string, ObjectValue> A{
-    {"let b = 1;fn a(c) {c = 2;}a(b);12;; b;", Integer(2)},
+    {"let b = 1;\
+      fn a(c) {\
+        if (true) {\
+          return 2;\
+        }\
+        return 0;\
+      }\
+      12;\
+      let g = a(b);;;;\
+      g;",
+     Integer(2)},
+
 };
 TEST(TestEvaluator, Aaaa) {
   for (const auto &[i, p] : A) {

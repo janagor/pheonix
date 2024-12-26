@@ -33,11 +33,11 @@ void Evaluator::visit(node::DeclarationArguments &da) {
 
 void Evaluator::visit(node::Block &b) {
   for (size_t i = 0; i < b.statements.size(); ++i) {
-    if (isReturning) {
-      isReturning = true;
-      return;
-    }
-    b.statements[i]->accept(*this);
+    // if (isReturning) {
+    //   return;
+    // }
+    if (!isReturning)
+      b.statements[i]->accept(*this);
   }
 }
 
@@ -80,16 +80,12 @@ void Evaluator::visit(node::IfStatement &is) {
   if (auto *predicate = std::get_if<bool>(&result.value)) {
     if (*predicate) {
       is.ifBody->accept(*this);
-      result = Object();
       return;
     }
     if (is.elseBody) {
       is.elseBody->accept(*this);
-      result = Object();
       return;
     }
-
-    result = Object();
   }
   // TODO: throw if predicate is not of bool type
 
@@ -98,6 +94,7 @@ void Evaluator::visit(node::IfStatement &is) {
 
 void Evaluator::visit(node::ReturnStatement &rs) {
   rs.expression->accept(*this);
+  isReturning = true;
 }
 
 void Evaluator::visit(node::ExpressionStatement &es) {
@@ -187,9 +184,10 @@ void Evaluator::visit(node::PrefixExpression &pe) {
 
 void Evaluator::visit(node::CallExpression &ce) {
   bool curIsReturning = isReturning;
+  isReturning = false;
   context.push_scope();
-  // ce.function->accept(*this);
-  auto function = std::get<Function>(context.at("a").value);
+  ce.function->accept(*this);
+  auto function = std::get<Function>(result.value);
   ce.arguments->accept(*this);
   for (size_t i = 0; i < resultVec.size(); ++i) {
     if (lastNames[i] != "")
