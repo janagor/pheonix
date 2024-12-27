@@ -37,6 +37,7 @@ void compareFunctions(const string &input, const ObjectValue &expected,
 }
 
 const map<string, ObjectValue> ARITHMETIC{
+    {R"("Kaczka";)", "Kaczka"},
     // only integers
     {"2147483647;", Integer(2147483647)},
     {"-3;", Integer(-3)},
@@ -72,6 +73,21 @@ const map<string, ObjectValue> ARITHMETIC{
     {"!false;", true},
     {"true && false;", false},
     {"true || false;", true},
+    // cast
+    {"1<-str;", "1"},
+    {"1.12<-str;", "1.120000"},
+    {"true<-str;", "true"},
+
+    {"12<-flt;", Float(12)},
+    {"false<-flt;", Float(0.)},
+    {"true<-flt;", Float(1.)},
+    //
+    {"false<-int;", Integer(0)},
+    {"true<-int;", Integer(1)},
+    //
+    {"0<-bol;", false},
+    {"1<-bol;", true},
+    {"2<-bol;", true},
     // assignement
     {"let b = 1;let c = 2;let d = b;", Integer(1)},
     {"let b = 1;while(b<12){b = b+1;}b;", Integer(12)},

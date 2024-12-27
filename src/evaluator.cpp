@@ -168,8 +168,15 @@ void Evaluator::visit(node::AdditiveExpression &ae) {
 }
 
 void Evaluator::visit(node::CastExpression &ce) {
-  // TODO: implement casting
   ce.expression->accept(*this);
+  if (ce.type) {
+    auto expression = result.value;
+    ce.type->accept(*this);
+    auto type = result.value;
+    result = std::visit(OperatorVisitor{}, expression, type,
+                        std::variant<std::string>("<-"));
+    return;
+  }
 }
 
 void Evaluator::visit(node::PrefixExpression &pe) {
