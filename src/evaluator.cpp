@@ -42,7 +42,7 @@ void Evaluator::visit(node::FunctionDeclaration &fd) {
   fd.arguments->accept(*this);
   context.insert(fd.identifier,
                  Object(Function(resultVec, fd.statements->clone())));
-  result = Object(Function());
+  result = ObjectValue(std::monostate());
 }
 
 void Evaluator::visit(node::WhileLoopStatement &wls) {
@@ -209,7 +209,10 @@ void Evaluator::visit(node::CallArguments &ca) {
   }
 }
 
-void Evaluator::visit(node::LambdaExpression &le) { UNUSED(le); }
+void Evaluator::visit(node::LambdaExpression &le) {
+  le.arguments->accept(*this);
+  result = Object(Function(resultVec, le.statements->clone()));
+}
 
 void Evaluator::visit(node::Identifier &i) {
   result = context.at(i.value);

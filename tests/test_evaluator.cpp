@@ -80,14 +80,6 @@ const map<string, ObjectValue> ARITHMETIC{
     {"let b = 1;fn v(c) {c = 2;} v(b);; b;", Integer(2)},
     {"let b = 1;fn a(c) {2;};12;a(b);", Integer(2)},
     {"let b = 1;fn a(c) {c+1;};12;a(b);", Integer(2)},
-    {"let b = 1;fn a(c) {return c+1;};12;let g = a(b);;;;g;", Integer(2)},
-};
-TEST(TestEvaluator, testArithmetic) {
-  for (const auto &[i, p] : ARITHMETIC) {
-    compareExpectedAndReceived(i, p);
-  }
-}
-const map<string, ObjectValue> A{
     {"let b = 1;\
       fn a(c) {\
         if (true) {\
@@ -99,7 +91,19 @@ const map<string, ObjectValue> A{
       let g = a(b);;;;\
       g;",
      Integer(2)},
-
+};
+TEST(TestEvaluator, testArithmetic) {
+  for (const auto &[i, p] : ARITHMETIC) {
+    compareExpectedAndReceived(i, p);
+  }
+}
+const map<string, ObjectValue> A{
+    {"let a = 11;\
+      let b = #(x){return x*a;};\
+      let c = b(a);\
+      ;\
+      c;",
+     Integer(121)},
 };
 TEST(TestEvaluator, Aaaa) {
   for (const auto &[i, p] : A) {
@@ -108,8 +112,8 @@ TEST(TestEvaluator, Aaaa) {
 }
 
 const vector<std::tuple<string, ObjectValue, int>> FUNCTIONS{
-    {"fn a(){}", Function(), 0},
-    {"fn a(a,b,c,d){}", Function(), 4},
+    {"#(){};", Function(), 0},
+    {"#(a,b,c,d){};", Function(), 4},
 };
 
 TEST(TestEvaluator, testFunctions) {
