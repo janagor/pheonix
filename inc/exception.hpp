@@ -1,30 +1,17 @@
 #include <cstdlib>
+#include <format>
 #include <stdexcept>
 
 namespace pheonix::exception {
 
-class LexerException : public std::runtime_error {
-  size_t line;
-  size_t column;
-
-public:
+struct LexerException : public std::runtime_error {
   LexerException(const std::string &msg, size_t ln, size_t col)
-      : std::runtime_error(msg), line(ln), column(col) {}
-
-  size_t getLine() const;
-  size_t getColumn() const;
+      : std::runtime_error(std::format("{}:{}: error: {}", ln, col, msg)) {}
 };
 
-class ParserException : public std::runtime_error {
-  size_t line;
-  size_t column;
-
-public:
+struct ParserException : public std::runtime_error {
   ParserException(const std::string &msg, size_t ln, size_t col)
-      : std::runtime_error(msg), line(ln), column(col) {}
-
-  size_t getLine() const;
-  size_t getColumn() const;
+      : std::runtime_error(std::format("{}:{}: error: {}", ln, col, msg)) {}
 };
 
 } // namespace pheonix::exception

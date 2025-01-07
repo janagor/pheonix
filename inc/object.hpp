@@ -102,9 +102,10 @@ inline std::ostream &operator<<(std::ostream &os, const ObjectValue &var) {
 }
 
 struct Object {
-  Object() : value(std::monostate{}) {}
-  Object(const Primitive &p) : value(castVariants(p)) {}
-  Object(const ObjectValue &p) : value(p) {}
+  Object() : value(std::monostate{}), mut(false) {}
+  Object(const Primitive &p, bool mut = false)
+      : value(castVariants(p)), mut(mut) {}
+  Object(const ObjectValue &p, bool mut = false) : value(p), mut(mut) {}
   Object clone() {
     if (std::holds_alternative<Function>(value)) {
       if (!std::get<Function>(value).body.empty()) {
@@ -114,6 +115,9 @@ struct Object {
     }
     return Object(value);
   }
+
   ObjectValue value;
+  bool mut;
 };
+
 } // namespace pheonix::eval

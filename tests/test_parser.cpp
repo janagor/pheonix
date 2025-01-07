@@ -827,9 +827,8 @@ TEST(TestParser, testErrorsNoSemicolon) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: SEMICOLON, Got: END_OF_FILE.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 7);
+    EXPECT_STREQ(e.what(),
+                 "1:7: error: Expected: SEMICOLON, Got: END_OF_FILE.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -846,9 +845,8 @@ TEST(TestParser, testErrorsNoSemicolon2) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: SEMICOLON, Got: END_OF_FILE.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 6);
+    EXPECT_STREQ(e.what(),
+                 "1:6: error: Expected: SEMICOLON, Got: END_OF_FILE.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -864,9 +862,7 @@ TEST(TestParser, notFinishedParenthesis1) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: RBRACE, Got: END_OF_FILE.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 5);
+    EXPECT_STREQ(e.what(), "1:5: error: Expected: RBRACE, Got: END_OF_FILE.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -882,9 +878,7 @@ TEST(TestParser, notFinishedParenthesis2) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: RPARENT, Got: LBRACE.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 3);
+    EXPECT_STREQ(e.what(), "1:3: error: Expected: RPARENT, Got: LBRACE.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -899,10 +893,9 @@ TEST(TestParser, NoRValue) {
     unique_ptr<Node> output = p.generateParsingTree();
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(),
-                 "Failed parsing expression in variable declaration.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 14);
+    EXPECT_STREQ(
+        e.what(),
+        "1:14: error: Failed parsing expression in variable declaration.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -917,9 +910,7 @@ TEST(TestParser, wrongUsageOfKeyword) {
     unique_ptr<Node> output = p.generateParsingTree();
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: SEMICOLON, Got: IDENTIFIER.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 5);
+    EXPECT_STREQ(e.what(), "1:5: error: Expected: SEMICOLON, Got: IDENTIFIER.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -934,9 +925,7 @@ TEST(TestParser, WrongEQSign) {
     unique_ptr<Node> output = p.generateParsingTree();
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: RPARENT, Got: ASSIGN.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 12);
+    EXPECT_STREQ(e.what(), "1:12: error: Expected: RPARENT, Got: ASSIGN.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -953,9 +942,7 @@ TEST(TestParser, NoPredicate) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected predicate in if statement");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 5);
+    EXPECT_STREQ(e.what(), "1:5: error: Expected predicate in if statement");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -972,9 +959,7 @@ TEST(TestParser, NoPredicate2) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected predicate in while statement");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 8);
+    EXPECT_STREQ(e.what(), "1:8: error: Expected predicate in while statement");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -991,9 +976,7 @@ TEST(TestParser, ArgumentsListWithCommaAtTheEnd) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Error parsing parameter list.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 18);
+    EXPECT_STREQ(e.what(), "1:18: error: Error parsing parameter list.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -1010,9 +993,7 @@ TEST(TestParser, LetWithoutLvalue) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: IDENTIFIER, Got: ASSIGN.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 5);
+    EXPECT_STREQ(e.what(), "1:5: error: Expected: IDENTIFIER, Got: ASSIGN.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -1029,9 +1010,7 @@ TEST(TestParser, AssignmentWithoutRvalue) {
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected expression.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 10);
+    EXPECT_STREQ(e.what(), "1:10: error: Expected expression.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
