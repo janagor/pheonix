@@ -93,12 +93,14 @@ void Evaluator::visit(node::IfStatement &is) {
 void Evaluator::visit(node::ReturnStatement &rs) {
   rs.expression->accept(*this);
   isReturning = true;
+  if (isDebugging)
+    std::cout << "[return: " << result.value << "]\n";
 }
 
 void Evaluator::visit(node::ExpressionStatement &es) {
   es.expression->accept(*this);
   if (isDebugging)
-    std::cout << "[" << "]" << std::endl;
+    std::cout << "[" << result.value << "]\n";
 }
 
 void Evaluator::visit(node::NullStatement &) { result = Primitive(); }
@@ -244,18 +246,24 @@ void Evaluator::visit(node::DebugExpression &de) {
   de.function->accept(*this);
   auto function = std::get<Function>(result.value);
   de.arguments->accept(*this);
+  std::cout << "[input: ";
   for (size_t i = 0; i < resultVec.size(); ++i) {
-    if (lastNames[i] != "")
+    if (lastNames.at(i) != "") {
+      std::cout << context.at(lastNames.at(i)).value;
       context.insertRef(function.args.at(i), lastNames.at(i));
-    else
+    } else {
+      std::cout << resultVec.at(i).value;
       context.insert(function.args.at(i), resultVec.at(i));
+    }
+    if (i < resultVec.size() - 1)
+      std::cout << ", ";
   }
+  std::cout << "]\n";
   function.body.at(0)->accept(*this);
   // if it is a composite function
   for (size_t i = 1; i < function.body.size(); ++i) {
     context.pop_scope();
     context.push_scope();
-    std::cout << "[" << "]" << std::endl;
     context.insert(function.args2.at(i - 1), result);
     isReturning = false;
     isDebugging = true;
@@ -304,10 +312,7 @@ void Evaluator::visit(node::TypeSpecifier &ts) {
 }
 
 void Evaluator::visit([[maybe_unused]] node::PrintFunction &pf) {
-  if (std::holds_alternative<std::string>(context.at("0").value)) {
-    auto x = std::get<std::string>(context.at("0").value);
-    std::cout << x << std::endl;
-  }
+  std::cout << context.at("0").value << "\n";
 }
 
 } // namespace pheonix::eval

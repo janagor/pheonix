@@ -66,6 +66,12 @@ struct Function {
   std::vector<std::unique_ptr<node::Node>> body;
 };
 
+inline std::ostream &operator<<(std::ostream &os, const Function &var) {
+  auto args = std::string('_', var.args.size());
+  os << "Function(" << args << ")";
+  return os;
+}
+
 using ObjectValue = std::variant<std::monostate, types::Integer, types::Float,
                                  std::string, bool, Function>;
 
@@ -79,6 +85,20 @@ inline ObjectValue castVariants(const Primitive &p) {
   if (std::holds_alternative<bool>(p))
     return std::get<bool>(p);
   return std::monostate();
+}
+
+inline std::ostream &operator<<(std::ostream &os, const ObjectValue &var) {
+  std::visit(
+      [&os](const auto &value) {
+        if constexpr (std::is_same_v<std::decay_t<decltype(value)>, bool>) {
+          os << (value ? "true" : "false");
+        } else {
+
+          os << value;
+        }
+      },
+      var);
+  return os;
 }
 
 struct Object {
