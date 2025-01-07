@@ -138,6 +138,24 @@ struct OperatorVisitor {
     else
       throw std::runtime_error("Invalid transition");
   }
+  ObjectValue operator()(const Function &lhs, const Function &rhs,
+                         const std::string &op) const {
+    if (op == "|") {
+      auto res = lhs;
+      if (rhs.args.size() != 1) {
+        throw std::runtime_error("Rhs function wrong number of parameters.");
+      }
+      res.args2.push_back(rhs.args.at(0));
+      for (const auto &arg2 : rhs.args2)
+        res.args2.push_back(arg2);
+
+      for (const auto &rhs_body : rhs.body)
+        res.body.push_back(rhs_body->clone());
+      assert(res.body.size() - 1 == res.args2.size());
+      return res;
+    } else
+      throw std::runtime_error("Invalid transition");
+  }
 
   ObjectValue operator()(const auto &, const auto &, const auto &) const {
     throw std::runtime_error("Invalid transition");
@@ -175,7 +193,15 @@ class Evaluator : public visitor::Visitor {
 public:
   Evaluator()
       : visitor::Visitor(), lastName(), lastNames(), isReturning(false),
-        result(), resultVec(), context() {};
+        isDebugging(false), result(), resultVec(), context() {
+    // inserting "print" function
+    // user cannot declare variable of such name
+    std::vector<std::string> args{"0"};
+    auto body = std::make_unique<node::PrintFunction>();
+    Function f(args, std::move(body));
+
+    context.insert("print", Object(f));
+  };
   Object getResult();
   inline std::vector<Object> getResultVec() { return resultVec; };
 
@@ -208,12 +234,14 @@ public:
   void visit(node::ParentExpression &pe) override;
   void visit(node::Literal &il) override;
   void visit(node::TypeSpecifier &ts) override;
+  void visit(node::PrintFunction &ts) override;
 
   std::string lastName;
   std::vector<std::string> lastNames;
 
 private:
   bool isReturning;
+  bool isDebugging;
   Object result;
   std::vector<Object> resultVec;
   context::Context context;

@@ -39,6 +39,7 @@ public:
   void visit(node::ParentExpression &pe) override;
   void visit(node::Literal &il) override;
   void visit(node::TypeSpecifier &ts) override;
+  void visit(node::PrintFunction &ts) override;
 
 private:
   std::string result;

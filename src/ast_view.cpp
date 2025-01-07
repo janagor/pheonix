@@ -307,4 +307,6 @@ void ASTView::visit(node::TypeSpecifier &ts) {
   dec();
 }
 
+void ASTView::visit(node::PrintFunction &) {}
+
 } // namespace pheonix::ast_view

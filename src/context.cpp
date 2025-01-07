@@ -1,5 +1,7 @@
 #include "context.hpp"
 
+#include <ranges>
+
 namespace pheonix::context {
 
 void Context::push_scope() { context.push_back({}); }
@@ -13,7 +15,7 @@ void Context::pop_scope() {
 ContextIterator Context::end() { return context.back().end(); }
 
 ContextIterator Context::find(const std::string &ident) {
-  for (auto &scope : context) {
+  for (auto &scope : std::ranges::reverse_view(context)) {
     auto it = scope.find(ident);
     if (it != scope.end()) {
       return it;
@@ -50,7 +52,7 @@ void Context::insert(const std::string &ident, const eval::Object &value) {
 }
 
 eval::Object &Context::at(const std::string &ident) {
-  for (auto &scope : context) {
+  for (auto &scope : std::ranges::reverse_view(context)) {
     auto it = scope.find(ident);
     if (it != scope.end()) {
       if (std::holds_alternative<eval::Object>(it->second)) {

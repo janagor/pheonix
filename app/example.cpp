@@ -1,4 +1,5 @@
 #include "ast_view.hpp"
+#include "evaluator.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include <iostream>
@@ -65,10 +66,10 @@ a%b; // 0 ok.
     R"(
 fn example(arg1, arg2){}
 
-print(1); // 1
+print(1<-str); // 1
 print("Hello world"); // Hello world
-print(1.12); // 1.12
-print(true); // true
+print(1.12<-str); // 1.12
+print(true<-str); // true
 print(example); // function(_,_)
 )",
     // Ex7
@@ -178,7 +179,7 @@ let d = c(1); // 2
     // Ex17
     R"(
 fn is_prime(num) {
-    let is_prime_rec = #(n, devisor) {
+    let is_prime_rec = #(n, divisor) {
         if (n <= 1) { return false; }
         else {
             if (divisor == 1) { return true; }
@@ -215,9 +216,9 @@ fn double(num) {
     // Ex19
     R"(
 fn is_prime(num) {
-    let is_prime_rec = #(n, devisor) {
+    let is_prime_rec = #(n, divisor) {
         n;
-        devisor;
+        divisor;
         if (n <= 1) { return false; }
         else {
             if (divisor == 1) { return true; }
@@ -341,5 +342,21 @@ int main(int argc, char **argv) {
     }
     return 0;
   }
+  if (argc == 2 && std::string(argv[1]) == "-i") {
+
+    int i = 0;
+    for (const auto &ex : EXAMPLES) {
+      std::istringstream in(ex);
+      pheonix::parser::Parser p(in);
+
+      std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
+      pheonix::eval::Evaluator visitor;
+      output->accept(visitor);
+
+      std::cout << "Example nr. " << ++i << std::endl;
+    }
+    return 0;
+  }
+
   std::cout << "no such option" << std::endl;
 }

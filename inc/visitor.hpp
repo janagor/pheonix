@@ -31,6 +31,7 @@ struct Identifier;
 struct ParentExpression;
 struct Literal;
 struct TypeSpecifier;
+struct PrintFunction;
 
 } // namespace pheonix::node
 
@@ -67,6 +68,7 @@ public:
   virtual void visit(node::ParentExpression &) = 0;
   virtual void visit(node::Literal &) = 0;
   virtual void visit(node::TypeSpecifier &) = 0;
+  virtual void visit(node::PrintFunction &) = 0;
   virtual ~Visitor() = default;
 };
 

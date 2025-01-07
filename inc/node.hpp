@@ -292,4 +292,11 @@ struct CallArguments : public Node {
   std::unique_ptr<Node> clone() const override;
 };
 
+// embedded function
+struct PrintFunction : public Node {
+  PrintFunction() : Node() {};
+  void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
+};
+
 } // namespace pheonix::node

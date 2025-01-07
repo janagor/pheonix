@@ -32,6 +32,7 @@ void Identifier::accept(visitor::Visitor &v) { v.visit(*this); }
 void ParentExpression::accept(visitor::Visitor &v) { v.visit(*this); }
 void Literal::accept(visitor::Visitor &v) { v.visit(*this); }
 void TypeSpecifier::accept(visitor::Visitor &v) { v.visit(*this); }
+void PrintFunction::accept(visitor::Visitor &v) { v.visit(*this); }
 
 std::unique_ptr<Node> Program::clone() const {
   auto program = std::make_unique<Program>();
@@ -187,6 +188,10 @@ std::unique_ptr<Node> Literal::clone() const {
 
 std::unique_ptr<Node> TypeSpecifier::clone() const {
   return std::make_unique<TypeSpecifier>(this->typeName);
+}
+
+std::unique_ptr<Node> PrintFunction::clone() const {
+  return std::make_unique<PrintFunction>();
 }
 
 } // namespace pheonix::node

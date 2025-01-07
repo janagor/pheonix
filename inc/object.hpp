@@ -5,34 +5,41 @@ namespace pheonix::eval {
 struct Object;
 
 struct Function {
-  Function() : body(nullptr) {}
+  Function() : body() {}
   bool operator==(const Function &other) const {
     (void)(other);
     return true; // Or any condition you want to define
   }
+
   inline Function clone() {
     Function temp;
     temp.args = args;
-    temp.body = this->body->clone();
+    temp.args2 = args2;
+    for (const auto &node : body) {
+      temp.body.push_back(node->clone());
+    }
     return temp;
   }
 
   Function(const Function &other) {
     args = other.args;
-    if (other.body) {
-      body =
-          other.body->clone(); // Clone the body using the clone method of Node
+    args2 = other.args2;
+    for (const auto &node : other.body) {
+      body.push_back(node->clone());
     }
   }
 
   // Function() : argNum(0), returnValue(std::monostate()), names({}) {}
-  Function(std::unique_ptr<node::Node> body) : body(std::move(body)) {}
+  Function(std::unique_ptr<node::Node> b) : body() {
+    body.push_back(std::move(b));
+  }
 
   Function(const std::vector<Object> &args, std::unique_ptr<node::Node> body);
 
-  Function(const std::vector<std::string> &args,
-           std::unique_ptr<node::Node> body)
-      : args(args), body(std::move(body)) {}
+  Function(const std::vector<std::string> &args, std::unique_ptr<node::Node> b)
+      : args(args), body() {
+    body.push_back(std::move(b));
+  }
   // // public
   // size_t argNum;
   // Primitive returnValue;
@@ -42,18 +49,21 @@ struct Function {
   // // NOTE: function declaration | lambda expression
   Function &operator=(const Function &other) {
     args = other.args;
+    args2 = other.args2;
     if (this != &other) {
-      if (other.body) {
-        body = other.body->clone();
-      } else {
-        body.reset();
+      body.clear();
+      if (!other.body.empty()) {
+        for (const auto &node : other.body)
+          body.push_back(node->clone());
       }
     }
     return *this;
   }
-
+  // those are used for `normal` functions
   std::vector<std::string> args;
-  std::unique_ptr<node::Node> body;
+  // those are used for compisition functions
+  std::vector<std::string> args2;
+  std::vector<std::unique_ptr<node::Node>> body;
 };
 
 using ObjectValue = std::variant<std::monostate, types::Integer, types::Float,
@@ -77,7 +87,7 @@ struct Object {
   Object(const ObjectValue &p) : value(p) {}
   Object clone() {
     if (std::holds_alternative<Function>(value)) {
-      if (std::get<Function>(value).body) {
+      if (!std::get<Function>(value).body.empty()) {
         return Object(std::get<Function>(value).clone());
       }
       return Object(Function());

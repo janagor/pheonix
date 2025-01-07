@@ -1,4 +1,5 @@
 #include "ast_view.hpp"
+#include "evaluator.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include <fstream>
@@ -22,6 +23,7 @@ void help() {
   std::cout << "    -h           Display this message" << std::endl;
   std::cout << "    -p INPUT     Generate parser output" << std::endl;
   std::cout << "    -l INPUT     Generate lexer output" << std::endl;
+  std::cout << "    -i INPUT     Generate interpreter output" << std::endl;
 }
 
 int main(int argc, char **argv) {
@@ -71,6 +73,23 @@ int main(int argc, char **argv) {
     input.close();
     return 0;
   }
+
+  if (argc == 3 && std::string(argv[1]) == "-i") {
+    std::string filename = std::string(argv[2]);
+    std::ifstream input(filename);
+    if (!input) {
+      std::cerr << "Error: Could not open file.\n";
+      return 1;
+    }
+    pheonix::parser::Parser p(input);
+
+    std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
+    pheonix::eval::Evaluator evaluator;
+    output->accept(evaluator);
+    input.close();
+    return 0;
+  }
+
   std::cout << "Wrong params." << std::endl;
   help();
   return 1;
