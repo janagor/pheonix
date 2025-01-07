@@ -90,59 +90,59 @@ const map<string, ObjectValue> ARITHMETIC{
     {"2<-bol;", true},
     // assignement
     {"let b = 1;let c = 2;let d = b;", Integer(1)},
-    {"let b = 1;while(b<12){b = b+1;}b;", Integer(12)},
-    {"let b = 1;if(true){b=12;}else{b=113;}b;", Integer(12)},
-    {"let b = 1;if(false){b=12;}else{b=113;}b;", Integer(113)},
-    {"let b = 1;fn v(c) {c = 2;} v(b);; b;", Integer(2)},
+    {"let mut b = 1;while(b<12){b = b+1;}b;", Integer(12)},
+    {"let mut b = 1;if(true){b=12;}else{b=113;}b;", Integer(12)},
+    {"let mut b = 1;if(false){b=12;}else{b=113;}b;", Integer(113)},
+    {"let mut b = 1;fn v(c) {c = 2;} v(b);; b;",
+     Integer(2)}, // TODO: test this with failing with mutablility
     {"let b = 1;fn a(c) {2;};12;a(b);", Integer(2)},
     {"let b = 1;fn a(c) {c+1;};12;a(b);", Integer(2)},
     {"let b = 1;fn a(c,d) {return c+d;};12;a(1,b);", Integer(2)},
     {"let b = 1;\
-      fn a(c) {\
-        if (true) {\
-          return 2;\
+        fn a(c) {\
+          if (true) {\
+            return 2;\
+          }\
+          return 0;\
         }\
-        return 0;\
-      }\
-      12;\
-      let g = a(b);;;;\
-      g;",
+        12;\
+        let g = a(b);;;;\
+        g;",
      Integer(2)},
     {"let b = 1;\
-      fn a(c) {\
-        return c+1;\
-      }\
-      12;\
-      let h = a|a;\
-      let g = h(b);;;;\
-      g;",
+        fn a(c) {\
+          return c+1;\
+        }\
+        12;\
+        let h = a|a;\
+        let g = h(b);;;;\
+        g;",
      Integer(3)},
     {"let b = 1;\
-      fn a(c) {\
-        return c+1;\
-      }\
-      12;\
-      let h = a|a;\
-      let g = [h](b);;;;\
-      g;",
+        fn a(c) {\
+          return c+1;\
+        }\
+        12;\
+        let h = a|a;\
+        let g = [h](b);;;;\
+        g;",
      Integer(3)},
     {"let mut a = 0;\
-      \
-      fn increment(mut a) {\
-        a = a + 1;\
-        return a;\
-      }\
-      fn add_one(a) { return a + 1; }\
-      \
-      if (a != 0) {\
-        a = increment;\
-      } else {\
-        a = add_one;\
-      }\
-      let mut b = 12;\
-      let c = a(b);",
+        \
+        fn increment(mut a) {\
+          a = a + 1;\
+          return a;\
+        }\
+        fn add_one(a) { return a + 1; }\
+        \
+        if (a != 0) {\
+          a = increment;\
+        } else {\
+          a = add_one;\
+        }\
+        let mut b = 12;\
+        let c = a(b);",
      Integer(13)},
-
 };
 TEST(TestEvaluator, testArithmetic) {
   for (const auto &[i, p] : ARITHMETIC) {
@@ -189,14 +189,3 @@ TEST(TestEvaluator, testFunctions) {
     compareFunctions(i, p, n);
   }
 }
-
-// TEST(TestEvaluator, IDK) {
-//   Context context;
-//   Function function(std::vector<string>{"a", "b"}, nullptr);
-//   Object ff = Object(function);
-//   context.insert("c", ff);
-//   context.insertRef("b", "c");
-//   std::get<Function>(context.at("c").value).args.push_back("aaaaa");
-//   EXPECT_EQ(std::get<Function>(context.at("c").value).args.size(), 3);
-//   EXPECT_EQ(std::get<Function>(context.at("b").value).args.size(), 3);
-// }

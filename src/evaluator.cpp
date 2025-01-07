@@ -67,6 +67,7 @@ void Evaluator::visit(node::WhileLoopStatement &wls) {
 void Evaluator::visit(node::VariableDeclaration &vd) {
   vd.expression->accept(*this);
   if (context.find_in_current_scope(vd.identifier) == context.end()) {
+    result.mut = vd.isMutable;
     context.insert(vd.identifier, result);
     return;
   }
@@ -106,12 +107,18 @@ void Evaluator::visit(node::ExpressionStatement &es) {
 void Evaluator::visit(node::NullStatement &) { result = Primitive(); }
 
 void Evaluator::visit(node::AssignementExpression &ae) {
-  if (context.find(ae.identifier) != context.end()) {
-    ae.expression->accept(*this);
-    context.at(ae.identifier) = result;
+  if (context.find(ae.identifier) == context.end()) {
+    throw std::runtime_error("variable was not declared");
     return;
   }
-  throw std::runtime_error("variable was not declared");
+  if (!context.at(ae.identifier).mut) {
+    throw std::runtime_error("variable is not mutable.");
+    return;
+  }
+
+  ae.expression->accept(*this);
+  context.at(ae.identifier).value = result.value;
+  return;
 }
 
 void Evaluator::visit(node::OrExpression &oe) {

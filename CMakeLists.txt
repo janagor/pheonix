@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(my-language VERSION 1.0)
+project(pheonix VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -58,13 +58,6 @@ set(SOURCE_FILES
     src/exception.cpp
     src/helpers.cpp
 )
-
-# add_executable(
-# my-language
-#     src/my-language.cpp
-#     ${SOURCE_FILES} ${HEADER_FILES}
-# )
-# target_link_libraries(my-language Boost::program_options)
 
 add_executable(
 example

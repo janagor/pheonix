@@ -144,7 +144,7 @@ std::optional<Lexem> Lexer::tryTwoCharOperator() {
       readChar();
       return Lexem{token::Token(token::TokenType::AND), sline, scolumn};
     }
-    throw exception::LexerException("Not a token.", sline, scolumn);
+    throw exception::NotAToken(sline, scolumn);
   case '|':
     readChar();
     if (ch == '|') {
@@ -214,7 +214,7 @@ Lexem Lexer::tryLiteralOrNotAToken() {
   size_t scolumn = column;
   token::Token token;
   if (!isalnum(ch)) {
-    throw exception::LexerException("Not a token.", sline, scolumn);
+    throw exception::NotAToken(sline, scolumn);
   }
   if (isdigit(ch)) {
     token = handleNumber(sline, scolumn);
@@ -287,7 +287,7 @@ token::Token Lexer::handleOnelineCommentToken(size_t row, size_t column) {
       readChar();
     }
   }
-  throw exception::LexerException("Oneline comment too long.", row, column);
+  throw exception::OneLineCommentTooLong(row, column);
 }
 
 token::Token Lexer::handleMultilineCommentToken(size_t row, size_t column) {
@@ -310,21 +310,19 @@ token::Token Lexer::handleMultilineCommentToken(size_t row, size_t column) {
         return token::Token(token::TokenType::MULTILINE_COMMENT, buffer);
       }
       if (ch == EOF) {
-        throw exception::LexerException("Unfinished multiline comment.", row,
-                                        column);
+        throw exception::UnfinishedMultilineComment(row, column);
       }
       buffer += ch;
       readChar();
       break;
     case EOF:
-      throw exception::LexerException("Unfinished multiline comment.", row,
-                                      column);
+      throw exception::UnfinishedMultilineComment(row, column);
     default:
       buffer += ch;
       readChar();
     }
   }
-  throw exception::LexerException("Multiline comment too long.", row, column);
+  throw exception::MultilineCommentTooLong(row, column);
 }
 
 token::Token Lexer::handleIdentifier(size_t row, size_t column) {
@@ -408,8 +406,7 @@ token::Token Lexer::handleString(size_t line, size_t column) {
         buffer += '\t';
         break;
       default:
-        throw exception::LexerException(
-            "Wrong usage of \\ character in string literal", line, column);
+        throw exception::BackSlashInString(line, column);
       }
       readChar();
       continue;

@@ -109,11 +109,11 @@ struct Object {
   Object clone() {
     if (std::holds_alternative<Function>(value)) {
       if (!std::get<Function>(value).body.empty()) {
-        return Object(std::get<Function>(value).clone());
+        return Object(std::get<Function>(value).clone(), mut);
       }
-      return Object(Function());
+      return Object(Function(), mut);
     }
-    return Object(value);
+    return Object(value, mut);
   }
 
   ObjectValue value;
