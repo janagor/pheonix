@@ -55,13 +55,20 @@ eval::Object &Context::at(const std::string &ident) {
   for (auto &scope : std::ranges::reverse_view(context)) {
     auto it = scope.find(ident);
     if (it != scope.end()) {
-      if (std::holds_alternative<eval::Object>(it->second)) {
-        return std::get<eval::Object>(it->second);
-      }
-      if (std::holds_alternative<std::reference_wrapper<eval::Object>>(
-              it->second)) {
-        return std::get<std::reference_wrapper<eval::Object>>(it->second).get();
-      }
+      return it->second;
+    }
+  }
+  throw std::out_of_range("Identifier not found: " + ident);
+}
+
+eval::Object &Context::at_ref(const std::string &ident) {
+  for (auto &scope : std::ranges::reverse_view(context)) {
+    auto it = scope.find(ident);
+    if (it != scope.end()) {
+      if (std::reference_wrapper<eval::Object> *ref =
+              get_if<std::reference_wrapper<eval::Object>>(&it->second.value))
+        return ref->get();
+      return it->second;
     }
   }
   throw std::out_of_range("Identifier not found: " + ident);

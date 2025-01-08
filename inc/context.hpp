@@ -10,13 +10,11 @@
 #include <vector>
 
 namespace pheonix::context {
-using ContextObject =
-    std::variant<eval::Object, std::reference_wrapper<eval::Object>>;
-using ContextIterator = std::map<std::string, ContextObject>::iterator;
+using ContextIterator = std::map<std::string, eval::Object>::iterator;
 
 struct Context {
 public:
-  Context() : inCall(false), references({}), context() { push_scope(); }
+  Context() : inCall(false), context() { push_scope(); }
 
   void pop_scope();
   void push_scope();
@@ -27,20 +25,21 @@ public:
   void insert_unique(const std::string &ident, const eval::Object &value);
   void insert(const std::string &ident, const eval::Object &value);
   eval::Object &at(const std::string &ident);
+  eval::Object &at_ref(const std::string &ident);
 
-  inline void insertRef(const std::string &ident,
-                        const std::string &referenced) {
+  inline void insertRef(const std::string &ident, const std::string &referenced,
+                        bool mut = false) {
     if (!context.empty()) {
       auto &current_scope = context.back();
-      current_scope[ident] = std::ref((*this).at(referenced));
+      current_scope[ident] = eval::Object(
+          eval::ObjectValue(std::ref((*this).at(referenced))), mut);
     }
   }
 
   bool inCall;
-  std::map<std::string, std::string> references;
 
 private:
-  std::vector<std::map<std::string, ContextObject>> context;
+  std::vector<std::map<std::string, eval::Object>> context;
 };
 
 } // namespace pheonix::context

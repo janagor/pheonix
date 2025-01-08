@@ -10,7 +10,8 @@ Function::Function(const std::vector<Object> &arguments,
   for (size_t i = 0; i < arguments.size(); ++i) {
     if (!std::holds_alternative<std::string>(arguments[i].value))
       throw std::runtime_error("");
-    args.push_back(std::get<std::string>(arguments[i].value));
+    args.emplace_back(std::get<std::string>(arguments[i].value),
+                      arguments[i].mut);
   }
 }
 

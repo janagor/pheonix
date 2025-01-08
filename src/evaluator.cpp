@@ -22,7 +22,7 @@ void Evaluator::visit(node::Program &p) {
   }
 }
 void Evaluator::visit(node::Parameter &p) {
-  resultVec.push_back(ObjectValue(p.identifier));
+  resultVec.emplace_back(ObjectValue(p.identifier), p.isMutable);
 }
 
 void Evaluator::visit(node::DeclarationArguments &da) {
@@ -117,7 +117,7 @@ void Evaluator::visit(node::AssignementExpression &ae) {
   }
 
   ae.expression->accept(*this);
-  context.at(ae.identifier).value = result.value;
+  context.at_ref(ae.identifier).value = result.value;
   return;
 }
 
@@ -223,17 +223,23 @@ void Evaluator::visit(node::CallExpression &ce) {
   assert(resultVec.size() == function.args.size());
   for (size_t i = 0; i < resultVec.size(); ++i) {
     // for (size_t i = 0; i < function.args.size(); ++i) {
-    if (lastNames[i] != "")
-      context.insertRef(function.args.at(i), lastNames.at(i));
+    if (lastNames[i] != "") {
+      if ((function.args.at(i).mut) && (!context.at(lastNames.at(i)).mut))
+        throw std::runtime_error("variable is not mutable.");
+      context.insertRef(function.args.at(i).name, lastNames.at(i),
+                        function.args.at(i).mut);
+    }
+
+    // function.args.at(i).mut  );
     else
-      context.insert(function.args.at(i), resultVec.at(i));
+      context.insert(function.args.at(i).name, resultVec.at(i));
   }
   function.body.at(0)->accept(*this);
   // if it is a composite function
   for (size_t i = 1; i < function.body.size(); ++i) {
     context.pop_scope();
     context.push_scope();
-    context.insert(function.args2.at(i - 1), result);
+    context.insert(function.args2.at(i - 1).name, result);
     isReturning = false;
     function.body.at(i)->accept(*this);
   }
@@ -257,10 +263,12 @@ void Evaluator::visit(node::DebugExpression &de) {
   for (size_t i = 0; i < resultVec.size(); ++i) {
     if (lastNames.at(i) != "") {
       std::cout << context.at(lastNames.at(i)).value;
-      context.insertRef(function.args.at(i), lastNames.at(i));
+      context.insertRef(function.args.at(i).name, lastNames.at(i),
+                        function.args.at(i).mut);
+
     } else {
       std::cout << resultVec.at(i).value;
-      context.insert(function.args.at(i), resultVec.at(i));
+      context.insert(function.args.at(i).name, resultVec.at(i));
     }
     if (i < resultVec.size() - 1)
       std::cout << ", ";
@@ -271,7 +279,7 @@ void Evaluator::visit(node::DebugExpression &de) {
   for (size_t i = 1; i < function.body.size(); ++i) {
     context.pop_scope();
     context.push_scope();
-    context.insert(function.args2.at(i - 1), result);
+    context.insert(function.args2.at(i - 1).name, result);
     isReturning = false;
     isDebugging = true;
     function.body.at(i)->accept(*this);

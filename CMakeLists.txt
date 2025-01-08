@@ -33,6 +33,7 @@ set(HEADER_FILES
     inc/node.hpp
     inc/parser.hpp
     inc/visitor.hpp
+    inc/operator_visitor.hpp
     inc/ast_view.hpp
     inc/evaluator.hpp
     inc/context.hpp
@@ -50,6 +51,7 @@ set(SOURCE_FILES
     src/node.cpp
     src/parser.cpp
     src/visitor.cpp
+    src/operator_visitor.cpp
     src/ast_view.cpp
     src/evaluator.cpp
     src/context.cpp

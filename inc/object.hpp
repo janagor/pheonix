@@ -4,7 +4,12 @@
 namespace pheonix::eval {
 struct Object;
 
+struct Param {
+  std::string name;
+  bool mut;
+};
 struct Function {
+
   Function() : body() {}
   bool operator==(const Function &other) const {
     (void)(other);
@@ -36,7 +41,7 @@ struct Function {
 
   Function(const std::vector<Object> &args, std::unique_ptr<node::Node> body);
 
-  Function(const std::vector<std::string> &args, std::unique_ptr<node::Node> b)
+  Function(const std::vector<Param> &args, std::unique_ptr<node::Node> b)
       : args(args), body() {
     body.push_back(std::move(b));
   }
@@ -60,9 +65,9 @@ struct Function {
     return *this;
   }
   // those are used for `normal` functions
-  std::vector<std::string> args;
+  std::vector<Param> args;
   // those are used for compisition functions
-  std::vector<std::string> args2;
+  std::vector<Param> args2;
   std::vector<std::unique_ptr<node::Node>> body;
 };
 
@@ -72,8 +77,9 @@ inline std::ostream &operator<<(std::ostream &os, const Function &var) {
   return os;
 }
 
-using ObjectValue = std::variant<std::monostate, types::Integer, types::Float,
-                                 std::string, bool, Function>;
+using ObjectValue =
+    std::variant<std::monostate, types::Integer, types::Float, std::string,
+                 bool, Function, std::reference_wrapper<Object>>;
 
 inline ObjectValue castVariants(const Primitive &p) {
   if (std::holds_alternative<types::Integer>(p))
