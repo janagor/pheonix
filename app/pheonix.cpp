@@ -2,6 +2,7 @@
 #include "evaluator.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
+#include "repl.hpp"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -28,8 +29,7 @@ void help() {
 
 int main(int argc, char **argv) {
   if (argc <= 1) {
-    help();
-    return 0;
+    pheonix::repl::repl();
   }
 
   if (argc == 2 && std::string(argv[1]) == "-h") {

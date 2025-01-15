@@ -14,7 +14,7 @@ using ContextIterator = std::map<std::string, eval::Object>::iterator;
 
 struct Context {
 public:
-  Context() : inCall(false), context() { push_scope(); }
+  Context() : context() { push_scope(); }
 
   void pop_scope();
   void push_scope();
@@ -35,8 +35,19 @@ public:
           eval::ObjectValue(std::ref((*this).at(referenced))), mut);
     }
   }
+  inline Context clone() const {
+    Context newContext;
 
-  bool inCall;
+    for (const auto &scope : context) {
+      std::map<std::string, eval::Object> newScope;
+      for (const auto &[ident, obj] : scope) {
+        newScope[ident] = (obj.clone());
+      }
+      newContext.context.push_back(std::move(newScope));
+    }
+
+    return newContext;
+  }
 
 private:
   std::vector<std::map<std::string, eval::Object>> context;

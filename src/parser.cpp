@@ -328,13 +328,13 @@ std::unique_ptr<node::Node> Parser::parseAndExpression() {
 
 /*
  * COMPARISON_EXPRESSION = RELATIONAL_EXPRESSION
- *                         { ( "==" | "!=" )
- *                         RELATIONAL_EXPRESSION } ;
+ *                         [ ( "==" | "!=" )
+ *                         RELATIONAL_EXPRESSION ] ;
  */
 std::unique_ptr<node::Node> Parser::parseComparisonExpression() {
   if (auto left = parseRelationalExpression()) {
-    while (current == token::TokenType::EQUALS ||
-           current == token::TokenType::NEQ) {
+    if (current == token::TokenType::EQUALS ||
+        current == token::TokenType::NEQ) {
       token::TokenType op = current.token.getTokenType();
       readLex();
       auto right = parseRelationalExpression();
@@ -348,15 +348,14 @@ std::unique_ptr<node::Node> Parser::parseComparisonExpression() {
 
 /*
  * RELATIONAL_EXPRESSION = ADDITIVE_EXPRESSION
- *                         { ( "<" | ">" | "<=" | ">=" )
- *                         ADDITIVE_EXPRESSION } ;
+ *                         [ ( "<" | ">" | "<=" | ">=" )
+ *                         ADDITIVE_EXPRESSION ] ;
  */
 std::unique_ptr<node::Node> Parser::parseRelationalExpression() {
   if (auto left = parseAdditiveExpression()) {
-    while (current == token::TokenType::LESS ||
-           current == token::TokenType::GREATER ||
-           current == token::TokenType::LEQ ||
-           current == token::TokenType::GEQ) {
+    if (current == token::TokenType::LESS ||
+        current == token::TokenType::GREATER ||
+        current == token::TokenType::LEQ || current == token::TokenType::GEQ) {
       token::TokenType op = current.token.getTokenType();
       readLex();
       auto right = parseAdditiveExpression();

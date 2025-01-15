@@ -98,27 +98,29 @@ const map<string, ObjectValue> ARITHMETIC{
      Integer(2)}, // TODO: test this with failing with mutablility
     {"let b = 1;fn a(c) {2;};12;a(b);", Integer(2)},
     {"let b = 1;fn a(c) {c+1;};12;a(b);", Integer(2)},
-    {"let b = 1;fn a(c,d) {return c+d;};12;a(1,b);", Integer(2)},
+    {"let b = 1;\
+      fn a(c,d) {return c+d;};12;a(1,b);",
+     Integer(2)},
 
     {"let b = 1;\
-          fn a(c) {\
-            if (true) {\
-              return 2;\
-            }\
-            return 0;\
-          }\
-          12;\
-          let g = a(b);;;;\
-          g;",
+        fn a(c) {\
+        if (true) {\
+          return 2;\
+        }\
+        return 0;\
+      }\
+      12;\
+      let g = a(b);;;;\
+      g;",
      Integer(2)},
     {"let b = 1;\
-          fn a(c) {\
-            return c+1;\
-          }\
-          12;\
-          let h = a|a;\
-          let g = h(b);;;;\
-          g;",
+      fn a(c) {\
+        return c+1;\
+      }\
+      12;\
+      let h = a|a;\
+      let g = h(b);;;;\
+      g;",
      Integer(3)},
     {"let b = 1;\
           fn a(c) {\
@@ -145,13 +147,6 @@ const map<string, ObjectValue> ARITHMETIC{
           let mut b = 12;\
           let c = a(b);",
      Integer(13)},
-};
-TEST(TestEvaluator, testArithmetic) {
-  for (const auto &[i, p] : ARITHMETIC) {
-    compareExpectedAndReceived(i, p);
-  }
-}
-const map<string, ObjectValue> A{
     {"\
       fn is_prime(num) {\
         fn is_prime_rec(n, divisor) {\
@@ -174,6 +169,26 @@ const map<string, ObjectValue> A{
       is_prime(16);\
    ",
      false},
+};
+TEST(TestEvaluator, testArithmetic) {
+  for (const auto &[i, p] : ARITHMETIC) {
+    compareExpectedAndReceived(i, p);
+  }
+}
+const map<string, ObjectValue> A{
+    {"\
+      let mut a = 0;\
+      fn mut_and_const(mut a, b) {\
+        let mut c = a;\
+        c = 12;\
+        print(b<-str);\
+        a = a + 1;\
+        print(b<-str);\
+      }\
+      mut_and_const(a, a);\
+      0;\
+     ",
+     Integer(0)},
 };
 TEST(TestEvaluator, Aaaa) {
   for (const auto &[i, p] : A) {

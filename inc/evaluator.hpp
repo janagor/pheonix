@@ -34,6 +34,11 @@ public:
 
     context.insert("print", Object(f));
   };
+
+  Evaluator(const context::Context &context)
+      : visitor::Visitor(), lastName(), lastNames(), isReturning(false),
+        isDebugging(false), result(), resultVec(), context(context) {};
+
   Object getResult();
   inline std::vector<Object> getResultVec() { return resultVec; };
 
@@ -70,6 +75,9 @@ public:
 
   std::string lastName;
   std::vector<std::string> lastNames;
+
+  inline context::Context getContext() { return context.clone(); }
+  inline void setContext(const context::Context &con) { context = con; }
 
 private:
   bool isReturning;

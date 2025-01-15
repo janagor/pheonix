@@ -29,7 +29,6 @@ include_directories(app)
 set(HEADER_FILES
     inc/token.hpp
     inc/lexer.hpp
-    # inc/repl.hpp
     inc/node.hpp
     inc/parser.hpp
     inc/visitor.hpp
@@ -42,12 +41,12 @@ set(HEADER_FILES
     inc/exception.hpp
     inc/helpers.hpp
     inc/token_type.hpp
+    inc/repl.hpp
 )
 
 set(SOURCE_FILES
     src/token.cpp
     src/lexer.cpp
-    # src/repl.cpp
     src/node.cpp
     src/parser.cpp
     src/visitor.cpp
@@ -59,6 +58,7 @@ set(SOURCE_FILES
     src/types.cpp
     src/exception.cpp
     src/helpers.cpp
+    src/repl.cpp
 )
 
 add_executable(

@@ -269,7 +269,33 @@ std::vector<pheonix::lexer::Lexem> lexerize(pheonix::lexer::Lexer &lexer) {
   }
 }
 
+void help() {
+  std::cout << "Usage: ./example [OPTIONS]" << std::endl << std::endl;
+  std::cout << "    -h            Display this message" << std::endl;
+  std::cout << "    -p            Generate parser output for all examples"
+            << std::endl;
+  std::cout << "    -l            Generate lexer output for all examples"
+            << std::endl;
+  std::cout << "    -i            Generate interpreter output for all examples"
+            << std::endl;
+  std::cout << "    -p NUMBER     Generate parser output for example nr NUMBER"
+            << std::endl;
+  std::cout << "    -l NUMBER     Generate lexer output for example nr NUMBER"
+            << std::endl;
+  std::cout
+      << "    -i NUMBER     Generate interpreter output for example nr NUMBER"
+      << std::endl;
+}
+
 int main(int argc, char **argv) {
+  if (argc == 1) {
+    help();
+    return 0;
+  }
+  if (argc > 1 && std::string(argv[1]) == "-h") {
+    help();
+    return 0;
+  }
   if (argc == 3 && std::string(argv[1]) == "-l") {
     size_t test_case = 1;
     test_case = std::atoi(argv[2]) - 1;

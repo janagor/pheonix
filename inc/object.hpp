@@ -13,10 +13,10 @@ struct Function {
   Function() : body() {}
   bool operator==(const Function &other) const {
     (void)(other);
-    return true; // Or any condition you want to define
+    return true;
   }
 
-  inline Function clone() {
+  inline Function clone() const {
     Function temp;
     temp.args = args;
     temp.args2 = args2;
@@ -34,7 +34,6 @@ struct Function {
     }
   }
 
-  // Function() : argNum(0), returnValue(std::monostate()), names({}) {}
   Function(std::unique_ptr<node::Node> b) : body() {
     body.push_back(std::move(b));
   }
@@ -45,12 +44,6 @@ struct Function {
       : args(args), body() {
     body.push_back(std::move(b));
   }
-  // // public
-  // size_t argNum;
-  // Primitive returnValue;
-  // reference
-  //
-  // // private?
   // // NOTE: function declaration | lambda expression
   Function &operator=(const Function &other) {
     args = other.args;
@@ -98,8 +91,10 @@ inline std::ostream &operator<<(std::ostream &os, const ObjectValue &var) {
       [&os](const auto &value) {
         if constexpr (std::is_same_v<std::decay_t<decltype(value)>, bool>) {
           os << (value ? "true" : "false");
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(value)>,
+                                            std::reference_wrapper<Object>>) {
+          os << value.get().value;
         } else {
-
           os << value;
         }
       },
@@ -112,7 +107,7 @@ struct Object {
   Object(const Primitive &p, bool mut = false)
       : value(castVariants(p)), mut(mut) {}
   Object(const ObjectValue &p, bool mut = false) : value(p), mut(mut) {}
-  Object clone() {
+  Object clone() const {
     if (std::holds_alternative<Function>(value)) {
       if (!std::get<Function>(value).body.empty()) {
         return Object(std::get<Function>(value).clone(), mut);

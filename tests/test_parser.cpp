@@ -717,38 +717,6 @@ const map<string, string> TWO_STATEMENTS{
             right=(Literal:\n\
                 type=Integer,\n\
                 value=123))))"},
-    // RelationalExpression
-    {"12<9<123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(RelationalExpression:\n\
-            left=(RelationalExpression:\n\
-                left=(Literal:\n\
-                    type=Integer,\n\
-                    value=12),\n\
-                operator=[<],\n\
-                right=(Literal:\n\
-                    type=Integer,\n\
-                    value=9)),\n\
-            operator=[<],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    // ComparisonExpressions
-    {"12==9==123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(ComparisonExpression:\n\
-            left=(ComparisonExpression:\n\
-                left=(Literal:\n\
-                    type=Integer,\n\
-                    value=12),\n\
-                operator=[==],\n\
-                right=(Literal:\n\
-                    type=Integer,\n\
-                    value=9)),\n\
-            operator=[==],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
     // AndExpressions
     {"12&&9&&123;", "(Program:\n\
     (ExpressionStatement:\n\
