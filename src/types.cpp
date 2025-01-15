@@ -114,6 +114,8 @@ bool Integer::operator>=(const Integer &other) const {
   return value >= other.value;
 }
 
+Integer Integer::operator-() const { return Integer(-value); }
+
 int Integer::getValue() const { return value; }
 
 void Integer::setValue(long val) {
@@ -204,6 +206,8 @@ bool Float::operator>(const Float &other) const { return value > other.value; }
 bool Float::operator>=(const Float &other) const {
   return value >= other.value;
 }
+
+Float Float::operator-() const { return Float(-value); }
 
 double Float::getValue() const { return value; }
 

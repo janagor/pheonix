@@ -1,6 +1,8 @@
+#include "ast_view.hpp"
+#include "evaluator.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
-#include "visitor.hpp"
+#include "repl.hpp"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -19,15 +21,16 @@ std::vector<pheonix::lexer::Lexem> lexerize(pheonix::lexer::Lexer &lexer) {
 
 void help() {
   std::cout << "Usage: ./pheonix [OPTIONS]" << std::endl << std::endl;
+  std::cout << "                 Read from stdin" << std::endl;
   std::cout << "    -h           Display this message" << std::endl;
   std::cout << "    -p INPUT     Generate parser output" << std::endl;
   std::cout << "    -l INPUT     Generate lexer output" << std::endl;
+  std::cout << "    -i INPUT     Generate interpreter output" << std::endl;
 }
 
 int main(int argc, char **argv) {
   if (argc <= 1) {
-    help();
-    return 0;
+    pheonix::repl::repl();
   }
 
   if (argc == 2 && std::string(argv[1]) == "-h") {
@@ -63,7 +66,7 @@ int main(int argc, char **argv) {
     pheonix::parser::Parser p(input);
 
     std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
-    pheonix::visitor::TreeGenVisitor visitor;
+    pheonix::ast_view::ASTView visitor;
     output->accept(visitor);
     std::string received = visitor.getResult();
 
@@ -71,6 +74,23 @@ int main(int argc, char **argv) {
     input.close();
     return 0;
   }
+
+  if (argc == 3 && std::string(argv[1]) == "-i") {
+    std::string filename = std::string(argv[2]);
+    std::ifstream input(filename);
+    if (!input) {
+      std::cerr << "Error: Could not open file.\n";
+      return 1;
+    }
+    pheonix::parser::Parser p(input);
+
+    std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
+    pheonix::eval::Evaluator evaluator;
+    output->accept(evaluator);
+    input.close();
+    return 0;
+  }
+
   std::cout << "Wrong params." << std::endl;
   help();
   return 1;

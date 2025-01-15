@@ -85,8 +85,7 @@ std::unique_ptr<node::Node> Parser::parseParameter() {
                                        current.column);
     return nullptr;
   }
-  std::string paramIdentifier =
-      std::get<std::string>(*current.token.getValue());
+  std::string paramIdentifier = std::get<std::string>(current.token.getValue());
   readLex();
 
   return std::make_unique<node::Parameter>(isMutable, paramIdentifier);
@@ -130,7 +129,7 @@ std::unique_ptr<node::Node> Parser::parseFunctionDeclaration() {
     return nullptr;
   readLex();
   expect(token::TokenType::IDENTIFIER);
-  std::string identifier = std::get<std::string>(*current.token.getValue());
+  std::string identifier = std::get<std::string>(current.token.getValue());
   auto functionDeclaration =
       std::make_unique<node::FunctionDeclaration>(identifier);
   readLex();
@@ -156,7 +155,7 @@ std::unique_ptr<node::Node> Parser::parseVariableDeclaration() {
     readLex();
   }
   expect(token::TokenType::IDENTIFIER);
-  std::string identifier = std::get<std::string>(*current.token.getValue());
+  std::string identifier = std::get<std::string>(current.token.getValue());
   readLex();
   consumeIf(token::TokenType::ASSIGN);
   if (auto expression = parseExpression()) {
@@ -187,9 +186,8 @@ std::unique_ptr<node::Node> Parser::parseWhileLoopStatement() {
   consumeIf(token::TokenType::RPARENT);
   auto block = parseBlock();
 
-  auto whileLoopStmt = std::make_unique<node::WhileLoopStatement>(
-      std::move(expression), std::move(block));
-  return whileLoopStmt;
+  return std::make_unique<node::WhileLoopStatement>(std::move(expression),
+                                                    std::move(block));
 }
 
 /*
@@ -283,7 +281,7 @@ std::unique_ptr<node::Node> Parser::parseAssignementExpression() {
   if (next != token::TokenType::ASSIGN)
     return nullptr;
   expect(token::TokenType::IDENTIFIER);
-  std::string identifier = std::get<std::string>(*current.token.getValue());
+  std::string identifier = std::get<std::string>(current.token.getValue());
   readLex();
   consumeIf(token::TokenType::ASSIGN);
   if (auto expression = parseOrExpression()) {
@@ -330,13 +328,13 @@ std::unique_ptr<node::Node> Parser::parseAndExpression() {
 
 /*
  * COMPARISON_EXPRESSION = RELATIONAL_EXPRESSION
- *                         { ( "==" | "!=" )
- *                         RELATIONAL_EXPRESSION } ;
+ *                         [ ( "==" | "!=" )
+ *                         RELATIONAL_EXPRESSION ] ;
  */
 std::unique_ptr<node::Node> Parser::parseComparisonExpression() {
   if (auto left = parseRelationalExpression()) {
-    while (current == token::TokenType::EQUALS ||
-           current == token::TokenType::NEQ) {
+    if (current == token::TokenType::EQUALS ||
+        current == token::TokenType::NEQ) {
       token::TokenType op = current.token.getTokenType();
       readLex();
       auto right = parseRelationalExpression();
@@ -350,15 +348,14 @@ std::unique_ptr<node::Node> Parser::parseComparisonExpression() {
 
 /*
  * RELATIONAL_EXPRESSION = ADDITIVE_EXPRESSION
- *                         { ( "<" | ">" | "<=" | ">=" )
- *                         ADDITIVE_EXPRESSION } ;
+ *                         [ ( "<" | ">" | "<=" | ">=" )
+ *                         ADDITIVE_EXPRESSION ] ;
  */
 std::unique_ptr<node::Node> Parser::parseRelationalExpression() {
   if (auto left = parseAdditiveExpression()) {
-    while (current == token::TokenType::LESS ||
-           current == token::TokenType::GREATER ||
-           current == token::TokenType::LEQ ||
-           current == token::TokenType::GEQ) {
+    if (current == token::TokenType::LESS ||
+        current == token::TokenType::GREATER ||
+        current == token::TokenType::LEQ || current == token::TokenType::GEQ) {
       token::TokenType op = current.token.getTokenType();
       readLex();
       auto right = parseAdditiveExpression();
@@ -436,8 +433,8 @@ std::unique_ptr<node::Node> Parser::parseCastExpression() {
     while (current == token::TokenType::LARROW) {
       readLex();
       std::unique_ptr<node::Node> type = parseTypeSpecifier();
-      return std::make_unique<node::CastExpression>(std::move(expression),
-                                                    std::move(type));
+      expression = std::make_unique<node::CastExpression>(std::move(expression),
+                                                          std::move(type));
     }
     return expression;
   }
@@ -553,7 +550,7 @@ std::unique_ptr<node::Node> Parser::parseMaybeDebugCall() {
 
 std::unique_ptr<node::Node> Parser::parseIdentifier() {
   if (current == token::TokenType::IDENTIFIER) {
-    std::string val = std::get<std::string>(*current.token.getValue());
+    std::string val = std::get<std::string>(current.token.getValue());
     readLex();
     return std::make_unique<node::Identifier>(val);
   }
@@ -632,7 +629,7 @@ std::unique_ptr<node::Node> Parser::parseLiteral() {
       current == token::TokenType::STRING ||
       current == token::TokenType::FLOAT ||
       current == token::TokenType::FALSE || current == token::TokenType::TRUE) {
-    auto node = std::make_unique<node::Literal>(*current.token.getValue());
+    auto node = std::make_unique<node::Literal>(current.token.getValue());
     readLex();
     return node;
   };
