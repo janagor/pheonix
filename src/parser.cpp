@@ -433,8 +433,8 @@ std::unique_ptr<node::Node> Parser::parseCastExpression() {
     while (current == token::TokenType::LARROW) {
       readLex();
       std::unique_ptr<node::Node> type = parseTypeSpecifier();
-      return std::make_unique<node::CastExpression>(std::move(expression),
-                                                    std::move(type));
+      expression = std::make_unique<node::CastExpression>(std::move(expression),
+                                                          std::move(type));
     }
     return expression;
   }

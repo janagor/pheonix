@@ -64,6 +64,7 @@ void repl() {
       if (_canCloseAllBrackets(brackets)) {
         pheonix::parser::Parser p(buffer);
         output = p.generateParsingTree();
+        prev_evaluator.setContext(evaluator.getContext());
         output->accept(evaluator);
         buffer.str("");
         buffer.clear();
