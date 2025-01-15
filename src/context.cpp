@@ -32,18 +32,6 @@ ContextIterator Context::find_in_current_scope(const std::string &ident) {
   return context.back().end();
 }
 
-void Context::insert_unique(const std::string &ident,
-                            const eval::Object &value) {
-  if (!context.empty()) {
-    auto &current_scope = context.back();
-    if (current_scope.find(ident) == current_scope.end()) {
-      current_scope[ident] = value;
-    } else {
-      std::cout << "Identifier already exists in the current scope.\n";
-    }
-  }
-}
-
 void Context::insert(const std::string &ident, const eval::Object &value) {
   if (!context.empty()) {
     auto &current_scope = context.back();
@@ -72,6 +60,28 @@ eval::Object &Context::at_ref(const std::string &ident) {
     }
   }
   throw std::out_of_range("Identifier not found: " + ident);
+}
+
+void Context::insertRef(const std::string &ident, const std::string &referenced,
+                        bool mut) {
+  if (!context.empty()) {
+    auto &current_scope = context.back();
+    current_scope[ident] =
+        eval::Object(eval::ObjectValue(std::ref((*this).at(referenced))), mut);
+  }
+}
+Context Context::clone() const {
+  Context newContext;
+
+  for (const auto &scope : context) {
+    std::map<std::string, eval::Object> newScope;
+    for (const auto &[ident, obj] : scope) {
+      newScope[ident] = (obj.clone());
+    }
+    newContext.context.push_back(std::move(newScope));
+  }
+
+  return newContext;
 }
 
 } // namespace pheonix::context

@@ -116,8 +116,8 @@ fn example(arg1, arg2) {
     // Ex12
     R"(
 fn add_one(num) {
-    let b = num + 1;
-    return b;
+    let a = num + 1;
+    return a;
 }
 let a = 1;
 let b = add_one(a); // 2

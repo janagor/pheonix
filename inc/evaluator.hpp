@@ -1,4 +1,5 @@
 #pragma once
+
 #include "context.hpp"
 #include "node.hpp"
 #include "object.hpp"
@@ -14,33 +15,16 @@
 
 namespace pheonix::eval {
 
-inline bool operator==(const ObjectValue &lhs, const ObjectValue &rhs) {
-  return std::visit([](const auto &lhs_val,
-                       const auto &rhs_val) { return lhs_val == rhs_val; },
-                    lhs, rhs);
-}
+bool operator==(const ObjectValue &lhs, const ObjectValue &rhs);
 
 class Evaluator : public visitor::Visitor {
 public:
-  Evaluator()
-      : visitor::Visitor(), lastName(), lastNames(), isReturning(false),
-        isDebugging(false), result(), resultVec(), context() {
-    // inserting "print" function
-    // NOTE: user cannot declare variable of such name
-    std::vector<eval::Param> args;
-    args.emplace_back("0", false);
-    auto body = std::make_unique<node::PrintFunction>();
-    Function f(args, std::move(body));
-
-    context.insert("print", Object(f));
-  };
-
-  Evaluator(const context::Context &context)
-      : visitor::Visitor(), lastName(), lastNames(), isReturning(false),
-        isDebugging(false), result(), resultVec(), context(context) {};
-
+  Evaluator();
+  Evaluator(const context::Context &context);
   Object getResult();
-  inline std::vector<Object> getResultVec() { return resultVec; };
+  std::vector<Object> getResultVec();
+  context::Context getContext();
+  void setContext(const context::Context &con);
 
   void visit(node::Program &p) override;
   void visit(node::Parameter &p) override;
@@ -73,11 +57,9 @@ public:
   void visit(node::TypeSpecifier &ts) override;
   void visit(node::PrintFunction &ts) override;
 
+public:
   std::string lastName;
   std::vector<std::string> lastNames;
-
-  inline context::Context getContext() { return context.clone(); }
-  inline void setContext(const context::Context &con) { context = con; }
 
 private:
   bool isReturning;

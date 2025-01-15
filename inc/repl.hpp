@@ -1,3 +1,5 @@
+#pragma once
+
 #include "evaluator.hpp"
 #include "parser.hpp"
 
@@ -42,6 +44,7 @@ ______ _        }             _
 | |   | | | |  __/ (_) | | | | |>  < 
 \_|   |_| |_|\___|\___/|_| |_|_/_/\_\
 )";
+
 void repl();
 
 } // namespace pheonix::repl

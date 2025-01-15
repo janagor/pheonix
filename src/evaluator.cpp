@@ -9,12 +9,35 @@
 #include <iomanip>
 #include <sstream>
 
-// NOTE: remove this after it is done
-#define UNUSED(x) (void)(x)
-
 namespace pheonix::eval {
 
+bool operator==(const ObjectValue &lhs, const ObjectValue &rhs) {
+  return std::visit([](const auto &lhs_val,
+                       const auto &rhs_val) { return lhs_val == rhs_val; },
+                    lhs, rhs);
+}
+
+Evaluator::Evaluator()
+    : visitor::Visitor(), lastName(), lastNames(), isReturning(false),
+      isDebugging(false), result(), resultVec(), context() {
+  // inserting "print" function
+  // NOTE: user cannot declare variable of such name
+  std::vector<eval::Param> args;
+  args.emplace_back("0", false);
+  auto body = std::make_unique<node::PrintFunction>();
+  Function f(args, std::move(body));
+
+  context.insert("print", Object(f));
+};
+
+Evaluator::Evaluator(const context::Context &context)
+    : visitor::Visitor(), lastName(), lastNames(), isReturning(false),
+      isDebugging(false), result(), resultVec(), context(context) {};
+
 Object Evaluator::getResult() { return Object(result); };
+std::vector<Object> Evaluator::getResultVec() { return resultVec; };
+context::Context Evaluator::getContext() { return context.clone(); }
+void Evaluator::setContext(const context::Context &con) { context = con; }
 
 void Evaluator::visit(node::Program &p) {
   for (size_t i = 0; i < p.statements.size(); ++i) {
