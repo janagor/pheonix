@@ -116,8 +116,8 @@ fn example(arg1, arg2) {
     // Ex12
     R"(
 fn add_one(num) {
-    let a = num + 1;
-    return a;
+    let b = num + 1;
+    return b;
 }
 let a = 1;
 let b = add_one(a); // 2
@@ -128,8 +128,8 @@ fn increment(mut a) {
     a = a + 1;
     return a;
 }
-let a = 1;
-let b = increment(a);
+let mut a = 1;
+let  b = increment(a);
 print(a); // 2
 print(b); // 2
 )",
@@ -251,7 +251,6 @@ print(is_prime(10));
 [return: false]
 [return: false]
 [return: false]
-[return: false]
 false
 */
 )",
@@ -301,7 +300,7 @@ int main(int argc, char **argv) {
     test_case = std::atoi(argv[2]) - 1;
     if (test_case >= EXAMPLES.size()) {
       std::cout << "wrong test case use index from [0, " << EXAMPLES.size()
-                << '.' << std::endl;
+                << ".]" << std::endl;
       return 1;
     }
     std::istringstream in(EXAMPLES[test_case]);
@@ -320,7 +319,7 @@ int main(int argc, char **argv) {
     test_case = std::atoi(argv[2]) - 1;
     if (test_case >= EXAMPLES.size()) {
       std::cout << "wrong test case use index from [0, " << EXAMPLES.size()
-                << '.' << std::endl;
+                << ".]" << std::endl;
       return 1;
     }
     std::istringstream in(EXAMPLES[test_case]);
@@ -333,6 +332,25 @@ int main(int argc, char **argv) {
 
     std::cout << "Example nr. " << ++test_case << std::endl;
     std::cout << received << std::endl;
+    return 0;
+  }
+
+  if (argc == 3 && std::string(argv[1]) == "-i") {
+    size_t test_case = 1;
+    test_case = std::atoi(argv[2]) - 1;
+    if (test_case >= EXAMPLES.size()) {
+      std::cout << "wrong test case use index from [0, " << EXAMPLES.size()
+                << ".]" << std::endl;
+      return 1;
+    }
+    std::cout << "Example nr. " << test_case << std::endl;
+    std::istringstream in(EXAMPLES[test_case++]);
+    pheonix::parser::Parser p(in);
+
+    std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
+    pheonix::eval::Evaluator visitor;
+    output->accept(visitor);
+
     return 0;
   }
 
@@ -372,14 +390,13 @@ int main(int argc, char **argv) {
 
     int i = 0;
     for (const auto &ex : EXAMPLES) {
+      std::cout << std::endl << "Example nr. " << ++i << std::endl;
       std::istringstream in(ex);
       pheonix::parser::Parser p(in);
 
       std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
       pheonix::eval::Evaluator visitor;
       output->accept(visitor);
-
-      std::cout << "Example nr. " << ++i << std::endl;
     }
     return 0;
   }

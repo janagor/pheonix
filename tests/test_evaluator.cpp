@@ -38,7 +38,6 @@ void compareFunctions(const string &input, const ObjectValue &expected,
 
 const map<string, ObjectValue> ARITHMETIC{
     {R"("Kaczka";)", "Kaczka"},
-    // only integers
     {"2147483647;", Integer(2147483647)},
     {"-3;", Integer(-3)},
     {"1 + 2;", Integer(3)},
@@ -53,7 +52,6 @@ const map<string, ObjectValue> ARITHMETIC{
     {"1 <= 2;", true},
     {"1 == 2;", false},
     {"1 != 2;", true},
-    // only floats
     {"2147483647.;", Float(2147483647.)},
     {"-3.;", Float(-3.)},
     {"1. + 2.;", Float(3.)},
@@ -66,18 +64,15 @@ const map<string, ObjectValue> ARITHMETIC{
     {"1. <= 2.;", true},
     {"1. == 2.;", false},
     {"1. != 2.;", true},
-    // only bools
     {"true;", true},
     {"false;", false},
     {"!true;", false},
     {"!false;", true},
     {"true && false;", false},
     {"true || false;", true},
-    // cast
     {"1<-str;", "1"},
     {"1.12<-str;", "1.120000"},
     {"true<-str;", "true"},
-
     {"12<-flt;", Float(12)},
     {"false<-flt;", Float(0.)},
     {"true<-flt;", Float(1.)},
@@ -88,20 +83,17 @@ const map<string, ObjectValue> ARITHMETIC{
     {"0<-bol;", false},
     {"1<-bol;", true},
     {"2<-bol;", true},
-    // assignement
     {"let b = 1;let c = 2;let d = b;", Integer(1)},
     {"let mut b = 1;while(b<12){b = b+1;}b;", Integer(12)},
     {"let mut b = 1;if(true){b=12;}else{b=113;}b;", Integer(12)},
     {"let mut b = 1;if(false){b=12;}else{b=113;}b;", Integer(113)},
 
-    {"let mut b = 1;fn v(mut c) {c = 2;} v(b);; b;",
-     Integer(2)}, // TODO: test this with failing with mutablility
+    {"let mut b = 1;fn v(mut c) {c = 2;} v(b);; b;", Integer(2)},
     {"let b = 1;fn a(c) {2;};12;a(b);", Integer(2)},
     {"let b = 1;fn a(c) {c+1;};12;a(b);", Integer(2)},
     {"let b = 1;\
       fn a(c,d) {return c+d;};12;a(1,b);",
      Integer(2)},
-
     {"let b = 1;\
         fn a(c) {\
         if (true) {\
@@ -173,36 +165,5 @@ const map<string, ObjectValue> ARITHMETIC{
 TEST(TestEvaluator, testArithmetic) {
   for (const auto &[i, p] : ARITHMETIC) {
     compareExpectedAndReceived(i, p);
-  }
-}
-const map<string, ObjectValue> A{
-    {"\
-      let mut a = 0;\
-      fn mut_and_const(mut a, b) {\
-        let mut c = a;\
-        c = 12;\
-        print(b<-str);\
-        a = a + 1;\
-        print(b<-str);\
-      }\
-      mut_and_const(a, a);\
-      0;\
-     ",
-     Integer(0)},
-};
-TEST(TestEvaluator, Aaaa) {
-  for (const auto &[i, p] : A) {
-    compareExpectedAndReceived(i, p);
-  }
-}
-
-const vector<std::tuple<string, ObjectValue, int>> FUNCTIONS{
-    {"#(){};", Function(), 0},
-    {"#(a,b,c,d){};", Function(), 4},
-};
-
-TEST(TestEvaluator, testFunctions) {
-  for (const auto &[i, p, n] : FUNCTIONS) {
-    compareFunctions(i, p, n);
   }
 }

@@ -21,6 +21,7 @@ std::vector<pheonix::lexer::Lexem> lexerize(pheonix::lexer::Lexer &lexer) {
 
 void help() {
   std::cout << "Usage: ./pheonix [OPTIONS]" << std::endl << std::endl;
+  std::cout << "                 Read from stdin" << std::endl;
   std::cout << "    -h           Display this message" << std::endl;
   std::cout << "    -p INPUT     Generate parser output" << std::endl;
   std::cout << "    -l INPUT     Generate lexer output" << std::endl;

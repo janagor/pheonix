@@ -47,14 +47,15 @@ void repl() {
   std::string line;
   std::stack<char> brackets;
   pheonix::eval::Evaluator evaluator;
-  // pheonix::ast_view::ASTView evaluator;
   pheonix::eval::Evaluator prev_evaluator;
   std::unique_ptr<pheonix::node::Node> output;
+  bool in_scope = false;
 
   std::cout << PHEONIX << std::endl;
 
   while (true) {
-    std::cout << ">>> ";
+    if (!in_scope)
+      std::cout << ">>> ";
     std::getline(std::cin, line);
 
     buffer << line;
@@ -66,9 +67,11 @@ void repl() {
         output->accept(evaluator);
         buffer.str("");
         buffer.clear();
+        in_scope = false;
         continue;
       } else {
         std::cout << "... ";
+        in_scope = true;
       }
     } else {
       std::cout
