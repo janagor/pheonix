@@ -1,6 +1,7 @@
+#include "ast_view.hpp"
+#include "evaluator.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
-#include "visitor.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
@@ -65,10 +66,10 @@ a%b; // 0 ok.
     R"(
 fn example(arg1, arg2){}
 
-print(1); // 1
+print(1<-str); // 1
 print("Hello world"); // Hello world
-print(1.12); // 1.12
-print(true); // true
+print(1.12<-str); // 1.12
+print(true<-str); // true
 print(example); // function(_,_)
 )",
     // Ex7
@@ -127,8 +128,8 @@ fn increment(mut a) {
     a = a + 1;
     return a;
 }
-let a = 1;
-let b = increment(a);
+let mut a = 1;
+let  b = increment(a);
 print(a); // 2
 print(b); // 2
 )",
@@ -178,7 +179,7 @@ let d = c(1); // 2
     // Ex17
     R"(
 fn is_prime(num) {
-    let is_prime_rec = #(n, devisor) {
+    let is_prime_rec = #(n, divisor) {
         if (n <= 1) { return false; }
         else {
             if (divisor == 1) { return true; }
@@ -215,9 +216,9 @@ fn double(num) {
     // Ex19
     R"(
 fn is_prime(num) {
-    let is_prime_rec = #(n, devisor) {
+    let is_prime_rec = #(n, divisor) {
         n;
-        devisor;
+        divisor;
         if (n <= 1) { return false; }
         else {
             if (divisor == 1) { return true; }
@@ -250,7 +251,6 @@ print(is_prime(10));
 [return: false]
 [return: false]
 [return: false]
-[return: false]
 false
 */
 )",
@@ -268,13 +268,39 @@ std::vector<pheonix::lexer::Lexem> lexerize(pheonix::lexer::Lexer &lexer) {
   }
 }
 
+void help() {
+  std::cout << "Usage: ./example [OPTIONS]" << std::endl << std::endl;
+  std::cout << "    -h            Display this message" << std::endl;
+  std::cout << "    -p            Generate parser output for all examples"
+            << std::endl;
+  std::cout << "    -l            Generate lexer output for all examples"
+            << std::endl;
+  std::cout << "    -i            Generate interpreter output for all examples"
+            << std::endl;
+  std::cout << "    -p NUMBER     Generate parser output for example nr NUMBER"
+            << std::endl;
+  std::cout << "    -l NUMBER     Generate lexer output for example nr NUMBER"
+            << std::endl;
+  std::cout
+      << "    -i NUMBER     Generate interpreter output for example nr NUMBER"
+      << std::endl;
+}
+
 int main(int argc, char **argv) {
+  if (argc == 1) {
+    help();
+    return 0;
+  }
+  if (argc > 1 && std::string(argv[1]) == "-h") {
+    help();
+    return 0;
+  }
   if (argc == 3 && std::string(argv[1]) == "-l") {
     size_t test_case = 1;
     test_case = std::atoi(argv[2]) - 1;
     if (test_case >= EXAMPLES.size()) {
       std::cout << "wrong test case use index from [0, " << EXAMPLES.size()
-                << '.' << std::endl;
+                << ".]" << std::endl;
       return 1;
     }
     std::istringstream in(EXAMPLES[test_case]);
@@ -293,19 +319,38 @@ int main(int argc, char **argv) {
     test_case = std::atoi(argv[2]) - 1;
     if (test_case >= EXAMPLES.size()) {
       std::cout << "wrong test case use index from [0, " << EXAMPLES.size()
-                << '.' << std::endl;
+                << ".]" << std::endl;
       return 1;
     }
     std::istringstream in(EXAMPLES[test_case]);
     pheonix::parser::Parser p(in);
 
     std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
-    pheonix::visitor::TreeGenVisitor visitor;
+    pheonix::ast_view::ASTView visitor;
     output->accept(visitor);
     std::string received = visitor.getResult();
 
     std::cout << "Example nr. " << ++test_case << std::endl;
     std::cout << received << std::endl;
+    return 0;
+  }
+
+  if (argc == 3 && std::string(argv[1]) == "-i") {
+    size_t test_case = 1;
+    test_case = std::atoi(argv[2]) - 1;
+    if (test_case >= EXAMPLES.size()) {
+      std::cout << "wrong test case use index from [0, " << EXAMPLES.size()
+                << ".]" << std::endl;
+      return 1;
+    }
+    std::cout << "Example nr. " << test_case << std::endl;
+    std::istringstream in(EXAMPLES[test_case++]);
+    pheonix::parser::Parser p(in);
+
+    std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
+    pheonix::eval::Evaluator visitor;
+    output->accept(visitor);
+
     return 0;
   }
 
@@ -332,7 +377,7 @@ int main(int argc, char **argv) {
       pheonix::parser::Parser p(in);
 
       std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
-      pheonix::visitor::TreeGenVisitor visitor;
+      pheonix::ast_view::ASTView visitor;
       output->accept(visitor);
       std::string received = visitor.getResult();
 
@@ -341,5 +386,20 @@ int main(int argc, char **argv) {
     }
     return 0;
   }
+  if (argc == 2 && std::string(argv[1]) == "-i") {
+
+    int i = 0;
+    for (const auto &ex : EXAMPLES) {
+      std::cout << std::endl << "Example nr. " << ++i << std::endl;
+      std::istringstream in(ex);
+      pheonix::parser::Parser p(in);
+
+      std::unique_ptr<pheonix::node::Node> output = p.generateParsingTree();
+      pheonix::eval::Evaluator visitor;
+      output->accept(visitor);
+    }
+    return 0;
+  }
+
   std::cout << "no such option" << std::endl;
 }

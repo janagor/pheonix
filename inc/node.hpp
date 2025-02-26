@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast_view.hpp"
 #include "token.hpp"
 #include "types.hpp"
 #include "visitor.hpp"
@@ -14,6 +15,7 @@ namespace pheonix::node {
 struct Node {
   virtual ~Node() = default;
   virtual void accept(visitor::Visitor &v) = 0;
+  virtual std::unique_ptr<Node> clone() const = 0;
 };
 
 struct Block : public Node {
@@ -22,6 +24,7 @@ struct Block : public Node {
   Block() : Node() {};
 
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct Program : public Node {
@@ -30,6 +33,7 @@ struct Program : public Node {
   Program() : Node() {};
 
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct Parameter : public Node {
@@ -39,6 +43,7 @@ struct Parameter : public Node {
   std::string identifier;
 
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct DeclarationArguments : public Node {
@@ -46,6 +51,7 @@ struct DeclarationArguments : public Node {
   std::vector<std::unique_ptr<Node>> arguments;
 
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 // Statements
 struct FunctionDeclaration : public Node {
@@ -56,6 +62,7 @@ struct FunctionDeclaration : public Node {
   FunctionDeclaration(std::string i) : Node(), identifier(i) {};
 
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct VariableDeclaration : public Node {
@@ -67,6 +74,7 @@ struct VariableDeclaration : public Node {
       : Node(), isMutable(isMut), identifier(i), expression(std::move(e)) {};
 
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct WhileLoopStatement : public Node {
@@ -77,6 +85,7 @@ struct WhileLoopStatement : public Node {
       : Node(), expression(std::move(e)), statements(std::move(s)) {};
 
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct IfStatement : public Node {
@@ -89,6 +98,7 @@ struct IfStatement : public Node {
         elseBody(nullptr) {};
 
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct ReturnStatement : public Node {
@@ -96,6 +106,7 @@ struct ReturnStatement : public Node {
   ReturnStatement(std::unique_ptr<Node> e)
       : Node(), expression(std::move(e)) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct ExpressionStatement : public Node {
@@ -103,11 +114,13 @@ struct ExpressionStatement : public Node {
   ExpressionStatement(std::unique_ptr<Node> e)
       : Node(), expression(std::move(e)) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct NullStatement : public Node {
   NullStatement() : Node() {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 // Expressions
@@ -119,6 +132,7 @@ struct AssignementExpression : public Node {
       : Node(), identifier(i), expression(std::move(e)) {};
 
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct OrExpression : public Node {
@@ -128,6 +142,7 @@ struct OrExpression : public Node {
   OrExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r, std::string t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct AndExpression : public Node {
@@ -137,6 +152,7 @@ struct AndExpression : public Node {
   AndExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r, std::string t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct ComparisonExpression : public Node {
@@ -147,6 +163,7 @@ struct ComparisonExpression : public Node {
                        std::string t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct RelationalExpression : public Node {
@@ -157,6 +174,7 @@ struct RelationalExpression : public Node {
                        std::string t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct AdditiveExpression : public Node {
@@ -167,6 +185,7 @@ struct AdditiveExpression : public Node {
                      std::string t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct MultiplicativeExpression : public Node {
@@ -177,6 +196,7 @@ struct MultiplicativeExpression : public Node {
                            std::string t)
       : Node(), left(std::move(l)), right(std::move(r)), op(t) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct CompositiveExpression : public Node {
@@ -185,6 +205,7 @@ struct CompositiveExpression : public Node {
   CompositiveExpression(std::unique_ptr<Node> l, std::unique_ptr<Node> r)
       : Node(), left(std::move(l)), right(std::move(r)) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct CastExpression : public Node {
@@ -193,6 +214,7 @@ struct CastExpression : public Node {
   CastExpression(std::unique_ptr<Node> e, std::unique_ptr<Node> t)
       : Node(), expression(std::move(e)), type(std::move(t)) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct PrefixExpression : public Node {
@@ -201,6 +223,7 @@ struct PrefixExpression : public Node {
   PrefixExpression(std::string o, std::unique_ptr<Node> e)
       : Node(), op(o), expression(std::move(e)) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct CallExpression : public Node {
@@ -209,6 +232,7 @@ struct CallExpression : public Node {
   CallExpression(std::unique_ptr<Node> f, std::unique_ptr<Node> a)
       : Node(), function(std::move(f)), arguments(std::move(a)) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct DebugExpression : public Node {
@@ -217,6 +241,7 @@ struct DebugExpression : public Node {
   DebugExpression(std::unique_ptr<Node> f, std::unique_ptr<Node> a)
       : Node(), function(std::move(f)), arguments(std::move(a)) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct LambdaExpression : public Node {
@@ -228,12 +253,14 @@ struct LambdaExpression : public Node {
       : Node(), arguments(std::move(a)), statements(std::move(s)) {};
 
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct Identifier : public Node {
   std::string value;
   Identifier(const std::string &val) : Node(), value(val) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct ParentExpression : public Node {
@@ -241,25 +268,35 @@ struct ParentExpression : public Node {
   ParentExpression(std::unique_ptr<Node> e)
       : Node(), expression(std::move(e)) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct Literal : public Node {
-  std::variant<types::Integer, types::Float, std::string, bool> value;
-  Literal(std::variant<types::Integer, types::Float, std::string, bool> val)
-      : Node(), value(val) {};
+  Primitive value;
+  Literal(Primitive val) : Node(), value(val) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct TypeSpecifier : public Node {
   std::string typeName;
   TypeSpecifier(const std::string &t) : Node(), typeName(t) {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 struct CallArguments : public Node {
   std::vector<std::unique_ptr<Node>> arguments;
   CallArguments() : Node() {};
   void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
+};
+
+// embedded function
+struct PrintFunction : public Node {
+  PrintFunction() : Node() {};
+  void accept(visitor::Visitor &v) override;
+  std::unique_ptr<Node> clone() const override;
 };
 
 } // namespace pheonix::node

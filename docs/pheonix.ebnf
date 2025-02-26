@@ -1,0 +1,163 @@
+                  program = { statement } ;
+
+                statement = function_declaration
+                          | variable_declaration
+                          | while_loop_statement
+                          | if_statement
+                          | return_statement
+                          | expression_statement
+                          | null_statement ;
+
+           null_statement = ";" ;
+
+     variable_declaration = "let" [ "mut"] identifier "=" expession ";" ;
+
+     while_loop_statement = "while"
+                            "(" expression ")"
+                            "{"  { statement } "}" ;
+
+         return_statement = "return" [ expression ] ";" ;
+
+     expression_statement = expression ";" ;
+
+               expression = assignement_expression 
+                          | or_expression ;
+
+          expression_list = [ expression { "," expression } ] ;
+
+            if_statement = if_clause [ else_clause ] ;
+
+                if_clause = "if"
+                            "(" expression ")"
+                            "{" { statement } "}" ;
+
+              else_clause = "else"
+                            (
+                            if_statement
+                            | ( "{" { statement } "}" )
+                            ) ;
+
+   assignement_expression = identifier "=" or_expression ;
+
+            or_expression = and_expression
+                            { "||" and_expression } ;
+
+           and_expression = comparison_expression
+                            { "&&" comparison_expression } ;
+
+    comparison_expression = relational_expression
+                            [ ( "==" | "!=" )
+                            relational_expression ] ;
+
+    relational_expression = additive_expression
+                            [ ( "<" | ">" | "<=" | ">=" )
+                            additive_expression ] ;
+
+      additive_expression = multiplicative_expression
+                            { ( "+" | "-" )
+                            multiplicative_expression } ;
+
+multiplicative_expression = compositive_expression
+                            { ( "*" | "/" | "%" )
+                            compositive_expression } ;
+
+   compositive_expression = cast_expression
+                            { "|" cast_expression } ;
+
+          cast_expression = prefix_expression { "<-" type_name } ;
+
+        prefix_expression = "!" other_expression
+                          | "-" other_expression
+                          | other_expression ;
+
+         other_expression = maybe_call_expression
+                          | literal ;
+
+    maybe_call_expression = maybe_identifier_call
+                          | maybe_lambda_call
+                          | maybe_parent_call
+                          | maybe_debug_call ;
+
+    maybe_identifier_call = identifier { "(" expression_list ")" } ;
+
+        maybe_lambda_call = lambda_expression { "(" expression_list ")" } ;
+
+        maybe_parent_call = parent_expression { "(" expression_list ")" } ;
+
+         maybe_debug_call = debug_expression { "(" expression_list ")" } ;
+
+        lambda_expression = "#" enclosed_parameter_list function_body ;
+
+        parent_expression = "(" expression ")" ;
+
+         debug_expression = "[" expression "]" "(" expression_list ")" ;
+
+                  literal = bool_literal
+                          | float_literal
+                          | integer_literal
+                          | string_literal ;
+
+     function_declaration = "fn" identifier
+                            enclosed_parameter_list function_body ;
+
+  enclosed_parameter_list = "(" parameter_list ")" ;
+
+           parameter_list = [
+                            [ "mut" ] identifier
+                            { "," [ "mut" ] identifier }
+                            ] ;
+
+            function_body = "{" 
+                            { statement - function_declaration }
+                            "}" ;
+
+               identifier = letter { letter | digit | "_" } ;
+
+                type_name = "bol" | "flt" | "int" | "str" ;
+
+             bool_literal = "true" | "false" ;
+
+            float_literal = integer_literal "." { digit } ;
+
+          integer_literal = ( non_zero_digit { digit } ) | "0" ;
+
+           string_literal = """ {
+                            special_string_character | normal_string_character
+                            } """ ;
+
+  normal_string_character = character - ( """ | "\" ) ;
+
+ special_string_character = "\"" | "\n" | "\\" | "\b";
+
+                character = alphanumeric_character
+                          | special_character
+                          | white_character ;
+
+          white_character = "\n" | "\t" | " " ; 
+
+   alphanumeric_character = letter | digit ;
+
+                   letter = "A" | "B" | "C" | "D" | "E" | "F" | "G"
+                          | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+                          | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
+                          | "V" | "W" | "X" | "Y" | "Z" | "a" | "b"
+                          | "c" | "d" | "e" | "f" | "g" | "h" | "i"
+                          | "j" | "k" | "l" | "m" | "n" | "o" | "p"
+                          | "q" | "r" | "s" | "t" | "u" | "v" | "w"
+                          | "x" | "y" | "z" ;
+
+                    digit = "0" | non_zero_digit ;
+
+           non_zero_digit = "1" | "2" | "3" | "4" | "5"
+                          | "6" | "7" | "8" | "9" ;
+
+        special_character = "~" | "!" | "@" | "#" | "$" | "%" | "^" | "&" | "*"
+                          | "(" | ")" | "-" | "_" | "+" | "=" | "{" | "}" | "["
+                          | "]" | "|" | "\" | ":" | ";" | """ | "'" | "<" | ">"
+                          | "," | "." | "?" | "/"
+
+                 new_line = ( "\n" | "\r" | "\r\n" ) ;
+
+         one_line_comment = "//" { character - new_line } new_line ;
+
+        multiline_comment = "/*" { ( character character ) - "*/" } "*/" ;

@@ -1,3 +1,4 @@
+#include "ast_view.hpp"
 #include "parser.hpp"
 
 #include <gtest/gtest.h>
@@ -7,6 +8,7 @@ using namespace std;
 using namespace pheonix::token;
 using namespace pheonix::exception;
 using namespace pheonix::node;
+using namespace pheonix::ast_view;
 using namespace pheonix::visitor;
 using namespace pheonix::lexer;
 using namespace pheonix::parser;
@@ -16,18 +18,1302 @@ void compareExpectedAndReceived(const string &input, const string &expected) {
   istringstream in(input);
   Parser p(in);
   unique_ptr<Node> output = p.generateParsingTree();
-  TreeGenVisitor visitor;
+  ASTView visitor;
   output->accept(visitor);
   string received = visitor.getResult();
   EXPECT_EQ(expected, received);
 }
 
 const map<string, string> TRIVIAL_CASES{
-    // Empty
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    //
     {"", "(Program:)"},
-    // just ";"
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // NULL_STATEMENT ;
+    //
     {";", "(Program:\n\
     (NullStatement:))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // FUNCTION_DECLARATION =
+    // "FN" IDENTIFIER ENCLOSED_PARAMETER_LIST FUNCTION_BODY =
+    // "FN" IDENTIFIER "(" PARAMETER_LIST ")"
+    //      "{" { STATEMENT - FUNCTION_DECLARATION } "}" =
+    // "FN" IDENTIFIER "(" [ [ "mut" ] identifier { "," [ "mut" ] identifier }
+    // ]
+    //      ")"
+    //      "{" { STATEMENT - FUNCTION_DECLARATION } "}"
+    //
+    {"fn returnOne() {\n\
+    return 123;\n\
+    }",
+     "(Program:\n\
+    (FunctionDeclaration:\n\
+        identifier=returnOne,\n\
+        arguments=(DeclarationArguments:),\n\
+        statements=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123)))))"},
+
+    {"fn returnOne() {\n\
+    return 123;\n\
+    return 123;\n\
+    }",
+     "(Program:\n\
+    (FunctionDeclaration:\n\
+        identifier=returnOne,\n\
+        arguments=(DeclarationArguments:),\n\
+        statements=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123)),\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123)))))"},
+
+    {"fn returnOne(num) {\n\
+    return 123;\n\
+    }",
+     "(Program:\n\
+    (FunctionDeclaration:\n\
+        identifier=returnOne,\n\
+        arguments=(DeclarationArguments:\n\
+            (Parameter:\n\
+                isMutable=false,\n\
+                identifier=num)),\n\
+        statements=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123)))))"},
+
+    {"fn returnOne(mut num) {\n\
+    return 123;\n\
+    }",
+     "(Program:\n\
+    (FunctionDeclaration:\n\
+        identifier=returnOne,\n\
+        arguments=(DeclarationArguments:\n\
+            (Parameter:\n\
+                isMutable=true,\n\
+                identifier=num)),\n\
+        statements=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123)))))"},
+
+    {"fn returnOne(mut num, num2) {\n\
+    return 123;\n\
+    }",
+     "(Program:\n\
+    (FunctionDeclaration:\n\
+        identifier=returnOne,\n\
+        arguments=(DeclarationArguments:\n\
+            (Parameter:\n\
+                isMutable=true,\n\
+                identifier=num),\n\
+            (Parameter:\n\
+                isMutable=false,\n\
+                identifier=num2)),\n\
+        statements=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123)))))"},
+
+    {"fn returnOne(mut num, mut num2) {\n\
+    return 123;\n\
+    }",
+     "(Program:\n\
+    (FunctionDeclaration:\n\
+        identifier=returnOne,\n\
+        arguments=(DeclarationArguments:\n\
+            (Parameter:\n\
+                isMutable=true,\n\
+                identifier=num),\n\
+            (Parameter:\n\
+                isMutable=true,\n\
+                identifier=num2)),\n\
+        statements=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123)))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // VARIABLE_DECLARATION =
+    // VARIABLE_DECLARATION = "LET" [ "MUT"] IDENTIFIER "=" EXPESSION ";" ;
+    //
+    {"let a = 123;", "(Program:\n\
+    (VariableDeclaration:\n\
+        isMutable=false,\n\
+        identifier=a,\n\
+        expression=(Literal:\n\
+            type=Integer,\n\
+            value=123)))"},
+
+    {"let  mut a = 123;", "(Program:\n\
+    (VariableDeclaration:\n\
+        isMutable=true,\n\
+        identifier=a,\n\
+        expression=(Literal:\n\
+            type=Integer,\n\
+            value=123)))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // WHILE_LOOP_STATEMENT =
+    // "WHILE" "(" EXPRESSION ")" "{"  { STATEMENT } "}" ;
+    //
+
+    {"while(1==1) { 1; }", "(Program:\n\
+    (WhileLoopStatement:\n\
+        expression=(ComparisonExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=1),\n\
+            operator=[==],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=1)),\n\
+        statements=(Block:\n\
+            (ExpressionStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=1)))))"},
+
+    {"while(1==1) { 1;1; }", "(Program:\n\
+    (WhileLoopStatement:\n\
+        expression=(ComparisonExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=1),\n\
+            operator=[==],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=1)),\n\
+        statements=(Block:\n\
+            (ExpressionStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=1)),\n\
+            (ExpressionStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=1)))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // IF_STATEMENT =
+    //  IF_CLAUSE [ ELSE_CLAUSE ] =
+    //  IF_CLAUSE [  "ELSE" ( IF_STATEMENT | ( "{" { STATEMENT } "}" )) ] =
+    //
+    // (IF)
+    {"if (1 == 1) {\n\
+    return 123;\n\
+    }",
+     "(Program:\n\
+    (IfStatement:\n\
+        predicate=(ComparisonExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=1),\n\
+            operator=[==],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=1)),\n\
+        ifBody=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123))),\n\
+        elseBody=))"},
+    // (IF) (ELSE)
+    {"if (1 == 1) {\n\
+    return 123;\n\
+    } else {\n\
+    return 123;\n\
+    }",
+     "(Program:\n\
+    (IfStatement:\n\
+        predicate=(ComparisonExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=1),\n\
+            operator=[==],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=1)),\n\
+        ifBody=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123))),\n\
+        elseBody=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123)))))"},
+    // (IF) (ELSE IF) (ELSE)
+    {"if (1 == 1) {\n\
+        return 123;\n\
+    } else if (1==1) {\n\
+        return 123;\n\
+    }",
+     "(Program:\n\
+    (IfStatement:\n\
+        predicate=(ComparisonExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=1),\n\
+            operator=[==],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=1)),\n\
+        ifBody=(Block:\n\
+            (ReturnStatement:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=123))),\n\
+        elseBody=(IfStatement:\n\
+            predicate=(ComparisonExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=1),\n\
+                operator=[==],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=1)),\n\
+            ifBody=(Block:\n\
+                (ReturnStatement:\n\
+                    expression=(Literal:\n\
+                        type=Integer,\n\
+                        value=123))),\n\
+            elseBody=)))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // RETURN_STATEMENT =
+    // "RETURN" [ EXPRESSION ] ";" ;
+    //
+
+    {"return;", "(Program:\n\
+    (ReturnStatement:\n\
+        expression=))"},
+
+    {"return 123;", "(Program:\n\
+    (ReturnStatement:\n\
+        expression=(Literal:\n\
+            type=Integer,\n\
+            value=123)))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // ASSIGNEMENT_EXPRESSION | OR_EXPRESSION;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // ASSIGNEMENT_EXPRESSION =
+    // IDENTIFIER "=" OR_EXPRESSION ;
+    //
+    {"a=123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AssignementExpression:\n\
+            identifier=a,\n\
+            expression=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION { "||" AND_EXPRESSION } ;
+    //
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION "||" AND_EXPRESSION ;
+    //
+    {"9||123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(OrExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[||],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION "||" AND_EXPRESSION "||" AND_EXPRESSION ;
+    //
+    {"12||9||123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(OrExpression:\n\
+            left=(OrExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[||],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[||],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION { "&&" COMPARISON_EXPRESSION } ;
+    //
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION "&&" COMPARISON_EXPRESSION ;
+    //
+    {"9&&123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AndExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[&&],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION "&&" COMPARISON_EXPRESSION "&&"
+    //      COMPARISON_EXPRESSION;
+    //
+    {"12&&9&&123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AndExpression:\n\
+            left=(AndExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[&&],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[&&],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION [ ( "==" | "!=" ) RELATIONAL_EXPRESSION ] ;
+    //
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION "!=" RELATIONAL_EXPRESSION ;
+    //
+    {"9!=123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(ComparisonExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[!=],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION "==" RELATIONAL_EXPRESSION ;
+    //
+    {"9==123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(ComparisonExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[==],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION [ ( "<" | ">" | "<=" | ">=" ) ADDITIVE_EXPRESSION ]
+    // ;
+    //
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION "<" ADDITIVE_EXPRESSION ;
+    //
+    {"9<123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(RelationalExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[<],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION  ">" ADDITIVE_EXPRESSION ;
+    //
+    {"9>123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(RelationalExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[>],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION  "<= "ADDITIVE_EXPRESSION ;
+    //
+    {"9<=123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(RelationalExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[<=],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION ">=" ADDITIVE_EXPRESSION ;
+    //
+    {"9>=123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(RelationalExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[>=],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION { ( "+" | "-" ) MULTIPLICATIVE_EXPRESSION } ;
+    //
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION "+" MULTIPLICATIVE_EXPRESSION ;
+    //
+    {"1+2;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=1),\n\
+            operator=[+],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=2))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION "-" MULTIPLICATIVE_EXPRESSION ;
+    //
+    {"100-100;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=100),\n\
+            operator=[-],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=100))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION "+" MULTIPLICATIVE_EXPRESSION "+"
+    //      MULTIPLICATIVE_EXPRESSION;
+    //
+    {"12+9+123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(AdditiveExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[+],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[+],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION "+" MULTIPLICATIVE_EXPRESSION "-"
+    //      MULTIPLICATIVE_EXPRESSION;
+    //
+    {"12+9-123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(AdditiveExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[+],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[-],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION "-" MULTIPLICATIVE_EXPRESSION "+"
+    //      MULTIPLICATIVE_EXPRESSION;
+    //
+    {"12-9+123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(AdditiveExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[-],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[+],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION "-" MULTIPLICATIVE_EXPRESSION "-"
+    //      MULTIPLICATIVE_EXPRESSION;
+    //
+    {"12-9-123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(AdditiveExpression:\n\
+            left=(AdditiveExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[-],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[-],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "*" COMPOSITIVE_EXPRESSION ;
+    //
+    {"9*123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[*],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "/" COMPOSITIVE_EXPRESSION ;
+    //
+    {"9/123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[/],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "%" COMPOSITIVE_EXPRESSION ;
+    //
+    {"9%123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[%],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "*" COMPOSITIVE_EXPRESSION "*"
+    //      COMPOSITIVE_EXPRESSION;
+    //
+    {"12*9*123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[*],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[*],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "/" COMPOSITIVE_EXPRESSION "/"
+    //      COMPOSITIVE_EXPRESSION;
+    //
+    {"12/9/123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[/],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[/],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "%" COMPOSITIVE_EXPRESSION "%"
+    //      COMPOSITIVE_EXPRESSION;
+    //
+    {"12%9%123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[%],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[%],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "*" COMPOSITIVE_EXPRESSION "/"
+    //      COMPOSITIVE_EXPRESSION;
+    //
+    {"12*9/123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[*],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[/],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "*" COMPOSITIVE_EXPRESSION "%"
+    //      COMPOSITIVE_EXPRESSION;
+    //
+    {"12*9%123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[*],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[%],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "/" COMPOSITIVE_EXPRESSION "*"
+    //      COMPOSITIVE_EXPRESSION;
+    //
+    {"12/9*123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[/],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[*],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "/" COMPOSITIVE_EXPRESSION "%"
+    //      COMPOSITIVE_EXPRESSION;
+    //
+    {"12/9%123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[/],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[%],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "%" COMPOSITIVE_EXPRESSION "*"
+    //      COMPOSITIVE_EXPRESSION;
+    //
+    {"12%9*123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[%],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[*],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION "%" COMPOSITIVE_EXPRESSION "/"
+    //      COMPOSITIVE_EXPRESSION;
+    //
+    {"12%9/123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(MultiplicativeExpression:\n\
+            left=(MultiplicativeExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[%],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[/],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION =
+    // CAST_EXPRESSION {"|" CAST_EXPRESSION } ;
+    //
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION =
+    // CAST_EXPRESSION "|" CAST_EXPRESSION ;
+    //
+    {"9%123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CompositiveExpression:\n\
+            left=(Literal:\n\
+                type=Integer,\n\
+                value=9),\n\
+            operator=[|],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION =
+    // CAST_EXPRESSION "|" CAST_EXPRESSION "|" CAST_EXPRESSION;
+    //
+    {"12|9|123;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CompositiveExpression:\n\
+            left=(CompositiveExpression:\n\
+                left=(Literal:\n\
+                    type=Integer,\n\
+                    value=12),\n\
+                operator=[|],\n\
+                right=(Literal:\n\
+                    type=Integer,\n\
+                    value=9)),\n\
+            operator=[|],\n\
+            right=(Literal:\n\
+                type=Integer,\n\
+                value=123))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION =
+    // CAST_EXPRESSION =
+    // PREFIX_EXPRESSION { "<-" TYPE_NAME } ;
+    //
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION =
+    // CAST_EXPRESSION =
+    // PREFIX_EXPRESSION "<-" "INT" ;
+    //
+    {"1<-int;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CastExpression:\n\
+            expression=(Literal:\n\
+                type=Integer,\n\
+                value=1),\n\
+            type=(TypeSpecifier:\n\
+                value=INT))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION =
+    // CAST_EXPRESSION =
+    // PREFIX_EXPRESSION "<-" "STR" ;
+    {"1<-str;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CastExpression:\n\
+            expression=(Literal:\n\
+                type=Integer,\n\
+                value=1),\n\
+            type=(TypeSpecifier:\n\
+                value=STR))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION =
+    // CAST_EXPRESSION =
+    // PREFIX_EXPRESSION "<-" "FLT" ;
+    //
+    {"1<-flt;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CastExpression:\n\
+            expression=(Literal:\n\
+                type=Integer,\n\
+                value=1),\n\
+            type=(TypeSpecifier:\n\
+                value=FLT))))"},
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION =
+    // CAST_EXPRESSION =
+    // PREFIX_EXPRESSION "<-" "BOL" ;
+    //
+    {"1<-bol;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CastExpression:\n\
+            expression=(Literal:\n\
+                type=Integer,\n\
+                value=1),\n\
+            type=(TypeSpecifier:\n\
+                value=BOL))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // PROGRAM =
+    // STATEMENT =
+    // EXPRESSION_STATEMENT =
+    // EXPRESSION ";" =
+    // OR_EXPRESSION =
+    // AND_EXPRESSION =
+    // COMPARISON_EXPRESSION =
+    // RELATIONAL_EXPRESSION =
+    // ADDITIVE_EXPRESSION =
+    // MULTIPLICATIVE_EXPRESSION =
+    // COMPOSITIVE_EXPRESSION =
+    // CAST_EXPRESSION =
+    // PREFIX_EXPRESSION "<-" "BOL" <- "STR" ;
+    //
+    {"1<-bol <-str;", "(Program:\n\
+    (ExpressionStatement:\n\
+        expression=(CastExpression:\n\
+            expression=(CastExpression:\n\
+                expression=(Literal:\n\
+                    type=Integer,\n\
+                    value=1),\n\
+                type=(TypeSpecifier:\n\
+                    value=BOL)),\n\
+            type=(TypeSpecifier:\n\
+                value=STR))))"},
+
+    ///////////////////////////////////////////////////////////////////////////
     // IntegerLiteral
     {"1;", "(Program:\n\
     (ExpressionStatement:\n\
@@ -62,39 +1348,6 @@ const map<string, string> TRIVIAL_CASES{
     (ExpressionStatement:\n\
         expression=(Identifier:\n\
             value=duck)))"},
-    // CastExpression
-    {"1<-int;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(CastExpression:\n\
-            expression=(Literal:\n\
-                type=Integer,\n\
-                value=1),\n\
-            type=(TypeSpecifier:\n\
-                value=INT))))"},
-    {"1<-str;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(CastExpression:\n\
-            expression=(Literal:\n\
-                type=Integer,\n\
-                value=1),\n\
-            type=(TypeSpecifier:\n\
-                value=STR))))"},
-    {"1<-flt;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(CastExpression:\n\
-            expression=(Literal:\n\
-                type=Integer,\n\
-                value=1),\n\
-            type=(TypeSpecifier:\n\
-                value=FLT))))"},
-    {"1<-bol;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(CastExpression:\n\
-            expression=(Literal:\n\
-                type=Integer,\n\
-                value=1),\n\
-            type=(TypeSpecifier:\n\
-                value=BOL))))"},
     // PrefixExpression
     {"-2;", "(Program:\n\
     (ExpressionStatement:\n\
@@ -110,48 +1363,6 @@ const map<string, string> TRIVIAL_CASES{
             expression=(Literal:\n\
                 type=Integer,\n\
                 value=2))))"},
-    // AdditiveExpression
-    {"1+2;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(AdditiveExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=1),\n\
-            operator=[+],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=2))))"},
-    {"100-100;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(AdditiveExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=100),\n\
-            operator=[-],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=100))))"},
-    // MultipliveExpression
-    {"9*123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(MultiplicativeExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=9),\n\
-            operator=[*],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    {"9/123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(MultiplicativeExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=9),\n\
-            operator=[/],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
     // CompositiveExpression
     {"9|123;", "(Program:\n\
     (ExpressionStatement:\n\
@@ -163,90 +1374,6 @@ const map<string, string> TRIVIAL_CASES{
             right=(Literal:\n\
                 type=Integer,\n\
                 value=123))))"},
-    // RelationalExpression
-    {"9<123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(RelationalExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=9),\n\
-            operator=[<],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    {"9<=123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(RelationalExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=9),\n\
-            operator=[<=],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    {"9>123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(RelationalExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=9),\n\
-            operator=[>],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    {"9>=123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(RelationalExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=9),\n\
-            operator=[>=],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    // ComparisonExpression
-    {"9==123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(ComparisonExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=9),\n\
-            operator=[==],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    {"9!=123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(ComparisonExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=9),\n\
-            operator=[!=],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    // AndExpression
-    {"9&&123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(AndExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=9),\n\
-            operator=[&&],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    // OrExpression
-    {"9||123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(OrExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=9),\n\
-            operator=[||],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
     // AssignementExpression
     {"a=123;", "(Program:\n\
     (ExpressionStatement:\n\
@@ -255,149 +1382,6 @@ const map<string, string> TRIVIAL_CASES{
             expression=(Literal:\n\
                 type=Integer,\n\
                 value=123))))"},
-    // VariableDeclaration
-    {"let a = 123;", "(Program:\n\
-    (VariableDeclaration:\n\
-        isMutable=false,\n\
-        identifier=a,\n\
-        expression=(Literal:\n\
-            type=Integer,\n\
-            value=123)))"},
-    // WhileLoopStatement
-    {"while(1==1) { 1; }", "(Program:\n\
-    (WhileLoopStatement:\n\
-        expression=(ComparisonExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=1),\n\
-            operator=[==],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=1)),\n\
-        statements=(Block:\n\
-            (ExpressionStatement:\n\
-                expression=(Literal:\n\
-                    type=Integer,\n\
-                    value=1)))))"},
-    // ReturnStatement
-    {"return;", "(Program:\n\
-    (ReturnStatement:\n\
-        expression=))"},
-    {"return 123;", "(Program:\n\
-    (ReturnStatement:\n\
-        expression=(Literal:\n\
-            type=Integer,\n\
-            value=123)))"},
-    // function declaration
-    {"fn returnOne() {\n\
-    return 123;\n\
-}",
-     "(Program:\n\
-    (FunctionDeclaration:\n\
-        identifier=returnOne,\n\
-        arguments=(DeclarationArguments:),\n\
-        statements=(Block:\n\
-            (ReturnStatement:\n\
-                expression=(Literal:\n\
-                    type=Integer,\n\
-                    value=123)))))"},
-    {"fn returnOne(mut num) {\n\
-    return 123;\n\
-}",
-     "(Program:\n\
-    (FunctionDeclaration:\n\
-        identifier=returnOne,\n\
-        arguments=(DeclarationArguments:\n\
-            (Parameter:\n\
-                isMutable=true,\n\
-                identifier=num)),\n\
-        statements=(Block:\n\
-            (ReturnStatement:\n\
-                expression=(Literal:\n\
-                    type=Integer,\n\
-                    value=123)))))"},
-    // if statement without else
-    {"if (1 == 1) {\n\
-    return 123;\n\
-}",
-     "(Program:\n\
-    (IfStatement:\n\
-        predicate=(ComparisonExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=1),\n\
-            operator=[==],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=1)),\n\
-        ifBody=(Block:\n\
-            (ReturnStatement:\n\
-                expression=(Literal:\n\
-                    type=Integer,\n\
-                    value=123))),\n\
-        elseBody=))"},
-    // if statement with one else
-    {"if (1 == 1) {\n\
-    return 123;\n\
-} else {\n\
-    return 123;\n\
-}",
-     "(Program:\n\
-    (IfStatement:\n\
-        predicate=(ComparisonExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=1),\n\
-            operator=[==],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=1)),\n\
-        ifBody=(Block:\n\
-            (ReturnStatement:\n\
-                expression=(Literal:\n\
-                    type=Integer,\n\
-                    value=123))),\n\
-        elseBody=(Block:\n\
-            (ReturnStatement:\n\
-                expression=(Literal:\n\
-                    type=Integer,\n\
-                    value=123)))))"},
-    // if statement with else if
-    {"if (1 == 1) {\n\
-    return 123;\n\
-} else if (1==1) {\n\
-    return 123;\n\
-}",
-     "(Program:\n\
-    (IfStatement:\n\
-        predicate=(ComparisonExpression:\n\
-            left=(Literal:\n\
-                type=Integer,\n\
-                value=1),\n\
-            operator=[==],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=1)),\n\
-        ifBody=(Block:\n\
-            (ReturnStatement:\n\
-                expression=(Literal:\n\
-                    type=Integer,\n\
-                    value=123))),\n\
-        elseBody=(IfStatement:\n\
-            predicate=(ComparisonExpression:\n\
-                left=(Literal:\n\
-                    type=Integer,\n\
-                    value=1),\n\
-                operator=[==],\n\
-                right=(Literal:\n\
-                    type=Integer,\n\
-                    value=1)),\n\
-            ifBody=(Block:\n\
-                (ReturnStatement:\n\
-                    expression=(Literal:\n\
-                        type=Integer,\n\
-                        value=123))),\n\
-            elseBody=)))"},
     // CallExpression
     {"call(1);", "(Program:\n\
     (ExpressionStatement:\n\
@@ -683,102 +1667,6 @@ const map<string, string> TWO_STATEMENTS{
                 right=(Literal:\n\
                     type=Integer,\n\
                     value=123)))))"},
-    // AdditiveExpressions
-    {"12+9+123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(AdditiveExpression:\n\
-            left=(AdditiveExpression:\n\
-                left=(Literal:\n\
-                    type=Integer,\n\
-                    value=12),\n\
-                operator=[+],\n\
-                right=(Literal:\n\
-                    type=Integer,\n\
-                    value=9)),\n\
-            operator=[+],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    // MultiplicativeExpressions
-    {"12*9*123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(MultiplicativeExpression:\n\
-            left=(MultiplicativeExpression:\n\
-                left=(Literal:\n\
-                    type=Integer,\n\
-                    value=12),\n\
-                operator=[*],\n\
-                right=(Literal:\n\
-                    type=Integer,\n\
-                    value=9)),\n\
-            operator=[*],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    // RelationalExpression
-    {"12<9<123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(RelationalExpression:\n\
-            left=(RelationalExpression:\n\
-                left=(Literal:\n\
-                    type=Integer,\n\
-                    value=12),\n\
-                operator=[<],\n\
-                right=(Literal:\n\
-                    type=Integer,\n\
-                    value=9)),\n\
-            operator=[<],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    // ComparisonExpressions
-    {"12==9==123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(ComparisonExpression:\n\
-            left=(ComparisonExpression:\n\
-                left=(Literal:\n\
-                    type=Integer,\n\
-                    value=12),\n\
-                operator=[==],\n\
-                right=(Literal:\n\
-                    type=Integer,\n\
-                    value=9)),\n\
-            operator=[==],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    // AndExpressions
-    {"12&&9&&123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(AndExpression:\n\
-            left=(AndExpression:\n\
-                left=(Literal:\n\
-                    type=Integer,\n\
-                    value=12),\n\
-                operator=[&&],\n\
-                right=(Literal:\n\
-                    type=Integer,\n\
-                    value=9)),\n\
-            operator=[&&],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
-    // OrExpressions
-    {"12||9||123;", "(Program:\n\
-    (ExpressionStatement:\n\
-        expression=(OrExpression:\n\
-            left=(OrExpression:\n\
-                left=(Literal:\n\
-                    type=Integer,\n\
-                    value=12),\n\
-                operator=[||],\n\
-                right=(Literal:\n\
-                    type=Integer,\n\
-                    value=9)),\n\
-            operator=[||],\n\
-            right=(Literal:\n\
-                type=Integer,\n\
-                value=123))))"},
 };
 
 TEST(TestParser, testTwoStatements) {
@@ -821,13 +1709,12 @@ TEST(TestParser, testErrorsNoSemicolon) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: SEMICOLON, Got: END_OF_FILE.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 7);
+    EXPECT_STREQ(e.what(),
+                 "1:7: error: Expected: SEMICOLON, Got: END_OF_FILE.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -840,13 +1727,12 @@ TEST(TestParser, testErrorsNoSemicolon2) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: SEMICOLON, Got: END_OF_FILE.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 6);
+    EXPECT_STREQ(e.what(),
+                 "1:6: error: Expected: SEMICOLON, Got: END_OF_FILE.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -858,13 +1744,11 @@ TEST(TestParser, notFinishedParenthesis1) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: RBRACE, Got: END_OF_FILE.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 5);
+    EXPECT_STREQ(e.what(), "1:5: error: Expected: RBRACE, Got: END_OF_FILE.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -876,13 +1760,11 @@ TEST(TestParser, notFinishedParenthesis2) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: RPARENT, Got: LBRACE.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 3);
+    EXPECT_STREQ(e.what(), "1:3: error: Expected: RPARENT, Got: LBRACE.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -897,10 +1779,9 @@ TEST(TestParser, NoRValue) {
     unique_ptr<Node> output = p.generateParsingTree();
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(),
-                 "Failed parsing expression in variable declaration.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 14);
+    EXPECT_STREQ(
+        e.what(),
+        "1:14: error: Failed parsing expression in variable declaration.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -915,9 +1796,7 @@ TEST(TestParser, wrongUsageOfKeyword) {
     unique_ptr<Node> output = p.generateParsingTree();
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: SEMICOLON, Got: IDENTIFIER.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 5);
+    EXPECT_STREQ(e.what(), "1:5: error: Expected: SEMICOLON, Got: IDENTIFIER.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -932,9 +1811,7 @@ TEST(TestParser, WrongEQSign) {
     unique_ptr<Node> output = p.generateParsingTree();
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: RPARENT, Got: ASSIGN.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 12);
+    EXPECT_STREQ(e.what(), "1:12: error: Expected: RPARENT, Got: ASSIGN.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -947,13 +1824,11 @@ TEST(TestParser, NoPredicate) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected predicate in if statement");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 5);
+    EXPECT_STREQ(e.what(), "1:5: error: Expected predicate in if statement");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -966,13 +1841,11 @@ TEST(TestParser, NoPredicate2) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected predicate in while statement");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 8);
+    EXPECT_STREQ(e.what(), "1:8: error: Expected predicate in while statement");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -985,13 +1858,11 @@ TEST(TestParser, ArgumentsListWithCommaAtTheEnd) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Error parsing parameter list.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 18);
+    EXPECT_STREQ(e.what(), "1:18: error: Error parsing parameter list.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -1004,13 +1875,11 @@ TEST(TestParser, LetWithoutLvalue) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected: IDENTIFIER, Got: ASSIGN.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 5);
+    EXPECT_STREQ(e.what(), "1:5: error: Expected: IDENTIFIER, Got: ASSIGN.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }
@@ -1023,13 +1892,11 @@ TEST(TestParser, AssignmentWithoutRvalue) {
   try {
     Parser p(in);
     unique_ptr<Node> output = p.generateParsingTree();
-    // TreeGenVisitor visitor;
+    // ASTView visitor;
     // output->accept(visitor);
     FAIL() << "Expected ParserException";
   } catch (const ParserException &e) {
-    EXPECT_STREQ(e.what(), "Expected expression.");
-    EXPECT_EQ(e.getLine(), 1);
-    EXPECT_EQ(e.getColumn(), 10);
+    EXPECT_STREQ(e.what(), "1:10: error: Expected expression.");
   } catch (...) {
     FAIL() << "Unexpected exception type thrown";
   }

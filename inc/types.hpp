@@ -44,6 +44,8 @@ struct Integer {
   bool operator>(const Integer &other) const;
   bool operator>=(const Integer &other) const;
 
+  Integer operator-() const;
+
   int getValue() const;
   void setValue(long val);
 
@@ -87,6 +89,8 @@ struct Float {
   bool operator<=(const Float &other) const;
   bool operator>(const Float &other) const;
   bool operator>=(const Float &other) const;
+
+  Float operator-() const;
 
   friend std::ostream &operator<<(std::ostream &os, const Float &obj);
 
