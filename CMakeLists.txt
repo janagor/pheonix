@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(pheonix VERSION 1.0)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(COMPILER_FLAGS "-Werror -Wextra -Wall -g")
@@ -13,8 +13,25 @@ elseif (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
 endif()
 
+find_package(LLVM REQUIRED CONFIG)
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+llvm_map_components_to_libnames(llvm_libs
+    core
+    native
+    orcjit
+    support
+    executionengine
+)
+add_definitions(${LLVM_DEFINITIONS})
+include_directories(${LLVM_INCLUDE_DIRS})
+link_directories(${LLVM_LIBRARY_DIRS})
+
+
 include(FetchContent)
-FetchContent_Declare( 
+FetchContent_Declare(
    googletest
    GIT_REPOSITORY      https://github.com/google/googletest.git
    GIT_TAG main
@@ -27,48 +44,50 @@ include_directories(tests)
 include_directories(app)
 
 set(HEADER_FILES
-    inc/token.hpp
-    inc/lexer.hpp
+    inc/jit.hpp
     inc/node.hpp
+    inc/repl.hpp
+    inc/lexer.hpp
+    inc/token.hpp
+    inc/types.hpp
+    inc/object.hpp
     inc/parser.hpp
+    inc/context.hpp
+    inc/helpers.hpp
     inc/visitor.hpp
-    inc/operator_visitor.hpp
     inc/ast_view.hpp
     inc/evaluator.hpp
-    inc/context.hpp
-    inc/object.hpp
-    inc/types.hpp
     inc/exception.hpp
-    inc/helpers.hpp
     inc/token_type.hpp
-    inc/repl.hpp
+    inc/inst_visitor.hpp
+    inc/operator_visitor.hpp
 )
 
 set(SOURCE_FILES
-    src/token.cpp
-    src/lexer.cpp
     src/node.cpp
-    src/parser.cpp
-    src/visitor.cpp
-    src/operator_visitor.cpp
-    src/ast_view.cpp
-    src/evaluator.cpp
-    src/context.cpp
-    src/object.cpp
-    src/types.cpp
-    src/exception.cpp
-    src/helpers.cpp
     src/repl.cpp
+    src/lexer.cpp
+    src/token.cpp
+    src/types.cpp
+    src/parser.cpp
+    src/object.cpp
+    src/context.cpp
+    src/helpers.cpp
+    src/visitor.cpp
+    src/ast_view.cpp
+    src/exception.cpp
+    src/evaluator.cpp
+    src/operator_visitor.cpp
 )
 
 add_executable(
-example
+    example
     app/example.cpp
     ${SOURCE_FILES} ${HEADER_FILES}
 )
 
 add_executable(
-pheonix
+    pheonix
     app/pheonix.cpp
     ${SOURCE_FILES} ${HEADER_FILES}
 )
@@ -76,14 +95,14 @@ pheonix
 enable_testing()
 
 add_executable(
-test_lexer
+    test_lexer
     tests/test_lexer.cpp
     ${SOURCE_FILES} ${HEADER_FILES}
 )
 target_link_libraries(test_lexer PRIVATE gtest gtest_main)
 
 add_executable(
-test_parser
+    test_parser
     tests/test_parser.cpp
     ${SOURCE_FILES} ${HEADER_FILES}
 )
@@ -99,3 +118,12 @@ target_link_libraries(test_evaluator PRIVATE gtest gtest_main)
 add_test(NAME test_lexer COMMAND test_lexer)
 add_test(NAME test_parser COMMAND test_parser)
 add_test(NAME test_evaluator COMMAND test_evaluator)
+
+add_executable(
+test_jit
+    tests/test_jit.cpp
+    ${SOURCE_FILES} ${HEADER_FILES}
+)
+target_include_directories(test_jit PRIVATE ${LLVM_INCLUDE_DIRS})
+target_compile_definitions(test_jit PRIVATE ${LLVM_DEFINITIONS})
+target_link_libraries(test_jit ${llvm_libs})
