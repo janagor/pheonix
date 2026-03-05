@@ -45,6 +45,7 @@ include_directories(app)
 
 set(HEADER_FILES
     inc/jit.hpp
+    inc/node_def.hpp
     inc/node.hpp
     inc/repl.hpp
     inc/lexer.hpp
@@ -118,6 +119,12 @@ target_link_libraries(test_evaluator PRIVATE gtest gtest_main)
 add_test(NAME test_lexer COMMAND test_lexer)
 add_test(NAME test_parser COMMAND test_parser)
 add_test(NAME test_evaluator COMMAND test_evaluator)
+
+add_executable(
+test_evaluator2
+    tests/test_evaluator2.cpp
+    ${SOURCE_FILES} ${HEADER_FILES}
+)
 
 add_executable(
 test_jit
