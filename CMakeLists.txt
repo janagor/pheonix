@@ -4,7 +4,7 @@ project(pheonix VERSION 1.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(COMPILER_FLAGS "-Werror -Wextra -Wall -g")
+set(COMPILER_FLAGS "-Wextra -Wall -g -Wpedantic")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -29,6 +29,7 @@ add_definitions(${LLVM_DEFINITIONS})
 include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
 
+set(COMPILER_FLAGS "-Werror -Wextra -Wall -g")
 
 include(FetchContent)
 FetchContent_Declare(
@@ -49,6 +50,7 @@ set(HEADER_FILES
     inc/node.hpp
     inc/repl.hpp
     inc/operator.hpp
+    inc/ast_context.hpp
     inc/lexer.hpp
     inc/token.hpp
     inc/types.hpp

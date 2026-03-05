@@ -23,16 +23,14 @@ struct Evaluator {
 
   void operator()(std::monostate) { std::cout << "Empty node" << std::endl; }
 
-  void operator()(const std::unique_ptr<node2::Literal> &I) {
-    result = I->value();
-  }
+  void operator()(const node2::Literal &I) noexcept { result = I.value(); }
 
-  void operator()(const std::unique_ptr<node2::InfixExpression> &I) {
-    auto const &lhs = I->lhs();
+  void operator()(const node2::InfixExpression &I) noexcept {
+    auto const &lhs = I.lhs();
     (*this)(lhs);
     auto lhsv = result;
 
-    auto const &rhs = I->rhs();
+    auto const &rhs = I.rhs();
     (*this)(rhs);
     auto rhsv = result;
 
@@ -40,7 +38,7 @@ struct Evaluator {
     std::cout << result << std::endl;
   }
 
-  void operator()(const node2::Node &node) { std::visit(*this, node); }
+  void operator()(const node2::Node &node) noexcept { std::visit(*this, node); }
 
 private:
   int result;

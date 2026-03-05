@@ -1,42 +1,48 @@
+#include "ast_context.hpp"
 #include "evaluator2.hpp"
 #include "node2.hpp"
 
 #include <iostream>
-#include <memory>
 #include <variant>
 
 void test1() {
   using namespace pheonix::node2;
   using namespace pheonix::eval2;
+  using namespace pheonix;
 
-  std::cout << "--- Test Evaluatora (std::variant) ---" << std::endl;
+  ASTContext context{};
+  Evaluator eval;
+
+  std::cout << "--- Test Evaluatora (PMR Arena) ---" << std::endl;
 
   Node emptyNode;
-  Evaluator eval;
   std::cout << "Test 1 (Pusty): ";
   eval(emptyNode);
 
-  Node literalNode = std::make_unique<Literal>(42);
-
   std::cout << "\nTest 2 (Literal 42):" << std::endl;
-  eval(literalNode);
+  Node *literalNode1 = context.make<Literal>(42);
+  eval(*literalNode1);
 
-  literalNode = std::make_unique<Literal>(100);
   std::cout << "\nTest 3 (Zmiana na Literal 100):" << std::endl;
-  eval(literalNode);
+  Node *literalNode2 = context.make<Literal>(100);
+  eval(*literalNode2);
 }
 
 void test2() {
   using namespace pheonix::node2;
   using namespace pheonix::eval2;
+  using namespace pheonix;
 
+  ASTContext context{};
   Evaluator eval;
-  Node a = std::make_unique<Literal>(42);
-  Node b = std::make_unique<Literal>(10);
-  Node c = std::make_unique<InfixExpression>(a, b);
 
-  std::cout << "\nTest 2 (Addition(42+10)):" << std::endl;
-  eval(c);
+  Node *a = context.make<Literal>(42);
+  Node *b = context.make<Literal>(10);
+
+  Node *c = context.make<InfixExpression>(a, b);
+
+  std::cout << "\nTest 4 (Addition(42+10)):" << std::endl;
+  eval(*c);
 }
 
 int main() {
