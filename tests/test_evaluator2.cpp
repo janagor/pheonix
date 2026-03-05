@@ -14,16 +14,16 @@ void test1() {
   Node emptyNode;
   Evaluator eval;
   std::cout << "Test 1 (Pusty): ";
-  eval.evaluate(emptyNode);
+  eval(emptyNode);
 
   Node literalNode = std::make_unique<Literal>(42);
 
   std::cout << "\nTest 2 (Literal 42):" << std::endl;
-  eval.evaluate(literalNode);
+  eval(literalNode);
 
   literalNode = std::make_unique<Literal>(100);
   std::cout << "\nTest 3 (Zmiana na Literal 100):" << std::endl;
-  eval.evaluate(literalNode);
+  eval(literalNode);
 }
 
 void test2() {
@@ -36,7 +36,7 @@ void test2() {
   Node c = std::make_unique<InfixExpression>(a, b);
 
   std::cout << "\nTest 2 (Addition(42+10)):" << std::endl;
-  eval.evaluate(c);
+  eval(c);
 }
 
 int main() {

@@ -29,18 +29,18 @@ struct Evaluator {
 
   void operator()(const std::unique_ptr<node2::InfixExpression> &I) {
     auto const &lhs = I->lhs();
-    evaluate(lhs);
+    (*this)(lhs);
     auto lhsv = result;
 
     auto const &rhs = I->rhs();
-    evaluate(rhs);
+    (*this)(rhs);
     auto rhsv = result;
 
     result = oper::Operator()(oper::OperatorType::Add, lhsv, rhsv);
     std::cout << result << std::endl;
   }
 
-  void evaluate(const node2::Node &node) { std::visit(*this, node); }
+  void operator()(const node2::Node &node) { std::visit(*this, node); }
 
 private:
   int result;
