@@ -3,37 +3,37 @@
 #include <memory>
 #include <variant>
 
-namespace pheonix::node2 {
-// struct Program;
-// struct Parameter;
-// struct DeclarationArguments;
-// struct Block;
-// struct FunctionDeclaration;
-// struct VariableDeclaration;
-// struct WhileLoopStatement;
-// struct IfStatement;
-// struct ReturnStatement;
-// struct ExpressionStatement;
-// struct NullStatement;
-// struct AssignementExpression;
-// struct OrExpression;
-// struct AndExpression;
-// struct ComparisonExpression;
-// struct RelationalExpression;
-struct InfixExpression;
-// struct MultiplicativeExpression;
-// struct CompositiveExpression;
-// struct CastExpression;
-// struct PrefixExpression;
-// struct CallExpression;
-// struct DebugExpression;
-// struct CallArguments;
-// struct LambdaExpression;
-// struct Identifier;
-// struct ParentExpression;
-struct Literal;
-// struct TypeSpecifier;
-// struct PrintFunction;
+namespace pheonix {
+// class Program;
+// class Parameter;
+// class DeclarationArguments;
+// class Block;
+// class FunctionDeclaration;
+// class VariableDeclaration;
+// class WhileLoopStatement;
+// class IfStatement;
+// class ReturnStatement;
+// class ExpressionStatement;
+// class NullStatement;
+// class AssignementExpression;
+// class OrExpression;
+// class AndExpression;
+// class ComparisonExpression;
+// class RelationalExpression;
+class InfixExpression;
+// class MultiplicativeExpression;
+// class CompositiveExpression;
+// class CastExpression;
+// class PrefixExpression;
+// class CallExpression;
+// class DebugExpression;
+// class CallArguments;
+// class LambdaExpression;
+// class Identifier;
+// class ParentExpression;
+class Literal;
+// class TypeSpecifier;
+// class PrintFunction;
 
 // clang-format off
 using Node = std::variant<
@@ -71,4 +71,4 @@ using Node = std::variant<
 >;
 // clang-format on
 
-} // namespace pheonix::node2
+} // namespace pheonix

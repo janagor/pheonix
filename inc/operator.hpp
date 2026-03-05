@@ -1,13 +1,16 @@
 #pragma once
 
-namespace pheonix::oper {
+namespace pheonix {
 
 enum class OperatorType {
   Add,
 };
 
-struct Operator {
-  int operator()(OperatorType op, int lhs, int rhs) {
+class Operator {
+
+public:
+  [[nodiscard]] constexpr int operator()(OperatorType op, int lhs,
+                                         int rhs) const noexcept {
     switch (op) {
     case OperatorType::Add:
       return lhs + rhs;
@@ -16,4 +19,4 @@ struct Operator {
   }
 };
 
-} // namespace pheonix::oper
+} // namespace pheonix

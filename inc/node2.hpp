@@ -1,31 +1,31 @@
 #pragma once
 
 #include "node_def.hpp"
-#include "token.hpp"
-#include "visitor.hpp"
 
-namespace pheonix::node2 {
+namespace pheonix {
 
-struct Literal {
+class Literal {
 
 public:
-  Literal(int value) : m_value(value) {}
-  [[nodiscard]] int const &value() const noexcept { return m_value; }
-  [[nodiscard]] int &value() noexcept { return m_value; }
+  constexpr Literal(int value) noexcept : m_value(value) {}
+
+  [[nodiscard]] constexpr int const &value() const noexcept { return m_value; }
+  [[nodiscard]] constexpr int &value() noexcept { return m_value; }
 
 private:
   int m_value;
 };
 
-struct InfixExpression {
+class InfixExpression {
 
 public:
-  InfixExpression(Node *const lhs, Node *const rhs)
-      : m_lhs(std::move(lhs)), m_rhs(std::move(rhs)) {}
-  [[nodiscard]] Node const &lhs() const noexcept { return *m_lhs; }
-  [[nodiscard]] Node &lhs() noexcept { return *m_lhs; }
-  [[nodiscard]] Node const &rhs() const noexcept { return *m_rhs; }
-  [[nodiscard]] Node &rhs() noexcept { return *m_rhs; }
+  constexpr InfixExpression(Node *lhs, Node *rhs) noexcept
+      : m_lhs(lhs), m_rhs(rhs) {}
+
+  [[nodiscard]] constexpr Node const &lhs() const noexcept { return *m_lhs; }
+  [[nodiscard]] constexpr Node &lhs() noexcept { return *m_lhs; }
+  [[nodiscard]] constexpr Node const &rhs() const noexcept { return *m_rhs; }
+  [[nodiscard]] constexpr Node &rhs() noexcept { return *m_rhs; }
 
 private:
   Node *m_lhs;

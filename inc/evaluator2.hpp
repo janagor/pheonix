@@ -1,47 +1,42 @@
 #pragma once
 
-#include "context.hpp"
 #include "node2.hpp"
 #include "node_def.hpp"
-#include "object.hpp"
 #include "operator.hpp"
-#include "operator_visitor.hpp"
-#include "types.hpp"
-#include "visitor.hpp"
 
 #include <iostream>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <variant>
-#include <vector>
 
-namespace pheonix::eval2 {
+namespace pheonix {
 
 struct Evaluator {
-  Evaluator() : result(0) {}
 
-  void operator()(std::monostate) { std::cout << "Empty node" << std::endl; }
+  constexpr Evaluator() noexcept : m_result(0) {}
 
-  void operator()(const node2::Literal &I) noexcept { result = I.value(); }
+  constexpr void operator()(std::monostate) const noexcept {}
 
-  void operator()(const node2::InfixExpression &I) noexcept {
+  constexpr void operator()(Literal const &I) noexcept { m_result = I.value(); }
+
+  constexpr void operator()(InfixExpression const &I) noexcept {
     auto const &lhs = I.lhs();
-    (*this)(lhs);
-    auto lhsv = result;
+    eval(lhs);
+    auto lhsv = m_result;
 
     auto const &rhs = I.rhs();
-    (*this)(rhs);
-    auto rhsv = result;
+    eval(rhs);
+    auto rhsv = m_result;
 
-    result = oper::Operator()(oper::OperatorType::Add, lhsv, rhsv);
-    std::cout << result << std::endl;
+    m_result = Operator()(OperatorType::Add, lhsv, rhsv);
   }
 
-  void operator()(const node2::Node &node) noexcept { std::visit(*this, node); }
+  constexpr void eval(Node const &node) noexcept { std::visit(*this, node); }
+
+  [[nodiscard]] constexpr int const &result() const noexcept {
+    return m_result;
+  }
+  [[nodiscard]] constexpr int &result() noexcept { return m_result; }
 
 private:
-  int result;
+  int m_result;
 };
 
-} // namespace pheonix::eval2
+} // namespace pheonix

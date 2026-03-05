@@ -6,31 +6,27 @@
 #include <variant>
 
 void test1() {
-  using namespace pheonix::node2;
-  using namespace pheonix::eval2;
   using namespace pheonix;
 
   ASTContext context{};
-  Evaluator eval;
+  Evaluator eval{};
 
   std::cout << "--- Test Evaluatora (PMR Arena) ---" << std::endl;
 
   Node emptyNode;
   std::cout << "Test 1 (Pusty): ";
-  eval(emptyNode);
+  eval.eval(emptyNode);
 
   std::cout << "\nTest 2 (Literal 42):" << std::endl;
   Node *literalNode1 = context.make<Literal>(42);
-  eval(*literalNode1);
+  eval.eval(*literalNode1);
 
   std::cout << "\nTest 3 (Zmiana na Literal 100):" << std::endl;
   Node *literalNode2 = context.make<Literal>(100);
-  eval(*literalNode2);
+  eval.eval(*literalNode2);
 }
 
 void test2() {
-  using namespace pheonix::node2;
-  using namespace pheonix::eval2;
   using namespace pheonix;
 
   ASTContext context{};
@@ -42,7 +38,8 @@ void test2() {
   Node *c = context.make<InfixExpression>(a, b);
 
   std::cout << "\nTest 4 (Addition(42+10)):" << std::endl;
-  eval(*c);
+  eval.eval(*c);
+  std::cout << eval.result() << std::endl;
 }
 
 int main() {
