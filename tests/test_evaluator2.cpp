@@ -52,6 +52,21 @@ TEST_F(EvaluatorTest, EvaluatesNestedExpressions) {
   EXPECT_EQ(eval.result(), 15);
 }
 
+TEST_F(EvaluatorTest, EvaluatesBlock) {
+  auto *stmt1 = context.make<Literal>(10);
+  auto *stmt2 = context.make<Literal>(20);
+  
+  auto *stmt3 = context.make<InfixExpression>(OperatorType::Add, stmt1, stmt2);
+
+  std::vector<Node *> statements = {stmt1, stmt2, stmt3};
+
+  auto *block = context.make<Block>(std::move(statements));
+
+  eval.eval(*block);
+
+  EXPECT_EQ(eval.result(), 30);
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

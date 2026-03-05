@@ -7,7 +7,7 @@ namespace pheonix {
 // class Program;
 // class Parameter;
 // class DeclarationArguments;
-// class Block;
+class Block;
 // class FunctionDeclaration;
 // class VariableDeclaration;
 // class WhileLoopStatement;
@@ -41,7 +41,7 @@ using Node = std::variant<
     // Program,
     // Parameter,
     // DeclarationArguments,
-    // Block,
+    Block,
     // FunctionDeclaration,
     // VariableDeclaration,
     // WhileLoopStatement,

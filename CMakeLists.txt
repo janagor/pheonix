@@ -46,11 +46,14 @@ include_directories(app)
 
 set(HEADER_FILES
     inc/jit.hpp
-    inc/node_def.hpp
     inc/node.hpp
+    inc/node_def.hpp
+    inc/value.hpp
+    inc/value_def.hpp
     inc/repl.hpp
     inc/operator.hpp
     inc/ast_context.hpp
+    inc/evaluator_context.hpp
     inc/lexer.hpp
     inc/token.hpp
     inc/types.hpp

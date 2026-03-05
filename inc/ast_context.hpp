@@ -4,7 +4,6 @@
 #include "node_def.hpp"
 
 #include <memory_resource>
-#include <vector>
 
 namespace pheonix {
 

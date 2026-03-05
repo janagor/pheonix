@@ -1,5 +1,6 @@
 #pragma once
 
+#include "evaluator_context.hpp"
 #include "node2.hpp"
 #include "node_def.hpp"
 #include "operator.hpp"
@@ -10,13 +11,15 @@ namespace pheonix {
 
 struct Evaluator {
 
-  constexpr Evaluator() noexcept : m_result(0) {}
+  Evaluator()
+      : m_globalEnvironment(), m_evaluatorContext(m_globalEnvironment),
+        m_result(0) {}
 
-  constexpr void operator()(std::monostate) const noexcept {}
+  void operator()(std::monostate) const {}
 
-  constexpr void operator()(Literal const &I) noexcept { m_result = I.value(); }
+  void operator()(Literal const &I) { m_result = I.value(); }
 
-  constexpr void operator()(InfixExpression const &I) noexcept {
+  void operator()(InfixExpression const &I) {
     auto const &lhs = I.lhs();
     eval(lhs);
     auto lhsv = m_result;
@@ -28,14 +31,21 @@ struct Evaluator {
     m_result = Operator()(I.op(), lhsv, rhsv);
   }
 
-  constexpr void eval(Node const &node) noexcept { std::visit(*this, node); }
-
-  [[nodiscard]] constexpr int const &result() const noexcept {
-    return m_result;
+  void operator()(Block const &I) {
+    BlockScopeGuard guard(m_evaluatorContext);
+    for (auto const *statement : I.statements()) {
+      eval(*statement);
+    }
   }
-  [[nodiscard]] constexpr int &result() noexcept { return m_result; }
+
+  void eval(Node const &node) { std::visit(*this, node); }
+
+  [[nodiscard]] int const &result() const { return m_result; }
+  [[nodiscard]] int &result() { return m_result; }
 
 private:
+  GlobalEnvironment m_globalEnvironment;
+  EvaluatorContext m_evaluatorContext;
   int m_result;
 };
 

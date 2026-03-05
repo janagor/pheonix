@@ -100,4 +100,14 @@ private:
   std::vector<CallFrame> m_callStack;
 };
 
+struct BlockScopeGuard {
+  EvaluatorContext &ctx;
+  explicit BlockScopeGuard(EvaluatorContext &c) : ctx(c) {
+    ctx.pushBlockScope();
+  }
+  ~BlockScopeGuard() { ctx.popBlockScope(); }
+  BlockScopeGuard(const BlockScopeGuard &) = delete;
+  BlockScopeGuard &operator=(const BlockScopeGuard &) = delete;
+};
+
 } // namespace pheonix

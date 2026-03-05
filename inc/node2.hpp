@@ -3,6 +3,8 @@
 #include "node_def.hpp"
 #include "operator.hpp"
 
+#include <vector>
+
 namespace pheonix {
 
 class Literal {
@@ -21,7 +23,7 @@ class InfixExpression {
 
 public:
   constexpr InfixExpression(OperatorType op, Node *lhs, Node *rhs) noexcept
-      : m_op(op), m_lhs(lhs), m_rhs(rhs) {}
+      : m_op(std::move(op)), m_lhs(lhs), m_rhs(rhs) {}
 
   [[nodiscard]] constexpr OperatorType const &op() const noexcept {
     return m_op;
@@ -36,6 +38,24 @@ private:
   OperatorType m_op;
   Node *m_lhs;
   Node *m_rhs;
+};
+
+class Block {
+
+public:
+  constexpr Block(std::vector<Node *> statements) noexcept
+      : m_statements(std::move(statements)) {}
+
+  [[nodiscard]] constexpr std::vector<Node *> const &
+  statements() const noexcept {
+    return m_statements;
+  }
+  [[nodiscard]] constexpr std::vector<Node *> &statements() noexcept {
+    return m_statements;
+  }
+
+private:
+  std::vector<Node *> m_statements;
 };
 
 } // namespace pheonix
