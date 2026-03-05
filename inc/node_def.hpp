@@ -20,7 +20,7 @@ namespace pheonix::node2 {
 // struct AndExpression;
 // struct ComparisonExpression;
 // struct RelationalExpression;
-// struct AdditiveExpression;
+struct InfixExpression;
 // struct MultiplicativeExpression;
 // struct CompositiveExpression;
 // struct CastExpression;
@@ -54,7 +54,7 @@ using Node = std::variant<
     // std::unique_ptr<AndExpression>,
     // std::unique_ptr<ComparisonExpression>,
     // std::unique_ptr<RelationalExpression>,
-    // std::unique_ptr<AdditiveExpression>,
+    std::unique_ptr<InfixExpression>,
     // std::unique_ptr<MultiplicativeExpression>,
     // std::unique_ptr<CompositiveExpression>,
     // std::unique_ptr<CastExpression>,

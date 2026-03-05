@@ -48,6 +48,7 @@ set(HEADER_FILES
     inc/node_def.hpp
     inc/node.hpp
     inc/repl.hpp
+    inc/operator.hpp
     inc/lexer.hpp
     inc/token.hpp
     inc/types.hpp

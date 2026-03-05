@@ -26,7 +26,21 @@ void test1() {
   eval.evaluate(literalNode);
 }
 
+void test2() {
+  using namespace pheonix::node2;
+  using namespace pheonix::eval2;
+
+  Evaluator eval;
+  Node a = std::make_unique<Literal>(42);
+  Node b = std::make_unique<Literal>(10);
+  Node c = std::make_unique<InfixExpression>(a, b);
+
+  std::cout << "\nTest 2 (Addition(42+10)):" << std::endl;
+  eval.evaluate(c);
+}
+
 int main() {
   test1();
+  test2();
   return 0;
 }
