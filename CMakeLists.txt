@@ -119,15 +119,18 @@ test_evaluator
 )
 target_link_libraries(test_evaluator PRIVATE gtest gtest_main)
 
-add_test(NAME test_lexer COMMAND test_lexer)
-add_test(NAME test_parser COMMAND test_parser)
-add_test(NAME test_evaluator COMMAND test_evaluator)
-
 add_executable(
 test_evaluator2
     tests/test_evaluator2.cpp
     ${SOURCE_FILES} ${HEADER_FILES}
 )
+target_link_libraries(test_evaluator2 PRIVATE gtest gtest_main)
+
+add_test(NAME test_lexer COMMAND test_lexer)
+add_test(NAME test_parser COMMAND test_parser)
+add_test(NAME test_evaluator COMMAND test_evaluator)
+add_test(NAME test_evaluator2 COMMAND test_evaluator2)
+
 
 add_executable(
 test_jit

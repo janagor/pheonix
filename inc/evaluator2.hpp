@@ -25,7 +25,7 @@ struct Evaluator {
     eval(rhs);
     auto rhsv = m_result;
 
-    m_result = Operator()(OperatorType::Add, lhsv, rhsv);
+    m_result = Operator()(I.op(), lhsv, rhsv);
   }
 
   constexpr void eval(Node const &node) noexcept { std::visit(*this, node); }

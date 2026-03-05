@@ -1,49 +1,58 @@
 #include "ast_context.hpp"
 #include "evaluator2.hpp"
 #include "node2.hpp"
+#include "operator.hpp"
+#include <gtest/gtest.h>
 
-#include <iostream>
-#include <variant>
+using namespace pheonix;
 
-void test1() {
-  using namespace pheonix;
-
-  ASTContext context{};
-  Evaluator eval{};
-
-  std::cout << "--- Test Evaluatora (PMR Arena) ---" << std::endl;
-
-  Node emptyNode;
-  std::cout << "Test 1 (Pusty): ";
-  eval.eval(emptyNode);
-
-  std::cout << "\nTest 2 (Literal 42):" << std::endl;
-  Node *literalNode1 = context.make<Literal>(42);
-  eval.eval(*literalNode1);
-
-  std::cout << "\nTest 3 (Zmiana na Literal 100):" << std::endl;
-  Node *literalNode2 = context.make<Literal>(100);
-  eval.eval(*literalNode2);
-}
-
-void test2() {
-  using namespace pheonix;
-
-  ASTContext context{};
+class EvaluatorTest : public ::testing::Test {
+protected:
+  ASTContext context;
   Evaluator eval;
+};
 
-  Node *a = context.make<Literal>(42);
-  Node *b = context.make<Literal>(10);
-
-  Node *c = context.make<InfixExpression>(a, b);
-
-  std::cout << "\nTest 4 (Addition(42+10)):" << std::endl;
-  eval.eval(*c);
-  std::cout << eval.result() << std::endl;
+TEST_F(EvaluatorTest, EvaluatesEmptyNode) {
+  Node emptyNode{};
+  eval.eval(emptyNode);
+  EXPECT_EQ(eval.result(), 0);
 }
 
-int main() {
-  test1();
-  test2();
-  return 0;
+TEST_F(EvaluatorTest, EvaluatesLiteralValues) {
+  auto *literal42 = context.make<Literal>(42);
+  eval.eval(*literal42);
+  EXPECT_EQ(eval.result(), 42);
+
+  auto *literal100 = context.make<Literal>(100);
+  eval.eval(*literal100);
+  EXPECT_EQ(eval.result(), 100);
+}
+
+TEST_F(EvaluatorTest, EvaluatesInfixAddition) {
+  auto *a = context.make<Literal>(42);
+  auto *b = context.make<Literal>(10);
+  auto op = OperatorType::Add;
+
+  auto *expr = context.make<InfixExpression>(op, a, b);
+
+  eval.eval(*expr);
+  EXPECT_EQ(eval.result(), 52);
+}
+
+TEST_F(EvaluatorTest, EvaluatesNestedExpressions) {
+  auto *a = context.make<Literal>(10);
+
+  auto *b_left = context.make<Literal>(2);
+  auto *b_right = context.make<Literal>(3);
+  auto *b = context.make<InfixExpression>(OperatorType::Add, b_left, b_right);
+
+  auto *root = context.make<InfixExpression>(OperatorType::Add, a, b);
+
+  eval.eval(*root);
+  EXPECT_EQ(eval.result(), 15);
+}
+
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
