@@ -1,8 +1,8 @@
 #pragma once
 
 #include "node2.hpp"
-#include "value.hpp"
 #include "node_def.hpp"
+#include "value.hpp"
 
 #include <memory_resource>
 

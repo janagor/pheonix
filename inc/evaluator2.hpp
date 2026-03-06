@@ -58,10 +58,31 @@ struct Evaluator {
     m_evaluatorContext.defineVariable(ident, val);
   }
 
+  void operator()(IfExpression const &I) {
+    eval(I.condition());
+    Value condition_result = m_result;
+
+    if (isTruthy(condition_result)) {
+      eval(I.consequence());
+    } else if (I.alternative() != nullptr) {
+      eval(*I.alternative());
+    } else {
+      m_result = std::monostate{};
+    }
+  }
+
   void eval(Node const &node) { std::visit(*this, node); }
 
   [[nodiscard]] Value const &result() const { return m_result; }
   [[nodiscard]] Value &result() { return m_result; }
+
+private:
+  [[nodiscard]] bool isTruthy(const Value &val) const {
+    if (std::holds_alternative<Int>(val)) {
+      return std::get<Int>(val).value() != 0;
+    }
+    return false;
+  }
 
 private:
   GlobalEnvironment m_globalEnvironment;

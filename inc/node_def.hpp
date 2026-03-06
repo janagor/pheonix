@@ -11,7 +11,7 @@ class Block;
 // class FunctionDeclaration;
 class VariableDeclaration;
 // class WhileLoopStatement;
-// class IfStatement;
+class IfExpression;
 // class ReturnStatement;
 class ExpressionStatement;
 // class NullStatement;
@@ -45,7 +45,7 @@ using Node = std::variant<
     // FunctionDeclaration,
     VariableDeclaration,
     // WhileLoopStatement,
-    // IfStatement,
+    IfExpression,
     // ReturnStatement,
     ExpressionStatement,
     // NullStatement,

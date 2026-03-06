@@ -10,13 +10,15 @@ namespace pheonix {
 class Literal {
 
 public:
-  constexpr Literal(int value) noexcept : m_value(value) {}
+  constexpr Literal(Value value) noexcept : m_value(value) {}
 
-  [[nodiscard]] constexpr int const &value() const noexcept { return m_value; }
-  [[nodiscard]] constexpr int &value() noexcept { return m_value; }
+  [[nodiscard]] constexpr Value const &value() const noexcept {
+    return m_value;
+  }
+  [[nodiscard]] constexpr Value &value() noexcept { return m_value; }
 
 private:
-  int m_value;
+  Value m_value;
 };
 
 class InfixExpression {
@@ -106,6 +108,29 @@ public:
 
 private:
   std::string m_value;
+};
+
+class IfExpression {
+public:
+  constexpr IfExpression(Node *condition, Node *consequence,
+                         Node *alternative = nullptr) noexcept
+      : m_condition(condition), m_consequence(consequence),
+        m_alternative(alternative) {}
+
+  [[nodiscard]] constexpr Node const &condition() const noexcept {
+    return *m_condition;
+  }
+  [[nodiscard]] constexpr Node const &consequence() const noexcept {
+    return *m_consequence;
+  }
+  [[nodiscard]] constexpr Node const *alternative() const noexcept {
+    return m_alternative;
+  }
+
+private:
+  Node *m_condition;
+  Node *m_consequence;
+  Node *m_alternative;
 };
 
 } // namespace pheonix
