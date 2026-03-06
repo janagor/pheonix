@@ -44,50 +44,52 @@ include_directories(include)
 include_directories(tests)
 include_directories(app)
 
+set(INCLUDE_DIR include)
+set(SRC_DIR src)
+
 set(HEADER_FILES
-    include/jit.hpp
-    include/node.hpp
-    include/repl.hpp
-    include/lexer.hpp
-    include/token.hpp
-    include/types.hpp
-    include/object.hpp
-    include/parser.hpp
-    include/context.hpp
-    include/helpers.hpp
-    include/visitor.hpp
-    include/ast_view.hpp
-    include/evaluator.hpp
-    include/exception.hpp
-    include/token_type.hpp
-    include/inst_visitor.hpp
-    include/operator_visitor.hpp
+	${INCLUDE_DIR}/jit.hpp
+	${INCLUDE_DIR}/node.hpp
+	${INCLUDE_DIR}/repl.hpp
+	${INCLUDE_DIR}/lexer.hpp
+	${INCLUDE_DIR}/token.hpp
+	${INCLUDE_DIR}/types.hpp
+	${INCLUDE_DIR}/object.hpp
+	${INCLUDE_DIR}/parser.hpp
+	${INCLUDE_DIR}/context.hpp
+	${INCLUDE_DIR}/helpers.hpp
+	${INCLUDE_DIR}/visitor.hpp
+	${INCLUDE_DIR}/ast_view.hpp
+	${INCLUDE_DIR}/evaluator.hpp
+	${INCLUDE_DIR}/exception.hpp
+	${INCLUDE_DIR}/token_type.hpp
+	${INCLUDE_DIR}/inst_visitor.hpp
+	${INCLUDE_DIR}/operator_visitor.hpp
 
-    include/Node.hpp
-    include/Value.hpp
-    include/NodeDef.hpp
-    include/Operator.hpp
-    include/ValueDef.hpp
-    include/ASTContext.hpp
-    include/EvaluatorContext.hpp
-
+	${INCLUDE_DIR}/Node.hpp
+	${INCLUDE_DIR}/Value.hpp
+	${INCLUDE_DIR}/NodeDef.hpp
+	${INCLUDE_DIR}/Operator.hpp
+	${INCLUDE_DIR}/ValueDef.hpp
+	${INCLUDE_DIR}/ASTContext.hpp
+	${INCLUDE_DIR}/EvaluatorContext.hpp
 )
 
 set(SOURCE_FILES
-    src/node.cpp
-    src/repl.cpp
-    src/lexer.cpp
-    src/token.cpp
-    src/types.cpp
-    src/parser.cpp
-    src/object.cpp
-    src/context.cpp
-    src/helpers.cpp
-    src/visitor.cpp
-    src/ast_view.cpp
-    src/exception.cpp
-    src/evaluator.cpp
-    src/operator_visitor.cpp
+	${SRC_DIR}/node.cpp
+	${SRC_DIR}/repl.cpp
+	${SRC_DIR}/lexer.cpp
+	${SRC_DIR}/token.cpp
+	${SRC_DIR}/types.cpp
+	${SRC_DIR}/parser.cpp
+	${SRC_DIR}/object.cpp
+	${SRC_DIR}/context.cpp
+	${SRC_DIR}/helpers.cpp
+	${SRC_DIR}/visitor.cpp
+	${SRC_DIR}/ast_view.cpp
+	${SRC_DIR}/exception.cpp
+	${SRC_DIR}/evaluator.cpp
+	${SRC_DIR}/operator_visitor.cpp
 )
 
 add_executable(
