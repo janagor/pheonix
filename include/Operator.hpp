@@ -1,7 +1,8 @@
 #pragma once
 
-#include <value.hpp>
-#include <value_def.hpp>
+#include "Value.hpp"
+#include "ValueDef.hpp"
+
 #include <variant>
 
 namespace pheonix {

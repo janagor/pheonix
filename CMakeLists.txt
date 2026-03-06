@@ -40,34 +40,37 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 include_directories(src)
-include_directories(inc)
+include_directories(include)
 include_directories(tests)
 include_directories(app)
 
 set(HEADER_FILES
-    inc/jit.hpp
-    inc/node.hpp
-    inc/node_def.hpp
-    inc/value.hpp
-    inc/value_def.hpp
-    inc/repl.hpp
-    inc/operator.hpp
-    inc/ast_context.hpp
-    inc/evaluator_context.hpp
-    inc/lexer.hpp
-    inc/token.hpp
-    inc/types.hpp
-    inc/object.hpp
-    inc/parser.hpp
-    inc/context.hpp
-    inc/helpers.hpp
-    inc/visitor.hpp
-    inc/ast_view.hpp
-    inc/evaluator.hpp
-    inc/exception.hpp
-    inc/token_type.hpp
-    inc/inst_visitor.hpp
-    inc/operator_visitor.hpp
+    include/jit.hpp
+    include/node.hpp
+    include/repl.hpp
+    include/lexer.hpp
+    include/token.hpp
+    include/types.hpp
+    include/object.hpp
+    include/parser.hpp
+    include/context.hpp
+    include/helpers.hpp
+    include/visitor.hpp
+    include/ast_view.hpp
+    include/evaluator.hpp
+    include/exception.hpp
+    include/token_type.hpp
+    include/inst_visitor.hpp
+    include/operator_visitor.hpp
+
+    include/Node.hpp
+    include/Value.hpp
+    include/NodeDef.hpp
+    include/Operator.hpp
+    include/ValueDef.hpp
+    include/ASTContext.hpp
+    include/EvaluatorContext.hpp
+
 )
 
 set(SOURCE_FILES
@@ -123,16 +126,16 @@ test_evaluator
 target_link_libraries(test_evaluator PRIVATE gtest gtest_main)
 
 add_executable(
-test_evaluator2
-    tests/test_evaluator2.cpp
+TestEvaluator
+	tests/TestEvaluator.cpp
     ${SOURCE_FILES} ${HEADER_FILES}
 )
-target_link_libraries(test_evaluator2 PRIVATE gtest gtest_main)
+target_link_libraries(TestEvaluator PRIVATE gtest gtest_main)
 
 add_test(NAME test_lexer COMMAND test_lexer)
 add_test(NAME test_parser COMMAND test_parser)
 add_test(NAME test_evaluator COMMAND test_evaluator)
-add_test(NAME test_evaluator2 COMMAND test_evaluator2)
+add_test(NAME TestEvaluator COMMAND TestEvaluator)
 
 
 add_executable(

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "node_def.hpp"
-#include "operator.hpp"
+#include "NodeDef.hpp"
+#include "Operator.hpp"
 
 #include <vector>
 

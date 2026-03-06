@@ -1,9 +1,9 @@
 #pragma once
 
-#include "evaluator_context.hpp"
-#include "node2.hpp"
-#include "node_def.hpp"
-#include "operator.hpp"
+#include "EvaluatorContext.hpp"
+#include "Node.hpp"
+#include "NodeDef.hpp"
+#include "Operator.hpp"
 
 #include <iostream>
 #include <variant>

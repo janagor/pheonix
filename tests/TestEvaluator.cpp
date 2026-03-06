@@ -1,7 +1,7 @@
-#include "ast_context.hpp"
-#include "evaluator2.hpp"
-#include "node2.hpp"
-#include "operator.hpp"
+#include "ASTContext.hpp"
+#include "Evaluator.hpp"
+#include "Node.hpp"
+#include "Operator.hpp"
 #include <gtest/gtest.h>
 #include <variant>
 
