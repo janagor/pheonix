@@ -73,4 +73,39 @@ private:
   Node *m_exprStmt;
 };
 
+class VariableDeclaration {
+
+public:
+  constexpr VariableDeclaration(std::string ident, Node *exprStmt) noexcept
+      : m_ident(std::move(ident)), m_exprStmt(std::move(exprStmt)) {}
+
+  [[nodiscard]] constexpr std::string const &ident() const noexcept {
+    return m_ident;
+  }
+  [[nodiscard]] constexpr std::string &ident() noexcept { return m_ident; }
+  [[nodiscard]] constexpr Node const &exprStmt() const noexcept {
+    return *m_exprStmt;
+  }
+  [[nodiscard]] constexpr Node &exprStmt() noexcept { return *m_exprStmt; }
+
+private:
+  std::string m_ident;
+  Node *m_exprStmt;
+};
+
+class Identifier {
+
+public:
+  constexpr Identifier(std::string value) noexcept
+      : m_value(std::move(value)) {}
+
+  [[nodiscard]] constexpr std::string const &value() const noexcept {
+    return m_value;
+  }
+  [[nodiscard]] constexpr std::string &value() noexcept { return m_value; }
+
+private:
+  std::string m_value;
+};
+
 } // namespace pheonix

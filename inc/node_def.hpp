@@ -9,7 +9,7 @@ namespace pheonix {
 // class DeclarationArguments;
 class Block;
 // class FunctionDeclaration;
-// class VariableDeclaration;
+class VariableDeclaration;
 // class WhileLoopStatement;
 // class IfStatement;
 // class ReturnStatement;
@@ -29,7 +29,7 @@ class InfixExpression;
 // class DebugExpression;
 // class CallArguments;
 // class LambdaExpression;
-// class Identifier;
+class Identifier;
 // class ParentExpression;
 class Literal;
 // class TypeSpecifier;
@@ -43,7 +43,7 @@ using Node = std::variant<
     // DeclarationArguments,
     Block,
     // FunctionDeclaration,
-    // VariableDeclaration,
+    VariableDeclaration,
     // WhileLoopStatement,
     // IfStatement,
     // ReturnStatement,
@@ -63,7 +63,7 @@ using Node = std::variant<
     // DebugExpression,
     // CallArguments,
     // LambdaExpression,
-    // Identifier,
+    Identifier,
     // ParentExpression,
     Literal
     // TypeSpecifier,

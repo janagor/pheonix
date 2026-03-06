@@ -43,6 +43,19 @@ struct Evaluator {
     eval(exprStmt);
   }
 
+  void operator()(Identifier const &I) {
+    if (auto val = m_evaluatorContext.getVariable(I.value()); val.has_value())
+      m_result = std::get<Int>(*val).value();
+  }
+
+  void operator()(VariableDeclaration const &I) {
+    auto const &ident = I.ident();
+    auto const &expr = I.exprStmt();
+    eval(expr);
+    auto val = m_result;
+    m_evaluatorContext.defineVariable(ident, val);
+  }
+
   void eval(Node const &node) { std::visit(*this, node); }
 
   [[nodiscard]] int const &result() const { return m_result; }

@@ -64,6 +64,36 @@ TEST_F(EvaluatorTest, EvaluatesExpressionStatement) {
   EXPECT_EQ(eval.result(), 99);
 }
 
+TEST_F(EvaluatorTest, EvaluatesVariableDeclarationAndIdentifier) {
+  auto *literal = context.make<Literal>(123);
+  auto *varDecl = context.make<VariableDeclaration>("x", literal);
+
+  eval.eval(*varDecl);
+
+  auto *identifier = context.make<Identifier>("x");
+
+  eval.result() = 0;
+
+  eval.eval(*identifier);
+
+  EXPECT_EQ(eval.result(), 123);
+}
+
+TEST_F(EvaluatorTest, EvaluatesVariablesInExpressions) {
+  auto *val42 = context.make<Literal>(42);
+  auto *varDecl = context.make<VariableDeclaration>("my_var", val42);
+  eval.eval(*varDecl);
+
+  auto *ident = context.make<Identifier>("my_var");
+  auto *val10 = context.make<Literal>(10);
+  auto *addition =
+      context.make<InfixExpression>(OperatorType::Add, ident, val10);
+
+  eval.eval(*addition);
+
+  EXPECT_EQ(eval.result(), 52);
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
