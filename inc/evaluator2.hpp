@@ -6,6 +6,7 @@
 #include "operator.hpp"
 
 #include <iostream>
+#include <variant>
 
 namespace pheonix {
 
@@ -13,7 +14,7 @@ struct Evaluator {
 
   Evaluator()
       : m_globalEnvironment(), m_evaluatorContext(m_globalEnvironment),
-        m_result(0) {}
+        m_result() {}
 
   void operator()(std::monostate) const {}
 
@@ -28,7 +29,8 @@ struct Evaluator {
     eval(rhs);
     auto rhsv = m_result;
 
-    m_result = Operator()(I.op(), lhsv, rhsv);
+    m_result =
+        std::visit(Operator(), std::variant<OperatorType>(I.op()), lhsv, rhsv);
   }
 
   void operator()(Block const &I) {
@@ -45,7 +47,7 @@ struct Evaluator {
 
   void operator()(Identifier const &I) {
     if (auto val = m_evaluatorContext.getVariable(I.value()); val.has_value())
-      m_result = std::get<Int>(*val).value();
+      m_result = *val;
   }
 
   void operator()(VariableDeclaration const &I) {
@@ -58,13 +60,13 @@ struct Evaluator {
 
   void eval(Node const &node) { std::visit(*this, node); }
 
-  [[nodiscard]] int const &result() const { return m_result; }
-  [[nodiscard]] int &result() { return m_result; }
+  [[nodiscard]] Value const &result() const { return m_result; }
+  [[nodiscard]] Value &result() { return m_result; }
 
 private:
   GlobalEnvironment m_globalEnvironment;
   EvaluatorContext m_evaluatorContext;
-  int m_result;
+  Value m_result;
 };
 
 } // namespace pheonix

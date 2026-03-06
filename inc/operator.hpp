@@ -1,5 +1,9 @@
 #pragma once
 
+#include <value.hpp>
+#include <value_def.hpp>
+#include <variant>
+
 namespace pheonix {
 
 enum class OperatorType {
@@ -12,19 +16,24 @@ enum class OperatorType {
 class Operator {
 
 public:
-  [[nodiscard]] constexpr int operator()(OperatorType op, int lhs,
-                                         int rhs) const noexcept {
+  [[nodiscard]] constexpr Value operator()(OperatorType op, Int const &lhs,
+                                           Int const &rhs) const noexcept {
     switch (op) {
     case OperatorType::Add:
-      return lhs + rhs;
+      return Value(lhs + rhs);
     case OperatorType::Sub:
-      return lhs - rhs;
+      return Value(lhs - rhs);
     case OperatorType::Mul:
-      return lhs * rhs;
+      return Value(lhs * rhs);
     case OperatorType::Div:
-      return lhs / rhs;
+      return Value(lhs / rhs);
     }
-    return 0;
+    return Value{};
+  }
+
+  [[nodiscard]] constexpr Value operator()(OperatorType, auto const &,
+                                           auto const &) const noexcept {
+    return Value{};
   }
 };
 

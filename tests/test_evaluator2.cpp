@@ -3,6 +3,7 @@
 #include "node2.hpp"
 #include "operator.hpp"
 #include <gtest/gtest.h>
+#include <variant>
 
 using namespace pheonix;
 
@@ -16,16 +17,16 @@ protected:
 TEST_F(EvaluatorTest, EvaluatesEmptyNode) {
   Node emptyNode{};
   eval.eval(emptyNode);
-  EXPECT_EQ(eval.result(), 0);
+  EXPECT_EQ(std::get<std::monostate>(eval.result()), std::monostate{});
 }
 
 TEST_F(EvaluatorTest, EvaluatesLiteralValues) {
   auto *literal42 = context.make<Literal>(42);
   eval.eval(*literal42);
-  EXPECT_EQ(eval.result(), 42);
+  EXPECT_EQ(std::get<Int>(eval.result()), 42);
   auto *literal100 = context.make<Literal>(100);
   eval.eval(*literal100);
-  EXPECT_EQ(eval.result(), 100);
+  EXPECT_EQ(std::get<Int>(eval.result()), 100);
 }
 
 TEST_F(EvaluatorTest, EvaluatesInfixAddition) {
@@ -34,7 +35,7 @@ TEST_F(EvaluatorTest, EvaluatesInfixAddition) {
   auto op = OperatorType::Add;
   auto *expr = context.make<InfixExpression>(op, a, b);
   eval.eval(*expr);
-  EXPECT_EQ(eval.result(), 52);
+  EXPECT_EQ(std::get<Int>(eval.result()), 52);
 }
 
 TEST_F(EvaluatorTest, EvaluatesNestedExpressions) {
@@ -44,7 +45,7 @@ TEST_F(EvaluatorTest, EvaluatesNestedExpressions) {
   auto *b = context.make<InfixExpression>(OperatorType::Add, b_left, b_right);
   auto *root = context.make<InfixExpression>(OperatorType::Add, a, b);
   eval.eval(*root);
-  EXPECT_EQ(eval.result(), 15);
+  EXPECT_EQ(std::get<Int>(eval.result()), 15);
 }
 
 TEST_F(EvaluatorTest, EvaluatesBlock) {
@@ -54,14 +55,14 @@ TEST_F(EvaluatorTest, EvaluatesBlock) {
   auto statements = std::vector<Node *>{stmt1, stmt2, stmt3};
   auto *block = context.make<Block>(std::move(statements));
   eval.eval(*block);
-  EXPECT_EQ(eval.result(), 30);
+  EXPECT_EQ(std::get<Int>(eval.result()), 30);
 }
 
 TEST_F(EvaluatorTest, EvaluatesExpressionStatement) {
   auto *literal = context.make<Literal>(99);
   auto *exprStmt = context.make<ExpressionStatement>(literal);
   eval.eval(*exprStmt);
-  EXPECT_EQ(eval.result(), 99);
+  EXPECT_EQ(std::get<Int>(eval.result()), 99);
 }
 
 TEST_F(EvaluatorTest, EvaluatesVariableDeclarationAndIdentifier) {
@@ -76,7 +77,7 @@ TEST_F(EvaluatorTest, EvaluatesVariableDeclarationAndIdentifier) {
 
   eval.eval(*identifier);
 
-  EXPECT_EQ(eval.result(), 123);
+  EXPECT_EQ(std::get<Int>(eval.result()), 123);
 }
 
 TEST_F(EvaluatorTest, EvaluatesVariablesInExpressions) {
@@ -91,7 +92,7 @@ TEST_F(EvaluatorTest, EvaluatesVariablesInExpressions) {
 
   eval.eval(*addition);
 
-  EXPECT_EQ(eval.result(), 52);
+  EXPECT_EQ(std::get<Int>(eval.result()), 52);
 }
 
 int main(int argc, char **argv) {
