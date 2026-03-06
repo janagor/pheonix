@@ -75,7 +75,6 @@ public:
     if (auto global_val = m_globalEnv.get(name)) {
       return *global_val;
     }
-
     return std::nullopt;
   }
 

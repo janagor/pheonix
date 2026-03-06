@@ -38,6 +38,11 @@ struct Evaluator {
     }
   }
 
+  void operator()(ExpressionStatement const &I) {
+    auto const &exprStmt = I.exprStmt();
+    eval(exprStmt);
+  }
+
   void eval(Node const &node) { std::visit(*this, node); }
 
   [[nodiscard]] int const &result() const { return m_result; }

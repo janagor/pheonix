@@ -58,4 +58,19 @@ private:
   std::vector<Node *> m_statements;
 };
 
+class ExpressionStatement {
+
+public:
+  constexpr ExpressionStatement(Node *exprStmt) noexcept
+      : m_exprStmt(std::move(exprStmt)) {}
+
+  [[nodiscard]] constexpr Node const &exprStmt() const noexcept {
+    return *m_exprStmt;
+  }
+  [[nodiscard]] constexpr Node &exprStmt() noexcept { return *m_exprStmt; }
+
+private:
+  Node *m_exprStmt;
+};
+
 } // namespace pheonix

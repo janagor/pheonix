@@ -13,7 +13,7 @@ class Block;
 // class WhileLoopStatement;
 // class IfStatement;
 // class ReturnStatement;
-// class ExpressionStatement;
+class ExpressionStatement;
 // class NullStatement;
 // class AssignementExpression;
 // class OrExpression;
@@ -47,7 +47,7 @@ using Node = std::variant<
     // WhileLoopStatement,
     // IfStatement,
     // ReturnStatement,
-    // ExpressionStatement,
+    ExpressionStatement,
     // NullStatement,
     // AssignementExpression,
     // OrExpression,
