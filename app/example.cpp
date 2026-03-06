@@ -1,7 +1,8 @@
-#include "ast_view.hpp"
-#include "evaluator.hpp"
-#include "lexer.hpp"
-#include "parser.hpp"
+#include "Pheonix/ast_view.hpp"
+#include "Pheonix/evaluator.hpp"
+#include "Pheonix/lexer.hpp"
+#include "Pheonix/parser.hpp"
+
 #include <iostream>
 #include <sstream>
 #include <stdio.h>

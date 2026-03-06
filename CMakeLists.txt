@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(pheonix VERSION 1.0)
+project(Pheonix VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -44,8 +44,8 @@ include_directories(include)
 include_directories(tests)
 include_directories(app)
 
-set(INCLUDE_DIR include)
-set(SRC_DIR src)
+set(INCLUDE_DIR include/Pheonix)
+set(SRC_DIR src/Pheonix)
 
 set(HEADER_FILES
 	${INCLUDE_DIR}/jit.hpp

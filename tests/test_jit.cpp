@@ -1,9 +1,9 @@
 #include <istream>
 #include <memory>
 
-#include "jit.hpp"
-#include "node.hpp"
-#include "types.hpp"
+#include "Pheonix/jit.hpp"
+#include "Pheonix/node.hpp"
+#include "Pheonix/types.hpp"
 
 void test2() {
   pheonix::init();

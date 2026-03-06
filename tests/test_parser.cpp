@@ -1,5 +1,5 @@
-#include "ast_view.hpp"
-#include "parser.hpp"
+#include "Pheonix/ast_view.hpp"
+#include "Pheonix/parser.hpp"
 
 #include <gtest/gtest.h>
 #include <map>

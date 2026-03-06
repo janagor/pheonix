@@ -1,5 +1,5 @@
-#include "lexer.hpp"
-#include "types.hpp"
+#include "Pheonix/lexer.hpp"
+#include "Pheonix/types.hpp"
 
 #include <cassert>
 #include <cstdio>

@@ -1,7 +1,8 @@
-#include "ASTContext.hpp"
-#include "Evaluator.hpp"
-#include "Node.hpp"
-#include "Operator.hpp"
+#include "Pheonix/ASTContext.hpp"
+#include "Pheonix/Evaluator.hpp"
+#include "Pheonix/Node.hpp"
+#include "Pheonix/Operator.hpp"
+
 #include <gtest/gtest.h>
 #include <variant>
 

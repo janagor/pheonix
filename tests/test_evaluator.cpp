@@ -1,5 +1,5 @@
-#include "evaluator.hpp"
-#include "parser.hpp"
+#include "Pheonix/evaluator.hpp"
+#include "Pheonix/parser.hpp"
 
 #include <gtest/gtest.h>
 
